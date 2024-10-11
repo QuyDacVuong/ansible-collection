@@ -1,0 +1,17 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+coreserver_bin_branch: "TAG/2403C"
+olapproxy_binaries:
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/{{ coreserver_bin_branch }}/disp64/
+    dest_path: D:\apps\c_olap_proxy
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+
+service_start_mode: "auto"
+service_state: "started"

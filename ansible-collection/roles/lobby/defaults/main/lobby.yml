@@ -1,0 +1,819 @@
+---
+# templates/configs/c_lobby/aamsintegrationserver.ini
+lobby_aamsintegrationserver_dynamicconnect: ""
+
+lobby_aamsintegrationserver_staticconnect: |
+  ;DbmAddress=&C_OLTP&
+  ;DbmInstance=AuxDbmServerInstance
+
+  ;IsDbmAddress=&C_OLTP&
+  ;IsDbmInstance=IntegrationDbmProxyInstance
+
+  ;IntegrationServerAddress=&C_LOBBY&
+  ;IntegrationServerInstance=IntegrationServerInstance
+
+  ;AamsGatewayServerAddress=&C_ITGATEWAY&
+  ;AamsGatewayServerInstance=AuxAamsGatewayServerInstance
+
+  ;idDbmAddress=&C_ZNS_OLTP&
+  ;idDbmInstance=AuxIdDbmInstance
+
+lobby_aamsintegrationserver_staticsettings: ""
+
+# templates/configs/c_lobby/abeserver.ini
+lobby_abeserver_startup: ""
+
+lobby_abeserver_staticconnect: ""
+
+lobby_abeserver_dynamicconnect: |
+  ;integrationServerAddress=&C_LOBBY&
+  ;integrationServerInstance=IntegrationServerInstance
+
+  ;dbmAddress=&C_OLTP&
+  ;dbmInstance=AuxDbmServerInstance
+
+  ;abeDbmAddress=&C_OLTP&
+  ;abeDbmInstance=AbeDbmServerProxyInstance
+
+  ;abeRoDbmAddress=&C_OLTP&
+  ;abeRoDbmInstance=AbeRODbmServerProxyInstance
+
+  ;entropyServerAddress=&C_ZNS_MAIN&
+
+  ;entropyServerInstance=AuxEnthropyServerInstance
+
+  ;lobbyServerAddress=&C_LOBBY&
+  ;lobbyServerInstance=AuxLobbyServerInstance
+
+  ;idDbmAddress=&C_ZNS_OLTP&
+  ;idDbmInstance=AuxIdDbmInstance
+
+lobby_abeserver_dynamicsettings: |
+  ;AdminInterface=xml
+  ;BypassDB=1
+
+  AlwaysIssueNewTicketforAdmin=1
+  AlwaysIssueNewTicketforICE=1
+
+lobby_abeserver_staticsettings: ""
+
+# templates/configs/c_lobby/auxlobbyetc.ini
+lobby_auxlobbyetc_startup: ""
+
+lobby_auxlobbyetc_staticconnect: ""
+
+lobby_auxlobbyetc_dynamicconnect: |
+  ;abeServerAddress=&C_LOBBY&
+  ;abeServerInstance=AbeServerInstance
+
+  ;authIntegrationServerAddress=&C_LOBBY&
+  ;authIntegrationServerInstance=IntegrationServerLoginInstance
+
+  ;dbmServerAddress=&C_OLTP&
+  ;dbmServerInstance=AuxDbmServerInstance
+
+  ;idDbmAddress=&C_ZNS_OLTP&
+  ;idDbmInstance=AuxIdDbmInstance
+
+lobby_auxlobbyetc_staticsettings: ""
+
+lobby_auxlobbyetc_dynamicsettings: ""
+
+# templates/configs/c_lobby/auxservicesgateway.ini
+lobby_auxservicesgateway_staticconnect: ""
+
+lobby_auxservicesgateway_dynamicconnect: |
+  ;notificationServerAddress=&C_OLTP&
+  ;notificationServerInstance=AuxNotificationServerInstance
+
+  ;abeServerAddress=&C_LOBBY&
+  ;abeServerInstance=AbeServerInstance
+
+  ;hhServerAddress=&C_STATS&
+  ;hhServerInstance=handHistoryInstance
+
+lobby_auxservicesgateway_staticsettings: ""
+
+lobby_auxservicesgateway_dynamicsettings: ""
+
+# templates/apps/c_lobby/isassistant.ini, templates/configs/c_lobby/isassistant.ini
+lobby_isassistant_dynamicsettings: |
+  EnableReefState=1
+
+lobby_isassistant_staticconnect: |
+  ;idsAddress=ip:{{ lobby_host }}:2348
+  ;idsInstance=AuxIDSInstance
+
+lobby_isassistant_reef_state: |
+  reefServerAddress=ip:{{ lobby_host }}:3348
+  reefServerInstance=AuxReefBackupInstance0
+
+# templates/configs/c_lobby/AuxShadow.ini
+lobby_auxshadow_dynamicconnect: |
+  ;momentsTickerAddress=ip:{{ oltp_host }}:2348
+  ;momentsTickerInstance=MomentsTickerServerInstance
+
+lobby_auxshadow_staticconnect: |
+  ;lobbyServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;lobbyServerInstance=AuxLobbyServerInstance
+
+  ;jackpotServerAddress={{ C_ZNS_LOBBY }}
+  ;jackpotServerInstance=JackpotServerInstance
+
+# templates/configs/c_lobby/AuxRaceScheduler.ini
+lobby_auxracescheduler_startup: ""
+
+lobby_auxracescheduler_staticconnect: ""
+
+lobby_auxracescheduler_dynamicconnect: |
+  ;raceDbmAddress=&C_OLTP&
+  ;raceDbmInstance=RaceDBMServerProxyInstance
+
+  ;raceServerAddress=&C_LOBBY&
+  ;raceServerInstance=AuxRaceServerInstance
+
+  ;idDbmAddress=&C_ZNS_OLTP&
+  ;idDbmInstance=AuxIdDbmInstance
+
+lobby_auxracescheduler_dynamicsettings: |
+  RaceTcVersion=3
+
+lobby_auxracescheduler_staticsettings: |
+  myId=AuxRaceServerInstance
+
+# templates/configs/c_lobby/AuxRaceServer.ini
+lobby_auxraceserver_startup: ""
+
+lobby_auxraceserver_staticconnect: ""
+
+lobby_auxraceserver_dynamicconnect: |
+  ;integrationServerAddress=&C_LOBBY&
+  ;integrationServerInstance=IntegrationServerInstance
+
+  ;dbmAddress=&C_OLTP&
+  ;dbmInstance=AuxDbmServerInstance
+
+  ;raceDbmAddress=&C_OLTP&
+  ;raceDbmInstance=RaceDBMServerProxyInstance
+
+  ;notificationServerAddress=&C_OLTP&
+  ;notificationServerInstance=AuxNotificationServerInstance
+
+  ;tableDbmAddress=&C_OLTP&
+  ;tableDbmInstance=AuxTableDbmHHICEServerInstance
+
+  ;idDbmAddress=&C_ZNS_OLTP&
+  ;idDbmInstance=AuxIdDbmInstance
+
+lobby_auxraceserver_dynamicsettings: ""
+
+lobby_auxraceserver_staticsettings: ""
+
+# templates/configs/c_lobby/AuxWebGateway.ini
+lobby_auxwebgateway_dynamicconnect: ""
+
+lobby_auxwebgateway_staticsettings: ""
+
+lobby_auxwebgateway_staticconnect: |
+  ;lobbyServerAddress=&C_LOBBY&
+  ;lobbyServerInstance=AuxLobbyServerInstance
+
+  ;StatsServerAddress=&C_OLTP&
+  ;StatsServerInstance=AuxStatsServerInstance
+
+  ;LobbyEtcServerAddress=&C_LOBBY&
+  ;LobbyEtcServerInstance=AuxLobbyEtcServerInstance
+
+  ;MomentsTickerAddress=&C_STATS&
+  ;MomentsTickerInstance=MomentsTickerServerInstance
+
+lobby_auxwebgateway_dynamicsettings: |
+  MaxWebSessionIdleTimeSec=14400
+  LastCompletedRacesLimit=10
+
+  WSLMTGROUP.C1=10.42.52.231,10.42.52.232
+  WSLMTGROUP.C2=10.42.152.231,10.42.152.232
+  WSLMTGROUP.C3=10.42.153.231,10.42.153.232
+  WSLMTGROUP.C4=10.42.154.231,10.42.154.232
+  WSLMTGROUP.C5=10.96.159.231,10.96.159.232
+
+  wsm.enable=1
+  wsm.windowSizeSecs=30
+  wsm.windowMessagesToRestrict=1000
+  wsm.restrictedDelayMilliSecs=100
+  wsm.pendingMessagesToDisable=100
+  wsm.disabledLingerSecs=30
+
+# templates/configs/c_lobby/IntegrationServer.ini
+lobby_integrationserver_dynamicconnect: |
+
+lobby_integrationserver_staticconnect: |
+  ;IsDbmAddress=ip:{{ oltp_host }}:2348
+  ;IsDbmInstance=IntegrationDbmProxyInstance
+
+  ;DbmAddress={{ C_ZNS_OLTP }}
+  ;DbmInstance=AuxDbmServerInstance
+
+  ;isaAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;isaInstance=AuxISAssistantInstance
+
+  ;AdaptorAddressPPB=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;AdaptorInstancePPB=AuxPPBAdaptorInstance
+
+  ;idDbmAddress={{ C_ZNS_OLTP }}
+  ;idDbmInstance=AuxIdDbmInstance
+
+lobby_integrationserver_reef: |
+  reefServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:3348
+  reefServerInstance=AuxReefBackupInstance0
+
+lobby_integrationserver_reef_state: |
+  reefServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:3348
+  reefServerInstance=AuxReefBackupInstance0
+
+lobby_integrationserver_dynamicsettings: |
+  ResubmitIntervalSec=5
+  EnableReefState=0
+  FailableMaxRetryTimes=5
+  FailableMaxRetryInterval=3600
+
+  initFunAmount.ppwr,bfair.ANY=1000000
+  ResetSuspendedInterval.ppwr,bfair.ANY=300
+  ResubmitIntervalSec.ppwr,bfair.ANY=10
+
+lobby_integrationserver_staticsettings: |
+  ;ForLoginOnly, ForGameOnly, ForLoginAndGame
+  RunningMode=ForGameOnly
+  CancelBetEnabled=1
+
+# templates/configs/c_lobby/RgsMessageRouter.ini
+lobby_rgsmessagerouter_staticsettings: |
+  RouterId=AZ1
+  ;RouterId=ZN1
+
+lobby_rgsmessagerouter_dynamicconnect: |
+  ;AdminServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;AdminServerInstance=AuxAdminServerInstance
+  ;AdminServerConnType=auxrouter
+
+  ;EntropyServerAddress={{ C_ZNS_LOBBY }}
+  ;EntropyServerInstance=AuxEnthropyServerInstance
+  ;EntropyServerConnType=
+
+  ;IntegrationDbmAddress=ip:{{ oltp_host }}:2348
+  ;IntegrationDbmInstance=IntegrationDbmProxyInstance
+  ;IntegrationDbmConnType=auxmr
+
+  ;tableDbmAddress=ip:{{ oltp_host }}:2348
+  ;tableDbmInstance=AuxTableDbmServerInstance
+  ;tableDbmConnType=auxtable
+
+lobby_rgsmessagerouter_dynamicsettings: |
+  EntropyBlocksKeep=1000  ; Maximum number of entropy blocks to cache (default=1000)
+  EntropyBlocksSend=0     ; Maximum number of cached entropy blocks to send to the Entropy Server in one message (default=0, send all)
+  DetailedLogging=0       ; Minimize AuxMessageRouter logging
+
+# templates/configs/c_lobby/TableMonitorServer.ini
+lobby_tablemonitorserver_startup: ""
+
+lobby_tablemonitorserver_panopticlogger: |
+  ;panopticBridgeAddress=&PANOPTICBRIDGESERVER&
+  ;panopticBridgeInstance=PanopticBridgeServerInstance
+
+# templates/configs/c_lobby/auxadaptor_ppb.ini
+lobby_auxadaptor_ppb_staticconnect: ""
+
+lobby_auxadaptor_ppb_staticsettings: ""
+
+lobby_auxadaptor_ppb_dynamicsettings: |
+  timeout=11
+
+# templates/configs/c_lobby/auxadaptor_sbg.ini
+lobby_auxadaptor_sbg_staticconnect: ""
+
+lobby_auxadaptor_sbg_dynamicsettings: ""
+
+# templates/configs/c_lobby/auxadmin.ini
+lobby_auxadmin_dynamicconnect: |
+  ;HandHistoryServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;HandHistoryServerInstance=handHistoryInstance
+
+  ;templateServerAddress={{ C_TEMPLATESERVER }}
+  ;templateServerInstance=TemplateServerInstance
+
+  ;auxTriggerAddress=&C_LOBBY&
+  ;auxTriggerInstance=AuxTriggerServerInstance
+
+lobby_auxadmin_staticconnect: |
+  ;lobbyServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;lobbyServerAddressrInstance=AuxLobbyServerInstance
+
+  ;mainDBServerAddress={{ C_ZNS_OLTP }}
+  ;mainDBServerAddressrInstance=AuxDbmServerInstance
+
+  ;roOlapDbmServerAddress=ip:auxolap:port
+  ;roOlapDbmServerInstance=OlapAdminRoProxyInstance
+
+  ;integrationServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;integrationServerAddressrInstance=IntegrationServerInstance
+
+  ;rgRouterServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:3348
+  ;rgRouterInstance=AuxRgMessageRouterInstance
+
+  ;roOltpServerAddress={{ C_ZNS_OLTP }}
+  ;roOltpServerInstance=AuxROOltpDbmServerInstance
+
+  ;tableDbmServerAddress=ip:{{ oltp_host }}:2348
+  ;tableDbmServerInstance=AuxTableDbmServerInstance
+
+  ;jackpotServerAddress={{ C_ZNS_OLTP }}
+  ;jackpotServerInstance=JackpotServerInstance
+
+  ;idDbmAddress={{ C_ZNS_OLTP }}
+  ;idDbmInstance=AuxIdDbmInstance
+
+lobby_auxadmin_logindbm: |
+  loginDbmAddress={{ LOGINDBM }}
+  loginDbmInstance=LoginRouterInstance
+
+lobby_auxadmin_dynamicsettings: |
+  admin.name=CasinoBgrdTsk
+  admin.id=65892923
+
+  #HH::MM(HH: 00 ~ 23, MM: 00 ~ 59)
+  WhenToExpireUFG=03:00
+
+  # HOST_FULLTILT = 1,
+  # HOST_POKERSTAR = 2,
+  # HOST_SIMULATOR = 3,
+  #
+  # GAMING_SITE_US_NJ = 1,
+  # GAMING_SITE_COM = 2,
+  # GAMING_SITE_NET = 3,
+  # GAMING_SITE_ORG = 4,
+  # GAMING_SITE_BETA = 5,
+  # GAMING_SITE_FRANCE = 6,
+  # GAMING_SITE_EU = 7,
+  # GAMING_SITE_ES = 8,
+  # GAMING_SITE_IT = 9,
+  # GAMING_SITE_UK = 10,
+
+lobby_auxadmin_expireufgsettings_ft: |
+  #HostSitePairs=H1S2,H1S3,H1S7
+  #UFGExpiryDays=240
+
+lobby_auxadmin_expireufgsettings_ps: |
+  #HostSitePairs=H2S8
+  #UFGExpiryDays=240
+
+lobby_auxadmin_staticsettings: |
+  TargetEnvironment={{ C_ZN1_AUXADMIN_ENV }}
+
+lobby_auxadmin_stucksessionnotify_pp: ""
+
+lobby_auxadmin_stucksessionnotify_bf: ""
+
+# templates/configs/c_lobby/auxhhserver.ini
+lobby_auxhhserver_dynamicconnect: |
+  ;roOlapDbmServerAddress=ip:auxolap:port
+  ;roOlapDbmServerInstance=OlapAdminRoProxyInstance
+
+  ;templateServerAddress=&C_TEMPLATESERVER&
+  ;templateServerInstance=TemplateServerInstance
+
+  ;CrmServerAddress=&C_POKER9&
+  ;CrmServerInstance=CrmInstance
+
+  ;rgMessageRouterAddress=&C_RGS&
+  ;rgMessageRouterInstance=AuxRgMessageRouterInstance
+
+lobby_auxhhserver_staticconnect: ""
+
+lobby_auxhhserver_dynamicsettings: |
+  ;i18nroot=hh_locale
+  i18nroot=d:\apps\configs\hh_locale
+
+  MaxAamsSessionQueryAllowed=100                  ;<max of sessions> (default = 100)
+  AamsSessionQueryDayBack=15                      ; (default = 15, unit - day)
+
+lobby_auxhhserver_staticsettings: ""
+
+# templates/configs/c_lobby/auxlobby.ini
+lobby_auxlobby_dynamicconnect: |
+  ;roOlapDbmServerAddress=ip:auxolap:port
+  ;roOlapDbmServerInstance=OlapROProxyServerInstance
+
+lobby_auxlobby_staticconnect: |
+  ;lobbyServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;lobbyServerInstance=AuxLobbyServerInstance
+
+  ;dbmAddress={{ C_ZNS_OLTP }}
+  ;dbmInstance=AuxDbmServerInstance
+
+  ;roOltpDbmAddress={{ C_ZNS_OLTP }}
+  ;roOltpDbmInstance=AuxROOltpDbmServerInstance
+
+  ;integrationServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;integrationServerInstance=IntegrationServerInstance
+
+  ;authIntegrationServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;authIntegrationServerInstance=IntegrationServerLoginInstance
+
+  ;hhServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;hhServerInstance=handHistoryInstance
+
+  ;jackpotServerAddress={{ C_ZNS_LOBBY }}
+  ;jackpotServerInstance=JackpotServerInstance
+
+  ;proAssistantAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;proAssistantInstance=AuxISAssistantInstance
+
+  ;idDbmAddress={{ C_ZNS_OLTP }}
+  ;idDbmInstance=AuxIdDbmInstance
+
+lobby_auxlobby_reef: |
+  reefServerAddress=ip:{{ lobby_host }}:3348
+  reefServerInstance=AuxReefBackupInstance0
+
+lobby_auxlobby_dynamicsettings: |
+  expiredTimeFinishedPromoSec=1800
+  expiredTimeLmhSec=1800
+
+  ; game speed configurations: the frist interger is for speed 0 (normal), the second integer is for speed 1 (turbo)
+  maxSlotGamesPerPlayer.SKY=5
+  maxSlotGamesPerPlayer.PPB=5
+
+  maxGamesPerPlayer.SKY=5
+  maxGamesPerPlayer.PPB=10
+
+  maxTotalBetPerHand.skbv=1000
+  maxTotalBetPerHand.ppwr,bfair.ANY=1000
+
+
+  roulette.betTimeOut=20, 20
+  roulette.minAnimationTimeOut=15, 10
+  roulette.animationTimeOut=60,40
+  roulette.newHandTimeOut=1, 1
+
+  blackjack.betTimeOut=12, 12
+  blackjack.insuranceTimeOut=12, 12
+  blackjack.playTimeOut=12, 12
+  blackjack.minAnimationTimeOut=2,1
+  blackjack.animationTimeOut=35,20
+  blackjack.newHandTimeOut=1, 1
+
+  baccarat.betTimeOut=30, 20
+  baccarat.minAnimationTimeOut=15, 10
+  baccarat.animationTimeOut=15,10
+  baccarat.newHandTimeOut=1, 1
+
+  huholdem.betTimeOut=15, 15
+  huholdem.sideBetTimeOut=15, 15
+  huholdem.playTimeOut=15, 15
+  huholdem.minAnimationTimeOut=30, 30
+  huholdem.animationTimeOut=30,30
+  huholdem.newHandTimeOut=1, 1
+
+  dbroulette.betTimeOut=30, 30
+  dbroulette.ballLaunchTimeOut=5, 5
+  dbroulette.minAnimationTimeOut=30, 30
+  dbroulette.animationTimeOut=60,40
+  dbroulette.newHandTimeOut=1, 1
+
+  hhbj.betTimeOut=30, 20
+  hhbj.insuranceTimeOut=15, 10
+  hhbj.playTimeOut=30, 20
+  hhbj.minAnimationTimeOut=10, 5
+  hhbj.animationTimeOut=15, 10
+  hhbj.newHandTimeOut=1, 1
+
+  CmntyBac.betTimeOut=15, 7
+  CmntyBac.minAnimationTimeOut=10, 8
+  CmntyBac.animationTimeOut=25, 20
+  CmntyBac.newHandTimeOut=1, 1
+
+  ;PM = One process processing one table object
+  ;RM = One process processing multiple table objects
+  multitabletypes={{ lobby_auxlobby_dynamicsettings_multitabletypes }}
+
+  javaXcBinaryHomePath=javagames
+
+  maxExposureForSlots=100000000
+
+  maxTableDeferRemoveTimeSeconds=30
+
+  ;for playtech livedealer new integration
+  vendorCasinoName.playtech_live={{ lobby_playtech_live_vendor_name }}
+
+lobby_auxlobby_spindelaysettings: |
+  uk=3
+
+lobby_auxlobby_disabledspinfeaturessettings: |
+  uk=1,1
+
+lobby_auxlobby_staticsettings: |
+  ;if below line is missing, will use default value 600
+  secondsToLogoutRestoredIdleLoginSession=600
+  myId=xcLobby
+
+lobby_auxlobby_clientconninfo: |
+  ShadowLobbyAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ShadowLobbyInstance=AuxShadowLobbyInstance
+
+lobby_auxlobby_statictableservers: ""
+
+lobby_auxlobby_tableplacementrules: |
+  ;all address are symbolic address
+  SERVERS={{ full_server_list | join(';') }}
+  TABLEWEIGHTS=GDK,2;ANY,1
+  PLACEMENT.GDK={{ groups[gdk_role] | sort | map('to_factory') | join(',') }}
+  PLACEMENT.ANY={{ groups[non_gdk_role] | sort | map('to_factory') | join(',') }}
+
+lobby_auxlobby_rgproxy_msglimitoptions: |
+  checkenabled=1
+
+lobby_auxlobby_ldproxy_msglimitoptions: |
+  checkenabled=1
+
+lobby_auxlobby_ictable_msglimitoptions: |
+  checkenabled=1
+
+lobby_auxlobby_table_msglimitoptions: |
+  checkenabled=1
+
+lobby_auxlobby_ptldproxy_msglimitoptions: |
+  ; 1 (on), 0 (off)
+  checkenabled=1
+  ; comma separated list of messages for which verification is ignored even if requested by checkLimit call
+  ;excludeList=AUX_MSG_PTLDPROXY_FORCE_LEAVE,AUX_MSG_PTLDPROXY_LOGIN_REPLY
+
+lobby_auxlobby_panopticlogger: |
+  ;panopticBridgeAddress=ip:{{ hercules_host }}:33501
+  ;panopticBridgeInstance=PanopticBridgeServerInstance
+
+# templates/configs/c_lobby/auxtrigger.ini
+lobby_auxtrigger_staticconnect: |
+  ; game IS
+  ;integrationServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  ;integrationServerInstance=IntegrationServerInstance
+
+lobby_auxtrigger_staticsettings: ""
+
+lobby_auxtrigger_dynamicsettings: |
+  SupportedHosts=bfair,ppwr
+
+lobby_auxtrigger_reef: |
+  reefServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:3348
+  reefServerInstance=AuxReefBackupInstance0
+
+# templates/configs/c_lobby/dispatcher.ini
+lobby_dispatcher_restrictsubscription: |
+  debug=3
+  ip:*:*/*/global=pyrtcp0:/*;forward ip:$0:$1/$0/Global
+
+lobby_dispatcher_comm: |
+  name=AppFactory
+  identification=AUX134
+  alias=ip:localhost:2348
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2350
+  alias=ip:*:2349
+  alias=ip:*:443
+  alias=ip:*:443/*
+  alias=ip:*:26002
+  ;alias=ip:*:26003
+
+  ; Shared zone - olap or olap proxy
+  rule=ip:auxolap:port pyrtcp0://{{ sharedzone_olap }}:2348
+
+  {% for host in (groups[gdk_role] | sort) %}
+  ; {{ hostvars[host]['inventory_hostname'] }}
+  rule={{ host | to_factory }} pyrtcp0://{{ hostvars[host]['private_ip_address'] }}:2348
+  {% endfor %}
+
+  {% for host in (groups[non_gdk_role] | sort) %}
+  ; {{ hostvars[host]['inventory_hostname'] }}
+  rule={{ host | to_factory }} pyrtcp0://{{ hostvars[host]['private_ip_address'] }}:2348
+  {% endfor %}
+
+  rule=ip:127.0.0.1:5447 pyrtcp0://127.0.0.1:5447
+  rule=ip:*:* pyrtcp0://$0:$1
+  performance=1
+  performancetimer=10000
+  appfactoryfile=d:\apps\logs\c_lobby\listofobjects.log
+  trafficprintlast=0
+
+lobby_dispatcher_config: |
+  multiexeport=2349
+  smemmultiexeport=2349
+
+lobby_dispatcher_managers: |
+  manager=tcp
+  manager=tcpd
+  manager=tcpmux
+  manager=smemmux
+  ;manager=smem
+  manager=ssl_out
+  ;manager=ssl_in
+
+lobby_dispatcher_tcp: |
+  type=tcp
+  port=2348
+  maxconnectionsperthread=3
+  option.islocal=1
+  option.protocol=3
+  option.framesize=64000
+  option.compressbits=0
+  option.logfile=d:\apps\logs\c_lobby\protolocal.log
+  option.keepalive=30000/180000
+  gatherstatistic=2
+
+lobby_dispatcher_tcpd: |
+  type=tcp
+  port=2350
+  maxconnectionsperthread=3
+  option.framesize=1000000
+  option.intcpbuffer=1000000
+  option.outtcpbuffer=1000000
+  option.protocol=5
+  option.islocal=1
+  option.logfile=d:\apps\logs\c_lobby\protolocald.log
+  option.keepalive=30000/180000
+  gatherstatistic=2
+
+lobby_dispatcher_tcpmux: |
+  type=tcpmux
+  port=2349
+  gatherstatistic=1
+
+lobby_dispatcher_smem: |
+  type=smem
+  port=2348
+  gatherstatistic=1
+
+lobby_dispatcher_smemmux: |
+  type=smemmux
+  port=2349
+  gatherstatistic=1
+
+lobby_dispatcher_ssl_out: |
+  type=ssl
+  option.logfile=d:\apps\logs\c_lobby\protolocalssl.log
+  clienttrustedcert=d:\apps\credentials\ca_disp.crt
+
+lobby_dispatcher_ssl_in: ""
+#  type=ssl
+#  port=2347
+#  option.keepalive=5000/30000
+#  @d:\apps\credentials\cert.ini
+
+lobby_dispatcher_exe: |
+  ;type=exe
+  auxadmin=d:\apps\bin\c_lobby\auxadmin.exe;d:\apps\logs\c_lobby
+  auxisassistant=d:\apps\bin\c_lobby\auxisassistant.exe;d:\apps\logs\c_lobby
+  auxlobby=d:\apps\bin\c_lobby\auxlobby.exe;d:\apps\logs\c_lobby;0/0;R240
+  auxtrigger=d:\apps\bin\c_lobby\auxtrigger.exe;d:\apps\logs\c_lobby
+  entropyProxy=d:\apps\bin\c_lobby\{{ lobby_entropy_binary }};d:\apps\logs\c_lobby
+  handhistory=d:\apps\bin\c_lobby\auxhhserver.exe;d:\apps\logs\c_lobby
+  entropyRouter=d:\apps\bin\c_lobby\pyrentropyroutersmem.exe;d:\apps\logs\c_lobby
+  integrationdispatcher=d:\apps\bin\c_lobby\auxids.exe;d:\apps\logs\c_lobby;0/0;R240
+  integrationserver=d:\apps\bin\c_lobby\auxintegrationserver.exe;d:\apps\logs\c_lobby;0/0;R240
+  integrationserver_ppb=d:\apps\bin\c_lobby\auxisadaptorppb.exe;d:\apps\logs\c_lobby
+  integrationserver_sbg=d:\apps\bin\c_lobby\auxisadaptorsbg.exe;d:\apps\logs\c_lobby
+  rgrouter=d:\apps\bin\c_lobby\auxrgsmessagerouter.exe;d:\apps\logs\c_lobby
+  shadowlobby=d:\apps\bin\c_lobby\auxshadowlobby.exe;d:\apps\logs\c_lobby
+  tablemonitor=d:\apps\bin\c_lobby\auxtablemonitorserver.exe;d:\apps\logs\c_lobby
+
+lobby_dispatcher_start: |
+  auxadmin=AuxAdminServerInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.AuxAdminServer-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  auxisassistant=AuxISAssistantInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.AuxISAssistant-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  auxlobby=AuxLobbyServerInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.AuxLobby-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  auxtrigger=AuxTriggerServerInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.AuxTrigger-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  entropyProxy=AuxEntropyProxyInstance;s=d:\\apps\\configs\\c_lobby\\entropy\\
+  entropyRouter=AuxEntropyServerInstance;s=d:\\apps\\configs\\c_lobby\\entropy\\
+  handhistory=handHistoryInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.AuxHandHistoryServer-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  integrationdispatcher=AuxIDSInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.AuxIDS-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  integrationserver=IntegrationServerInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.AuxIntegrationServer-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  integrationserver=IntegrationServerLoginInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\login\;station_name={{ stationname }}.C_LOBBY.AuxIntegrationServer-login-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  integrationserver_ppb=AuxPPBAdaptorInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.PPBAuxAdaptor-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  integrationserver_sbg=AuxSBGAdaptorInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.SBGAuxAdaptor-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  rgrouter=AuxRgMessageRouterInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.AuxRgsRouter-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  shadowlobby=AuxShadowLobbyInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.AuxShadowLobby-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+  tablemonitor=AuxTableMonitorServerInstance;ver=1;[ini_path=D:\apps\configs\c_lobby\;station_name={{ stationname }}.C_LOBBY.TableMonitorServer-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }};service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone1_settings.ini]
+
+# templates/configs/c_lobby/entropy/EntropyRouter.ini
+lobby_entropy_entropyrouter_router: |
+  rules=AllRule
+  pollFrequency=10000
+  responseThreshold=400
+  simultaneousSendtoPrimaryAndSecondary=0
+  useUnhealthyPriIfSecDisconnected=1
+
+lobby_entropy_entropyrouter_allrule: |
+  sites=ALL
+  primaryEntropy=EntropyPrimary
+  secondaryEntropy=EntropyPrimary
+
+lobby_entropy_entropyrouter_list: |
+  [EntropyPrimary]
+  entropyaddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  entropyobject=AuxEntropyProxyInstance
+
+# templates/configs/c_lobby/entropy/dgeentropy.ini
+lobby_entropy_dgeentropy_staticsettings: |
+  allowAuxAdminRequests=1
+
+lobby_entropy_dgeentropy_dynamicsettings: |
+  overspan=0
+  pollInterval=1
+  ; Enable to simulate release mode in debug environment by ignoring table names
+  ignoreNames=0
+
+  ; Directory and filename of the prearranged runs
+  script=d:\apps\configs\c_lobby\entropy\dgeentropy.script
+
+  ; For disabling
+  disabled=0
+
+lobby_entropy_dgeentropy_dynamicconnect: |
+  LoginDbmAddress={{ LOGINDBM }}
+  LoginDbmObject=LoginRouterInstance
+  LoginDbmConnType=DgeEntropy
+
+  EntropyAddress=ip:{{ main_host }}:2347
+  EntropyObject=AuxEntropyProxyInstance
+  EntropyConnType=
+
+  ; PYR-50101. Connection to AuxLobby, for resetting table-cached dynamic runs
+  AuxLobbyAddress=ip:{{ lobby_host }}:2348
+  AuxLobbyObject=AuxLobbyServerInstance
+  AuxLobbyConnType=dge
+
+# templates/configs/c_lobby/entropy/dgeentropy.script
+lobby_entropy_dgeentropy_script_table: |
+  disabled=0
+  decks=1
+  cards=7h,8c
+  cards=Qh
+  cards=Qd,4c,Ks,5d,Qs,6s
+  comment.numplayers=1
+  comment.blackjackvariant=ATLANTIC
+  comment.gametype=blackjack
+
+# templates/configs/c_lobby/entropy/multiproxy.ini
+lobby_entropy_multiproxy_servers: |
+  {% for host in groups[entropy_role] %}
+  server={{ ordinal_numbers[loop.index] }}
+  {% endfor %}
+
+lobby_entropy_multiproxy_limits: |
+  number=2
+
+lobby_entropy_multiproxy_server_lists: |
+  {% for host in groups[entropy_role] %}
+  [{{ ordinal_numbers[loop.index] }}]
+  server=ip:{{ hostvars[host]['private_ip_address'] }}:33303
+  serverobject=RNGEntropyInstance
+  weight=2
+
+  {% endfor %}
+
+# templates/configs/c_lobby/login/IntegrationServer.ini
+lobby_login_integrationserver_dynamicconnect: ""
+lobby_login_integrationserver_staticconnect: |
+  IsDbmAddress=ip:{{ oltp_host }}:2348
+  IsDbmInstance=IntegrationDbmLoginInstance
+
+  DbmAddress=ip:{{ oltp_host }}:2348
+  DbmInstance=AuxDbmServerInstance
+
+  isaAddress=ip:{{ lobby_host }}:2348
+  isaInstance=AuxISAssistantInstance
+
+  AdaptorAddressPPB=ip:{{ lobby_host }}:2348
+  AdaptorInstancePPB=AuxPPBAdaptorInstance
+
+  AuxTriggerAddress=ip:{{ lobby_host }}:2348
+  AuxTriggerInstance=AuxTriggerServerInstance
+
+  idDbmAddress={{ C_ZNS_OLTP }}
+  idDbmInstance=AuxIdDbmInstance
+
+lobby_login_integrationserver_reef_state: |
+  reefServerAddress=ip:{{ lobby_host }}:3348
+  reefServerInstance=AuxReefBackupInstance0
+
+lobby_login_integrationserver_reef: |
+  reefServerAddress=ip:{{ lobby_host }}:3348
+  reefServerInstance=AuxReefBackupInstance0
+
+lobby_login_integrationserver_dynamicsettings: |
+  ResubmitIntervalSec=5
+  ForceValidateWebToken=false
+  EnableReefState=1
+  FailableMaxRetryTimes=5
+  FailableMaxRetryInterval=3600
+
+lobby_login_integrationserver_staticsettings: |
+  ;ForLoginOnly, ForGameOnly, ForLoginAndGame
+  RunningMode=ForLoginOnly

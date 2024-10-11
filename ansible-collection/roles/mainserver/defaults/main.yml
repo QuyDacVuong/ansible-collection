@@ -1,0 +1,42 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+casinoserver_bin_branch: "TAG/AUX2401"
+coreserver_bin_branch: "TAG/2401E"
+mainserver_binaries:
+  - binary: auxjackpotserver.exe
+    url_path: build-results/casinoserver/{{ casinoserver_bin_branch }}/auxjackpotserver/
+    dest_path: D:\apps\bin\c_main
+  - binary: auxjsassistant.exe
+    url_path: build-results/casinoserver/{{ casinoserver_bin_branch }}/auxjsassistant/
+    dest_path: D:\apps\bin\c_main
+  - binary: pyrdgeentropysmem.exe
+    url_path: casino-devops/dge_qa/
+    dest_path: D:\apps\bin\c_main
+  - binary: pyrmultiproxysmem.exe
+    url_path: build-results/coreserver/{{ coresever_bin_branch }}/multiproxy/
+    dest_path: D:\apps\bin\c_main
+  - binary: auxreef.exe
+    url_path: build-results/casinoserver/{{ casinoserver_bin_branch }}/auxreef/
+    dest_path: D:\apps\bin\c_reef_main
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/{{ coreserver_bin_branch }}/disp64/
+    dest_path: D:\apps\c_main
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/{{ coreserver_bin_branch }}/disp64/
+    dest_path: D:\apps\c_reef_main
+
+ordinal_numbers:
+  - first
+  - second
+  - third
+  - fourth
+  - fifth
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+region: eu-west-1
+service_start_mode: "auto"
+service_state: "started"

@@ -1,0 +1,216 @@
+---
+- name: Create base noncritical folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps
+    - D:\apps\bin
+    - D:\apps\bin\c_stats
+    - D:\apps\bin\c_reef_stats
+    - D:\apps\bin\c_auxwingman
+    - D:\apps\c_stats
+    - D:\apps\c_reef_stats
+    - D:\apps\c_auxwingman
+    - D:\apps\certificates
+    - D:\apps\configs
+    - D:\apps\configs\hh_locale
+    - D:\apps\configs\c_stats
+    - D:\apps\configs\c_stats\automationdbd
+    - D:\apps\configs\c_stats\auxadmindbd
+    - D:\apps\configs\c_stats\emaildbd
+    - D:\apps\configs\c_stats\gamedbd
+    - D:\apps\configs\c_stats\jackpotdbd
+    - D:\apps\configs\c_stats\jackpotreportdbd
+    - D:\apps\configs\c_stats\logindbd
+    - D:\apps\configs\c_stats\racedbd
+    - D:\apps\configs\c_reef_stats
+    - D:\apps\configs\c_reef_stats\replica1
+    - D:\apps\configs\c_auxwingman
+    - D:\apps\credentials
+    - D:\apps\logs
+    - D:\apps\logs\c_stats
+    - D:\apps\logs\c_reef_stats
+    - D:\apps\logs\c_auxwingman
+
+- name: Deploy noncritical binaries
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ noncritical_binaries }}"
+    win_deploy_services:
+      - PYR_C_STATS
+      - PYR_C_REEF_STATS
+      - PYR_C_AUXWINGMAN
+
+- name: Certificate config
+  ansible.windows.win_copy:
+    content: |
+      servercert=d:\apps\certificates\server_disp.pyr.crt
+      serverkey=d:\apps\certificates\server_disp.pyr.key
+      serverkeypassword={{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/common/server_disp_pass') }}
+    dest: D:\apps\certificates\cert.ini
+  notify:
+    - Restart stats
+    - Restart reef
+
+- name: CA certificate
+  ansible.windows.win_copy:
+    content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/common/ca_disp_crt') }}"
+    dest: D:\apps\certificates\ca_disp.crt
+  notify:
+    - Restart stats
+    - Restart reef
+
+- name: Server certificate
+  ansible.windows.win_copy:
+    content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/common/server_disp_crt') }}"
+    dest: D:\apps\certificates\server_disp.pyr.crt
+  notify:
+    - Restart stats
+    - Restart reef
+
+- name: Server key
+  ansible.windows.win_copy:
+    content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/common/server_disp_key') }}"
+    dest: D:\apps\certificates\server_disp.pyr.key
+  notify:
+    - Restart stats
+    - Restart reef
+
+- name: IMDGNCA01 certificate for auxwingman
+  ansible.windows.win_copy:
+    content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/auxwingman/IMDGNCA01-CA') }}"
+    dest: D:\apps\configs\c_auxwingman\IMDGNCA01-CA.crt
+  notify:
+    - Restart auxwingman
+
+- name: IMDGNCA02 certificate for auxwingman
+  ansible.windows.win_copy:
+    content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/auxwingman/csr-IMDGNCA02-CA') }}"
+    dest: D:\apps\configs\c_auxwingman\csr-IMDGNCA02-CA.crt
+  notify:
+    - Restart auxwingman
+
+- name: ISD certificate for auxwingman
+  ansible.windows.win_copy:
+    content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/auxwingman/isd-csrpstars') }}"
+    dest: D:\apps\configs\c_auxwingman\isd-csrpstars.crt
+  notify:
+    - Restart auxwingman
+
+- name: Create dispatcher.ini links
+  community.windows.win_lineinfile:
+    path: D:\apps\{{ item.path }}\dispatcher.ini
+    line: "{{ item.content }}"
+    create: true
+  loop:
+    - path: c_auxwingman
+      content: "@d:/apps/configs/c_auxwingman/dispatcher.ini"
+    - path: c_stats
+      content: "@d:/apps/configs/c_stats/dispatcher.ini"
+    - path: c_reef_stats
+      content: "@d:/apps/configs/c_reef_stats/dispatcher.ini"
+  notify:
+    - Restart stats
+    - Restart reef
+    - Restart auxwingman
+
+- name: Config files
+  ansible.windows.win_template:
+    src: "apps/configs/{{ item.src }}"
+    dest: "D:\\apps\\configs\\{{ item.dest }}"
+  loop:
+    - src: c_stats/AuxLobbyStats.ini
+      dest: c_stats\AuxLobbyStats.ini
+    - src: c_stats/AuxGameMonitor.ini
+      dest: c_stats\AuxGameMonitor.ini
+    - src: c_stats/TableMonitorServer.ini
+      dest: c_stats\TableMonitorServer.ini
+    - src: c_stats/dispatcher.ini
+      dest: c_stats\dispatcher.ini
+    - src: c_stats/auxhhserver.ini
+      dest: c_stats\auxhhserver.ini
+    - src: c_stats/AuxMomentsTicker.ini
+      dest: c_stats\AuxMomentsTicker.ini
+    - src: c_stats/auxdbd.ini
+      dest: c_stats\auxdbd.ini
+    - src: c_stats/auxemailserver.ini
+      dest: c_stats\auxemailserver.ini
+    - src: c_stats/emaildbd/auxdbd.ini
+      dest: c_stats\emaildbd\auxdbd.ini
+    - src: c_stats/auxadmindbd/auxdbd.ini
+      dest: c_stats\auxadmindbd\auxdbd.ini
+    - src: c_stats/logindbd/auxdbd.ini
+      dest: c_stats\logindbd\auxdbd.ini
+    - src: c_stats/jackpotreportdbd/auxdbd.ini
+      dest: c_stats\jackpotreportdbd\auxdbd.ini
+    - src: c_stats/jackpotdbd/auxdbd.ini
+      dest: c_stats\jackpotdbd\auxdbd.ini
+    - src: c_stats/automationdbd/auxdbd.ini
+      dest: c_stats\automationdbd\auxdbd.ini
+    - src: c_stats/racedbd/auxdbd.ini
+      dest: c_stats\racedbd\auxdbd.ini
+    - src: c_stats/gamedbd/auxdbd.ini
+      dest: c_stats\gamedbd\auxdbd.ini
+    - src: c_reef_stats/dispatcher.ini
+      dest: c_reef_stats\dispatcher.ini
+    - src: c_reef_stats/replica1/auxreef.ini
+      dest: c_reef_stats\replica1\auxreef.ini
+    - src: c_auxwingman/auxwingman.ini
+      dest: c_auxwingman\auxwingman.ini
+    - src: c_auxwingman/dispatcher.ini
+      dest: c_auxwingman\dispatcher.ini
+  notify:
+    - Restart stats
+    - Restart reef
+    - Restart auxwingman
+
+- name: Create monitor_client files
+  ansible.windows.win_template:
+    src: "apps/monitor_client/{{ item }}"
+    dest: "D:\\apps\\monitor_client\\{{ item }}"
+  loop:
+    - MemSender.ini
+    - Hercules.ini
+
+- name: Configure Log Aggregation
+  ansible.windows.win_template:
+    src: promtail.yaml.j2
+    dest: "C:\\ProgramData\\Promtail\\promtail.yaml"
+  notify:
+    - Restart promtail
+
+- name: Create c_stats service
+  ansible.windows.win_service:
+    name: PYR_C_STATS
+    path: D:\apps\c_stats\pyr64.exe
+    start_mode: auto
+    state: started
+  tags:
+    - launch
+
+- name: Create c_reef_stats service
+  ansible.windows.win_service:
+    name: PYR_C_REEF_STATS
+    path: D:\apps\c_reef_stats\pyr164.exe
+    start_mode: auto
+    state: started
+  tags:
+    - launch
+
+- name: Create c_auxwingman service
+  ansible.windows.win_service:
+    name: PYR_C_AUXWINGMAN
+    path: D:\apps\c_auxwingman\pyr264.exe
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch
+
+- name: Configure net_response metrics
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify:
+    - Restart Telegraf

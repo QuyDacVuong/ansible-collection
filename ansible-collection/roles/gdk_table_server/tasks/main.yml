@@ -1,0 +1,222 @@
+---
+- name: Create base table server folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps
+    - D:\apps\temp
+    - D:\apps\bin
+    - D:\apps\bin\c_gdk
+    - D:\apps\bin\c_gdk\javagames
+    - D:\apps\bin\c_gdk\javagames\temp
+    - D:\apps\bin\c_gdk\javagames\vendors
+    - D:\apps\c_gdk
+    - D:\apps\credentials
+    - D:\apps\configs\c_gdk
+    - D:\apps\logs
+    - D:\apps\logs\c_gdk
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ gdk_table_server_binaries }}"
+    win_deploy_services:
+      - PYR_C_GDK
+
+- name: Download Java
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/casino-devops/table_server/jre1.8.0_191.zip"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+    dest: D:\software\java.zip
+
+- name: Download interfaces and platform
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/casino-devops/table_server/interfaces_platform.zip"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+    dest: D:\apps\temp\interfaces_platform.zip
+
+- name: Unzip interfaces and platform
+  community.windows.win_unzip:
+    src: D:\apps\temp\interfaces_platform.zip
+    dest: D:\apps\bin\c_gdk\javagames
+    creates: D:\apps\bin\c_gdk\javagames\interfaces
+
+- name: Copy config for gdk_table_server
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: dispatcher.ini
+      dest: D:\apps\c_gdk\dispatcher.ini
+
+    - src: dispatcher_config.ini
+      dest: D:\apps\configs\c_gdk\dispatcher.ini
+
+    - src: apps/monitor_client/hercules.ini
+      dest: D:\apps\monitor_client\hercules.ini
+
+    - src: apps/monitor_client/MemSender.ini
+      dest: D:\apps\monitor_client\MemSender.ini
+  notify:
+    - Restart GDK service
+
+- name: Copy config for VTTMServer
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: VTTMServer.ini
+      dest: D:\apps\configs\c_gdk\VTTMServer.ini
+  when: hostvars[inventory_hostname].tags.Zone != "zone1"
+  notify:
+    - Restart GDK service
+
+# Credentials
+- name: Generate cert
+  ansible.builtin.include_role:
+    name: casino.server.generate_certs
+  vars:
+    certificate_domain: "disp-{{ env }}.csr.pstars-{{ region }}-intermediate"
+- name: Generate encryption key
+  ansible.builtin.set_fact:
+    key_passphrase: "{{ lookup('ansible.builtin.password', '/dev/null', length=15, chars=['ascii_letters', 'digits'], seed=inventory_hostname) }}"
+  no_log: true
+- name: Download Signed certs from ACM
+  ansible.windows.win_command:
+    argv:
+      - C:\Program Files\Amazon\AWSCLIV2\aws.exe
+      - acm
+      - export-certificate
+      - --certificate-arn
+      - "{{ certificate_arn }}"
+      - --passphrase
+      - "{{ key_passphrase | b64encode }}"
+  register: acm_certs
+  no_log: true
+  when: not ansible_check_mode
+- name: Certificate config
+  ansible.windows.win_copy:
+    content: |
+      servercert=d:\apps\credentials\server_disp.pyr.crt
+      serverkey=d:\apps\credentials\server_disp.pyr.key
+      serverkeypassword={{ key_passphrase }}
+    dest: D:\apps\credentials\cert.ini
+  notify:
+    - Restart GDK service
+    - Restart HESENDER service
+    - Restart MEMSENDER service
+- name: CA certificate
+  ansible.windows.win_copy:
+    remote_src: true
+    src: "C:\\software\\pki-csr-pstars-{{ region }}-intermediate.pem"
+    dest: D:\apps\credentials\ca_disp.crt
+  notify:
+    - Restart GDK service
+    - Restart HESENDER service
+    - Restart MEMSENDER service
+- name: Server certificate
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).Certificate }}{{ (acm_certs.stdout | from_json).CertificateChain }}"
+    dest: D:\apps\credentials\server_disp.pyr.crt
+  notify:
+    - Restart GDK service
+    - Restart HESENDER service
+    - Restart MEMSENDER service
+- name: Server key
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).PrivateKey }}"
+    dest: D:\apps\credentials\server_disp.pyr.key
+  notify:
+    - Restart GDK service
+    - Restart HESENDER service
+    - Restart MEMSENDER service
+- name: Server pass
+  ansible.windows.win_copy:
+    content: "{{ key_passphrase }}"
+    dest: D:\apps\credentials\server_disp.pyr.pass
+  notify:
+    - Restart GDK service
+    - Restart HESENDER service
+    - Restart MEMSENDER service
+
+# Install Java
+- name: Install java
+  community.windows.win_unzip:
+    src: D:\software\java.zip
+    dest: C:\Java\
+    creates: C:\Java\jre1.8.0_191
+
+# Set env variable
+- name: Set an environment variable for all users
+  ansible.windows.win_environment:
+    state: present
+    name: XCGDK_JAVA_HOME
+    value: C:\Java\jre1.8.0_191
+    level: machine
+
+
+# Create Windows Services for the apps
+- name: Create GDK service
+  ansible.windows.win_service:
+    name: PYR_C_GDK
+    path: D:\apps\c_gdk\pyr64.exe
+    display_name: PYR_C_GDK
+    description: Service for GGN GDK Table Server
+
+# Start app Windows Services
+- name: Start GDK-Table-Server service
+  ansible.windows.win_service:
+    name: PYR_C_GDK
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch
+
+# common/tasks/metrics-windows.yml should start these, but we explicitly ensure they are started here because they connect to our services
+- name: Start monitoring
+  block:
+    - name: Start hesender Monitoring service
+      ansible.windows.win_service:
+        name: PYR_HESENDER
+        start_mode: "{{ service_start_mode }}"
+        state: "{{ service_state }}"
+    - name: Start memsender Monitoring service
+      ansible.windows.win_service:
+        name: PYR_MEMSENDER
+        start_mode: "{{ service_start_mode }}"
+        state: "{{ service_state }}"
+
+- name: Configure Log Aggregation
+  ansible.windows.win_template:
+    src: promtail.yaml.j2
+    dest: "C:\\ProgramData\\Promtail\\promtail.yaml"
+  notify:
+    - Restart promtail
+
+- name: Configure net_response metrics
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify: Restart telegraf
+
+- name: Register game_data
+  ansible.windows.win_copy:
+    src: read_revision_files.ps1
+    dest: "D:\\software\\read_revision_files.ps1"
+- name: Ingest game_data
+  ansible.windows.win_copy:
+    content: |
+      [[inputs.exec]]
+        commands = ["powershell -File D:/software/read_revision_files.ps1"]
+        data_format = "json"
+        tag_keys=["gameName","date","buildKey","buildNumber","revision"]
+        name_override = "game_data"
+    dest: "C:\\ProgramData\\Telegraf\\game_data.conf"
+  notify:
+    - Restart Telegraf

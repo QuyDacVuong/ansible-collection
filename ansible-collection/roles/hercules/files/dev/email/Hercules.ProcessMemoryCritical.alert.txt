@@ -1,0 +1,7 @@
+Process <PARAM> on station <STATION> has a critical value.
+
+Current value is <VALUE>.
+
+Limit is <LIMIT>.
+
+Now is <DATETIME>.

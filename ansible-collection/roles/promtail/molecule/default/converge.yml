@@ -1,0 +1,19 @@
+---
+- name: Converge
+  hosts: promtail
+  become: true
+
+  pre_tasks:
+    - name: Install dependencies
+      ansible.builtin.yum:
+        name:
+          - tar
+          - unzip
+        state: present
+    - name: Create bigdisk0 directory
+      ansible.builtin.file:
+        path: /bigdisk0
+        state: directory
+        mode: "0755"
+  roles:
+    - role: promtail

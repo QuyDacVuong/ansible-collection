@@ -1,0 +1,7 @@
+---
+- name: Restart services
+  ansible.windows.win_service:
+    name: "{{ item }}"
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+  loop: "{{ win_deploy_services }}"

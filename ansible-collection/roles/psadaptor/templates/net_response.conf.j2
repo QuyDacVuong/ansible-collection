@@ -1,0 +1,35 @@
+# Hercules
+{% for host in groups[hercules_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# LOBBY
+{% for host in groups[lobby_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:2348"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# LOBBY
+{% for host in groups[lobby_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:4348"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# PYRHUB / AuxHub
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ PYRHUB.split(":")[1] }}:{{ PYRHUB.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+
+# vim: ft=toml

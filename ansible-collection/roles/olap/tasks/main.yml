@@ -1,0 +1,105 @@
+---
+- name: Create base mainserver folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps
+    - D:\apps\bin
+    - D:\apps\bin\c_olap
+    - D:\apps\c_olap
+    - D:\apps\configs\c_olap\Olap
+    - D:\apps\configs\c_olap\OlapAdminRODbmProxy
+    - D:\apps\configs\c_olap\OlapRODbmProxy
+    - D:\apps\configs\c_olap\WingmanROdbm
+    - D:\apps\configs\c_olap\WMolap
+    - D:\apps\credentials
+    - D:\apps\logs
+    - D:\apps\logs\c_olap
+
+- name: Deploy olap binaries
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ olap_binaries }}"
+    win_deploy_services:
+      - PYR_C_OLAP
+
+# One time deployment only - no need to update as it may introduce regression
+- name: Deploy olap-auxwingmanrodbm binary
+  ansible.windows.win_copy:
+    remote_src: true
+    src: "D:\\software\\build-results_casinoserver_{{ casinoserver_bin_branch | regex_replace('/', '_') }}_auxrodbm_-auxrodbm.exe"
+    dest: "D:\\apps\\bin\\c_olap\\wingmanROdbm.exe"
+    force: false
+
+# Copy over other config files
+- name: Copy config for olap
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+
+    # configs/c_olap
+    - src: configs/c_olap/Olap/AuxOlap.ini
+      dest: D:\apps\configs\c_olap\Olap\AuxOlap.ini
+    - src: configs/c_olap/Olap/dbmproxy2.ini
+      dest: D:\apps\configs\c_olap\Olap\dbmproxy2.ini
+    - src: configs/c_olap/OlapAdminRODbmProxy/AuxRODbm.ini
+      dest: D:\apps\configs\c_olap\OlapAdminRODbmProxy\AuxRODbm.ini
+    - src: configs/c_olap/OlapAdminRODbmProxy/auxproxyserver.ini
+      dest: D:\apps\configs\c_olap\OlapAdminRODbmProxy\auxproxyserver.ini
+    - src: configs/c_olap/OlapRODbmProxy/AuxRODbm.ini
+      dest: D:\apps\configs\c_olap\OlapRODbmProxy\AuxRODbm.ini
+    - src: configs/c_olap/OlapRODbmProxy/auxproxyserver.ini
+      dest: D:\apps\configs\c_olap\OlapRODbmProxy\auxproxyserver.ini
+    - src: configs/c_olap/WMolap/m2nproxy.ini
+      dest: D:\apps\configs\c_olap\WMolap\m2nproxy.ini
+    - src: configs/c_olap/WingmanROdbm/AuxRODbm.ini
+      dest: D:\apps\configs\c_olap\WingmanROdbm\AuxRODbm.ini
+    - src: configs/c_olap/WMolap/wmOlapAuxDbm.ini
+      dest: D:\apps\configs\c_olap\WMolap\wmOlapAuxDbm.ini
+    - src: configs/c_olap/dispatcher.ini
+      dest: D:\apps\configs\c_olap\dispatcher.ini
+    # apps/monitor_client
+    - src: monitor_client/Hercules.ini
+      dest: D:\apps\monitor_client\Hercules.ini
+    - src: monitor_client/MemSender.ini
+      dest: D:\apps\monitor_client\MemSender.ini
+  notify:
+    - Restart hesender
+    - Restart memsender
+    - Restart olap
+
+
+- name: Create dispatcher.ini links
+  ansible.windows.win_copy:
+    content: "@d:/apps/configs/c_olap/dispatcher.ini"
+    dest: D:\apps\c_olap\dispatcher.ini
+  notify:
+    - Restart olap
+
+- name: Configure Log Aggregation
+  ansible.windows.win_template:
+    src: promtail.yaml.j2
+    dest: "C:\\ProgramData\\Promtail\\promtail.yaml"
+  notify:
+    - Restart promtail
+
+- name: Create olap service
+  ansible.windows.win_service:
+    name: PYR_C_OLAP
+    path: D:\apps\c_olap\pyr64.exe
+- name: Start Main service
+  ansible.windows.win_service:
+    name: PYR_C_OLAP
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch
+
+- name: Configure net_response metrics
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify: Restart telegraf

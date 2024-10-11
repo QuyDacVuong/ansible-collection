@@ -1,0 +1,12 @@
+# we can setup memory ajustments here ... and everything else
+
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true -XX:MaxPermSize=1024m -Xss1m -Xms256m -Xmx2048m \
+                  -DlistenPort=8115 -DserverPort=9136"
+
+export EGTGATEWAY_HOME=/bigdisk0/tomcat/conf/cs-egt
+export VENDORSERVICEGATEWAY_HOME=/bigdisk0/tomcat/conf/cs-vendorservice-egt
+export VENDOR=EGT
+export VENDOR_ID=36
+
+export JAVA_HOME=/software/jdk11
+export TOMCAT_VERSION=/software/tomcat8

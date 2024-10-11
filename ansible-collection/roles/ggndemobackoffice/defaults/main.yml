@@ -1,0 +1,18 @@
+---
+env: 'test'
+stationname: "TST"
+
+ggndemobackoffice_version: 1.1.4
+ggndemobackoffice_tomcat_version: 8.5.78
+ggndemobackoffice_api_password: 'P455w0rd'
+certificate_domain: "ggndemobackoffice-{{ env }}.csr.pstars-eu-west-1-intermediate"
+
+advertise_host: "127.0.0.1"
+hercules_host: "127.0.0.145"
+
+artifactory_baseurl: https://artifactory.pyrsoftware.ca/artifactory
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push

@@ -1,0 +1,50 @@
+---
+- name: Converge
+  hosts: common
+  become: true
+
+  pre_tasks:
+    - name: Install tar
+      ansible.builtin.yum:
+        name: tar
+        state: present
+    - name: Create bigdisk0 directory
+      ansible.builtin.file:
+        path: /bigdisk0
+        state: directory
+        mode: "0755"
+    - name: Create promtail group
+      ansible.builtin.group:
+        name: promtail
+        state: present
+    - name: Create promtail user
+      ansible.builtin.user:
+        name: promtail
+        group: promtail
+        state: present
+    - name: Create telegraf group
+      ansible.builtin.group:
+        name: telegraf
+        state: present
+    - name: Create telegraf user
+      ansible.builtin.user:
+        name: telegraf
+        group: telegraf
+        state: present
+    - name: Create telegraf config directory
+      ansible.builtin.file:
+        path: /etc/telegraf/telegraf.d
+        state: directory
+        mode: "0755"
+    - name: Create promtail config directory
+      ansible.builtin.file:
+        path: /etc/promtail
+        state: directory
+        mode: "0755"
+    - name: Create SSH directory
+      ansible.builtin.file:
+        path: /etc/ssh
+        state: directory
+        mode: "0755"
+  roles:
+    - role: casino.server.common

@@ -1,0 +1,8 @@
+---
+#
+# Tasks to be applied to all servers
+#
+
+- name: Windows configuration
+  ansible.builtin.include_tasks: windows.yml
+  when: ansible_facts['os_family']=="Windows"

@@ -1,0 +1,125 @@
+---
+- name: Create base oltp folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps
+    - D:\apps\bin
+    - D:\apps\bin\c_oltp
+    - D:\apps\bin\c_tobrelay
+    - D:\apps\c_oltp
+    - D:\apps\c_tobrelay
+    - D:\apps\configs\c_oltp
+    - D:\apps\configs\c_tobrelay
+    - D:\apps\logs\c_oltp
+    - D:\apps\logs\c_tobrelay
+    - D:\apps\configs\c_oltp\ROdbm
+    - D:\apps\configs\c_oltp\ROjackpot
+    - D:\apps\configs\c_oltp\jackpotdbmproxy
+    - D:\apps\configs\c_tobrelay\main
+    - D:\apps\configs\c_tobrelay\main\sql
+    - D:\apps\configs\c_tobrelay\jackpot
+    - D:\apps\configs\c_tobrelay\jackpot\sql
+    - C:\ProgramData\IBM\DB2\DB2COPY1\cfg\
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ oltp_binaries }}"
+    win_deploy_services:
+      - PYR_C_OLTP
+      - PYR_C_TOBRELAY
+
+- name: Create tobrelay jackpot instance directories
+  ansible.windows.win_file:
+    path: D:\apps\configs\c_tobrelay\jackpot\jackpot{{ item }}
+    state: directory
+  with_sequence: start=0 end={{ oltp_jackpot_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Copy pyr64.exe everywhere
+  ansible.windows.win_copy:
+    src: D:\apps\bin\c_oltp\pyr64.exe
+    dest: "{{ item }}"
+    remote_src: true
+    force: true  # only performs a copy if the two files are different
+  loop:
+    - D:\apps\c_oltp\pyr64.exe
+    - D:\apps\c_tobrelay\pyr164.exe
+  notify:
+    - Restart OLTP service  # only notifies if the copy actually happened
+    - Restart TOBRELAY service  # only notifies if the copy actually happened
+
+- name: Create dispatcher.ini links
+  community.windows.win_lineinfile:
+    path: D:\apps\{{ item.path }}\dispatcher.ini
+    line: "{{ item.content }}"
+    create: true
+  loop:
+    - path: c_oltp
+      content: "@d:/apps/configs/c_oltp/dispatcher.ini"
+    - path: c_tobrelay
+      content: "@d:/apps/configs/c_tobrelay/dispatcher.ini"
+  notify:
+    - Restart OLTP service  # only notifies if the copy actually happened
+    - Restart TOBRELAY service  # only notifies if the copy actually happened
+
+- name: ZoneS config files
+  ansible.windows.win_template:
+    src: "apps/configs/zoneS/{{ item.src }}"
+    dest: "D:\\apps\\configs\\{{ item.dest }}"
+  loop:
+    - src: c_oltp/AuxDbm.ini
+      dest: c_oltp\AuxDbm.ini
+    - src: c_oltp/dispatcher.ini
+      dest: c_oltp\dispatcher.ini
+    - src: c_oltp/auxiddbm.ini
+      dest: c_oltp\auxiddbm.ini
+    - src: c_oltp/ROdbm/AuxDbm.ini
+      dest: c_oltp\ROdbm\AuxDbm.ini
+    - src: c_oltp/ROjackpot/AuxJackpotDbm.ini
+      dest: c_oltp\ROjackpot\AuxJackpotDbm.ini
+    - src: c_oltp/jackpotdbmproxy/AuxJackpotDbm.ini
+      dest: c_oltp\jackpotdbmproxy\AuxJackpotDbm.ini
+    - src: c_oltp/jackpotdbmproxy/auxproxyserver.ini
+      dest: c_oltp\jackpotdbmproxy\auxproxyserver.ini
+    - src: c_tobrelay/dispatcher.ini
+      dest: c_tobrelay\dispatcher.ini
+    - src: c_tobrelay/main/tobrelay.ini
+      dest: c_tobrelay\main\tobrelay.ini
+  notify:
+    - Restart OLTP service  # only notifies if the copy actually happened
+    - Restart TOBRELAY service  # only notifies if the copy actually happened
+
+- name: Create tobrelay jackpot ini files
+  ansible.windows.win_template:
+    src: apps/configs/zoneS/c_tobrelay/jackpot/jackpotN/tobrelay.ini
+    dest: D:\apps\configs\c_tobrelay\jackpot\jackpot{{ item }}\tobrelay.ini
+  with_sequence: start=0 end={{ oltp_jackpot_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create and start services
+  block:
+    - name: Create services
+      ansible.windows.win_service:
+        name: "PYR_{{ item.name }}"
+        path: D:\apps\{{ item.name }}\{{ item.bin_name }}
+        display_name: "PYR_{{ item.name }}"
+      loop:
+        - {name: 'C_OLTP', bin_name: 'pyr64.exe'}
+        - {name: 'C_TOBRELAY', bin_name: 'pyr164.exe'}
+
+    - name: Start services
+      ansible.windows.win_service:
+        name: "PYR_{{ item }}"
+        start_mode: "{{ service_start_mode }}"
+        state: "{{ service_state }}"
+      loop:
+        - C_OLTP
+        - C_TOBRELAY
+      tags:
+        - launch

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- reload configuration every hour -->
+<Configuration strict="true" name="CasinolobbyadmineConfig" monitorInterval="10"> <!-- PROD: monitorInterval="3600" -->
+	<!-- Specify application log full path here -->
+	<Properties>
+		<Property name="logPath">D:\\logs\\casinolobbyadmin\\casinolobbyadmin.log</Property>
+	</Properties>
+	<Appenders>
+		<Appender type="Console" name="STDOUT">
+			<Layout type="PatternLayout">
+				<Pattern>%d{yyyy-MM-dd HH:mm:ss, SSS} [%5p] (%c{1}:%M:%L) - [%t] %m%n</Pattern>
+			</Layout>
+		</Appender>
+		<!-- ref to environmnet variable example: "${env:CLBSERVICE_LOG}-->
+		<Appender type="RollingFile" name="LogFile"	fileName="${sys:logPath}" filePattern="${sys:logPath}.%d{yyyyMMdd}" immediateFlush="false">
+			<Layout type="PatternLayout">
+				<Pattern>%d{yyyy-MM-dd HH:mm:ss, SSS} [%5p] (%c{1}:%M:%L) - [%t] %m%n</Pattern>
+			</Layout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			</Policies>
+		</Appender>
+	</Appenders>
+	<!-- Mixed asynch logging. Asynch only logging requires JVM parameter:  -DLog4jContextSelector="org.apache.logging.log4j.core.async.AsyncLoggerContextSelector" and no <async*> tags -->
+	<Loggers>
+		<asyncLogger name="com.ps.clb.logger.console" additivity="false" includeLocation="false">
+			<AppenderRef ref="STDOUT" />
+		</asyncLogger>
+
+		<asyncLogger name="com.ps.clb.logger.file" additivity="false" includeLocation="true">
+			<AppenderRef ref="LogFile" />
+		</asyncLogger>
+
+		<asyncRoot level="debug">
+			<AppenderRef ref="LogFile" />
+			<AppenderRef ref="STDOUT" /> <!-- Remove for PROD -->
+		</asyncRoot>
+	</Loggers>
+</Configuration>

@@ -1,0 +1,19 @@
+[Unit]
+Description=Linux RNGEntropy Dispatcher
+After=network.target
+
+[Service]
+LimitNOFILE=100000
+Type=simple
+StandardOutput=null
+StandardError=null
+
+WorkingDirectory=/bigdisk0/apps/C_RNGEntropy
+ExecStart=/bigdisk0/apps/C_RNGEntropy/pyr64.bin
+;/etc/systemd/system/
+
+KillSignal=SIGUSR1
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target

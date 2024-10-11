@@ -1,0 +1,126 @@
+---
+- name: Install java
+  ansible.builtin.include_role:
+    name: casino.server.java
+
+- name: Install tomcat
+  ansible.builtin.include_role:
+    name: casino.server.tomcat
+  vars:
+    tomcat_instances: "{{ clbservice_tomcat_instances }}"
+
+- name: Rotate clbservice.out
+  ansible.builtin.copy:
+    src: "logrotate"
+    dest: "/etc/logrotate.d/tomcat"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install and configure nginx
+  ansible.builtin.include_tasks:
+    file: nginx.yml
+# Required to ensure tomcat and nginx are running as expected
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Configure Log Aggregation
+  ansible.builtin.template:
+    src: promtail.yaml.j2
+    dest: /etc/promtail/promtail.yaml
+    owner: promtail
+    group: promtail
+    mode: "0644"
+  notify:
+    - Restart promtail
+
+- name: Copy kafka key
+  ansible.builtin.copy:
+    content: "{{ lookup('amazon.aws.aws_secret', '/{{ env }}/clbservice/kafka_keystore.jks', secret_type='binary') }}"
+    dest: "/bigdisk0/tomcat/clbservice/conf/config/kafka_keystore.jks"
+    owner: tomcat
+    group: tomcat
+    mode: "0644"
+  notify:
+    - Restart tomcat
+
+- name: Copy truststore key
+  ansible.builtin.copy:
+    content: "{{ lookup('amazon.aws.aws_secret', '/{{ env }}/clbservice/kafka_keystore.jks', secret_type='binary') }}"
+    dest: "/bigdisk0/tomcat/clbservice/conf/config/kafka_truststore.jks"
+    owner: tomcat
+    group: tomcat
+    mode: "0644"
+  when: hostvars[inventory_hostname].tags.Environment == "QA"
+  notify:
+    - Restart tomcat
+
+- name: Monitor connectivity
+  ansible.builtin.template:
+    src: net_response.conf.j2
+    dest: /etc/telegraf/telegraf.d/net_response.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+    validate: telegraf --test --config %s
+  notify:
+    - Reload telegraf
+  tags: notest
+
+- name: Monitor clbservice
+  ansible.builtin.template:
+    src: clbservice.conf.j2
+    dest: /etc/telegraf/telegraf.d/clbservice.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+  notify:
+    - Reload telegraf
+
+- name: Monitor starsweb
+  ansible.builtin.copy:
+    content: |
+      [[inputs.http]]
+        urls = ["https://casinoapp.pokerstars.com.{{ starsweb_environment }}.starsweb.io/clbservice/main/status/"]
+        data_format = "json"
+        json_string_fields = ["version", "status"]
+        name_override = "starsweb_clbservice_status"
+
+      [[inputs.http]]
+        urls = ["https://{{ starsweb_environment }}.starsweb.io/api/v1-preview/system/status"]
+        json_string_fields = [
+        "account",
+        "account.idscan",
+        "auth",
+        "cashier",
+        "casino",
+        "notification",
+        "ram2-account",
+        "ram2-auth",
+        "utils"
+        ]
+        data_format = "json"
+        name_override = "starsweb_api_status"
+        [[processors.enum]]
+        [[processors.enum.mapping]]
+        field="*"
+        [processors.enum.mapping.value_mappings]
+            green = 0
+            amber = 1
+            red = 2
+
+      [[inputs.http]]
+        urls = ["https://www.pokerstars.com.{{ starsweb_environment }}.starsweb.io/wmtp/info/status"]
+        json_string_fields = ["*_status"]
+        data_format = "json"
+        name_override="starsweb_wmtp_status"
+        [[processors.enum]]
+        [[processors.enum.mapping]]
+        field="*_status"
+        [processors.enum.mapping.value_mappings]
+          READY = 0
+          DOWN = 2
+    dest: /etc/telegraf/telegraf.d/starsweb.conf
+  notify:
+    - Reload telegraf
+  when: starsweb_environment|length > 0

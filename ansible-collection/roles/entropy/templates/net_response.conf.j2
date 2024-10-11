@@ -1,0 +1,7 @@
+# Hercules
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hercules_host }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+# vim: ft=toml

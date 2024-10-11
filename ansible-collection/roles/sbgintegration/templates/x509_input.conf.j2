@@ -1,0 +1,5 @@
+# This isn't necessarily the same endpoint as we currently use, just the latest HTTPS endpoint seen by Ansible
+[[inputs.x509_cert]]
+  sources = ["{{ SBGGatewayUrl }}"]
+  interval = "15m"
+  exclude_root_certs = true

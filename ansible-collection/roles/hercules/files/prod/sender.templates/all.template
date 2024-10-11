@@ -1,0 +1,15 @@
+[parameters]
+item=\Cache\Data Map Hits %, name=Cache - Data Map Hits percent
+item=\Cache\Pin Read Hits %, name=Cache - Pin Read Hits percent
+item=\Memory\% Committed Bytes in Use, name=Memory - Committed Bytes in Use percent
+item=\Memory\Available MBytes, name=Memory - Available MBytes
+item=\Memory\Committed Bytes, name=Memory - Committed Bytes
+item=\Memory\Page Faults/sec, name=Memory - Page Faults per sec
+item=\Memory\Page Reads/sec, name=Memory - Page Reads per sec
+item=\Memory\Page Writes/sec, name=Memory - Page Writes per sec
+item=\Memory\Pages Input/sec, name=Memory - Pages Input per sec
+item=\Memory\Pages Output/sec, name=Memory - Pages Output per sec
+item=\Memory\Pages/sec, name=Memory - Pages per sec
+item=\Memory\System Cache Resident Bytes, name=Memory - System Cache Resident Bytes
+item=\System\Processor Queue Length, name=System - Processor Queue Length
+item=\System\System Up Time, name=System - System Up time

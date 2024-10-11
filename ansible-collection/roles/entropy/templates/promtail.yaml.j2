@@ -1,0 +1,42 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /bigdisk0/monitoring/promtail-positions.yaml
+
+clients:
+  - url: {{ loki_url }}
+    external_labels:
+      environment: {{ hostvars[inventory_hostname].tags.CasinoEnvironment }}
+      name: {{ hostvars[inventory_hostname].tags.Name }}
+      instanceid: {{ hostvars[inventory_hostname].instance_id }}
+      platform: {{ hostvars[inventory_hostname].tags.Platform }}
+      zone: {{ hostvars[inventory_hostname].tags.Zone }}
+    tenant_id: casino
+
+scrape_configs:
+  - job_name: journal
+    journal:
+      max_age: 12h
+      labels:
+         job: systemd-journal
+    relabel_configs:
+      - source_labels: ["__journal__systemd_unit"]
+        target_label: "unit"
+
+  - job_name: dispatcher-logs
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        job: dispatcher
+        __path__: /bigdisk0/apps/C_RNGEntropy/dispatcher.log.*
+
+  - job_name: entropy-logs
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        job: entropy
+        __path__: /bigdisk0/apps/logs/C_RNGEntropy/*.log.*

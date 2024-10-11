@@ -1,0 +1,39 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: ppbintegration
+    image: "ghcr.io/alicekaerast/docker-amazonlinux2023-ansible"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /run
+    cgroupns_mode: host
+    pre_build_image: true
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
+  host_vars:
+    stationname: "TEST"
+    lobby_host: "127.0.10.136"
+    hercules_host: "127.0.10.145"
+    advertise_host: "127.0.10.133"
+  inventory:
+    group_vars:
+      all:
+        artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+        artifactory_username: ${ARTIFACTORY_USERNAME:-"anonymous"}
+        artifactory_password: ${ARTIFACTORY_PASSWORD:-"password"}
+        get_url_force_basic_auth: false
+        env: unittest
+        instance_id: i-abc123
+        tags:
+          CasinoEnvironment: unittest
+          Name: ppbgw
+          Platform: Linux
+          Zone: zone-1

@@ -1,0 +1,108 @@
+---
+- name: Create base oltp folder structure for zone1
+  ansible.builtin.include_tasks: "zone1.yml"
+  when: hostvars[inventory_hostname].tags.Zone == "zone1"
+
+- name: Create base oltp folder structure for zone0
+  ansible.builtin.include_tasks: "zone0.yml"
+  when: hostvars[inventory_hostname].tags.Zone == "zone0"
+
+- name: Create base oltp folder structure for zoneS
+  ansible.builtin.include_tasks: "zoneS.yml"
+  when: hostvars[inventory_hostname].tags.Zone == "zoneS"
+
+- name: Create monitor_client files
+  ansible.windows.win_template:
+    src: "apps/monitor_client/{{ item }}"
+    dest: "D:\\apps\\monitor_client\\{{ item }}"
+  loop:
+    - MemSender.ini
+    - Hercules.ini
+
+- name: DB2 Client setup
+  block:
+    - name: Query Installed Programs
+      ansible.windows.win_reg_stat:
+        path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{E27D4C1E-2DC8-4E6E-BD9F-C4EF5E86F07D}
+        name: DisplayVersion
+      register: installed_programs_versions
+      ignore_errors: true  # Ignore errors if the registry path does not exist
+
+    - name: Verify Db2 Client Installation
+      ansible.builtin.set_fact:
+        db2_client_installed: "{{ installed_programs_versions.value | default('0') }}"  ## This can be found in DB2_client_11.5.8.32821_ntx64\db2\spec under vara: vrmf=11.5.8000.7748
+
+    - name: Download DB2 client installer
+      ansible.windows.win_get_url:
+        url: "{{ artifactory_baseurl }}/ggn-applications/db2/{{ db2_client_package }}.zip"
+        dest: D:\{{ db2_client_package }}.zip
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        force_basic_auth: "{{ get_url_force_basic_auth }}"
+      when: db2_client_installed != db2_client_version
+
+    # Using powershell expand archive because of a bug in win_unzip module with tilde "~". Link to the issue: https://github.com/ansible-collections/community.windows/issues/76
+    - name: Extract DB2 client installer
+      ansible.windows.win_powershell:
+        script: |
+          Expand-Archive -LiteralPath D:\{{ db2_client_package }}.zip -DestinationPath D:\Software\ -Force
+        creates: D:\Software\{{ db2_client_package }}
+
+    - name: Install DB2 client
+      ansible.windows.win_powershell:
+        script: |
+          net localgroup db2admns %USERDOMAIN%\%USERNAME% /ADD
+          net localgroup db2users %USERDOMAIN%\%USERNAME% /ADD
+          D:\Software\{{ db2_client_package }}\setup.exe -u D:\Software\{{ db2_client_package }}\11.5.8_CLIENT.rsp -l D:\Software\{{ db2_client_package }}\new-install-db2-11-5.log
+      when: db2_client_installed != db2_client_version
+
+    - name: Copy db2dsdriver into relevant place - templated
+      ansible.windows.win_template:
+        src: db2dsdriver.cfg.j2
+        dest: C:\ProgramData\IBM\DB2\DB2COPY1\cfg\db2dsdriver.cfg
+      notify: Restart DB2 service
+
+- name: Clean up old files
+  block:
+    - name: Create admtools directory
+      ansible.windows.win_file:
+        path: "D:\\admtools"
+        state: directory
+
+    - name: Download tmpwatch.exe
+      ansible.windows.win_get_url:
+        url: "{{ artifactory_baseurl }}/ggn-applications/tmpwatch.exe"
+        dest: D:\admtools\tmpwatch.exe
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        force_basic_auth: "{{ get_url_force_basic_auth }}"
+
+    - name: Create batch script to run tmpwatch.exe
+      ansible.windows.win_template:
+        src: admtools/tmpwatch.bat
+        dest: D:\admtools\tmpwatch.bat
+
+    - name: Schedule tmpwatch to be run nightly
+      community.windows.win_scheduled_task:
+        name: tmpwatch
+        description: clean up old application logs and data
+        actions:
+          - path: D:\admtools\tmpwatch.bat
+        username: SYSTEM
+        state: present
+        triggers:
+          - type: daily
+            start_boundary: '2023-02-16T01:15:00'
+
+- name: Configure Log Aggregation
+  ansible.windows.win_template:
+    src: promtail.yaml.j2
+    dest: "C:\\ProgramData\\Promtail\\promtail.yaml"
+  notify:
+    - Restart promtail
+
+- name: Configure net_response metrics
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify: Restart Telegraf

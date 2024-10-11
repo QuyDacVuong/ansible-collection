@@ -1,0 +1,19 @@
+---
+
+- name: config_file | Make directory
+  ansible.builtin.file:
+    path: "{{ tomcat_directory }}/{{ instance.name }}/conf/{{ config_file.dest }}"
+    state: directory
+    owner: "{{ instance.user | default(tomcat_user) }}"
+    group: "{{ instance.group | default(tomcat_group) }}"
+    mode: "0755"
+  when: config_file.dest is defined
+- name: config_file | Deploy config_file
+  ansible.builtin.template:
+    src: "{{ config_file.src }}"
+    dest: "{{ tomcat_directory }}/{{ instance.name }}/conf/{{ config_file.dest | default('') }}"
+    owner: "{{ instance.user | default(tomcat_user) }}"
+    group: "{{ instance.group | default(tomcat_group) }}"
+    mode: "{{ config_file.mode | default('0644') }}"
+  notify:
+    - Restart tomcat instance

@@ -1,0 +1,10 @@
+<Connector 
+  port                   = "${listenPort}" 
+  protocol               = "org.apache.coyote.http11.Http11NioProtocol"
+  server                 = "app server"
+  redirectPort           = "8443"
+  maxThreads             = "4096"
+  maxConnections         = "49152"
+  acceptCount            = "1024"
+  connectionTimeout      = "60000"
+/>

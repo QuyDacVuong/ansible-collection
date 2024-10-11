@@ -1,0 +1,75 @@
+---
+- name: Install java
+  ansible.builtin.include_role:
+    name: casino.server.java
+
+- name: Install tomcat
+  ansible.builtin.include_role:
+    name: casino.server.tomcat
+  vars:
+    tomcat_instances: "{{ gateway_tomcat_instances }}"
+
+- name: Rotate catalina.out
+  ansible.builtin.copy:
+    src: "logrotate"
+    dest: "/etc/logrotate.d/tomcat"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install and configure nginx
+  ansible.builtin.include_tasks:
+    file: nginx.yml
+# Required to ensure tomcat and nginx are running as expected
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Configure Log Aggregation
+  ansible.builtin.template:
+    src: promtail.yaml.j2
+    dest: /etc/promtail/promtail.yaml
+    owner: promtail
+    group: promtail
+    mode: "0644"
+  notify:
+    - Restart promtail
+
+- name: Monitor connectivity
+  ansible.builtin.template:
+    src: net_response.conf.j2
+    dest: /etc/telegraf/telegraf.d/net_response.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+    validate: telegraf --test --config %s
+  notify:
+    - Reload telegraf
+  tags: notest
+
+- name: Monitor CS
+  ansible.builtin.template:
+    src: cs.conf.j2
+    dest: /etc/telegraf/telegraf.d/cs.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+  notify:
+    - Reload telegraf
+
+- name: Create common config directory
+  ansible.builtin.file:
+    path: /bigdisk0/tomcat/conf/cs-common/config
+    state: directory
+    owner: tomcat
+    group: tomcat
+    mode: 0755
+- name: Create common config
+  ansible.builtin.template:
+    src: conf/cs-common/config/casinoservices.ini
+    dest: /bigdisk0/tomcat/conf/cs-common/config
+    owner: tomcat
+    group: tomcat
+    mode: "0644"
+- name: Install nginx
+  ansible.builtin.include_tasks:
+    file: nginx.yml

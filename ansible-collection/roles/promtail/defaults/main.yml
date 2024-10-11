@@ -1,0 +1,19 @@
+---
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com
+promtail_config_clients:
+  - url: "{{ loki_url }}/loki/api/v1/push"
+    tenant_id: casino
+
+promtail_config_scrape_configs: []
+#  promtail_config_scrape_configs:
+#    - job_name: system
+#      entry_parser: raw
+#      static_configs:
+#      - targets:
+#          - localhost
+#        labels:
+#          job: varlogs
+#          host: {{ ansible_hostname }}
+#          __path__: /var/log/*log
+promtail_config_dir: /etc/promtail
+promtail_config_file: "{{ promtail_config_dir }}/promtail.yml"

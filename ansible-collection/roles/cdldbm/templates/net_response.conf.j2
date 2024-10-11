@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+# OLTP
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ db_config['dbs']['zone0-oltp']['host'] }}:{{ db_config['dbs']['zone0-oltp']['port'] }}"
+  interval = "60s"
+  collection_jitter = "20s"
+
+# vim: ft=toml

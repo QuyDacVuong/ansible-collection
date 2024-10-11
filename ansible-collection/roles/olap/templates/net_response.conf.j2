@@ -1,0 +1,16 @@
+# Hercules
+{% for host in groups[hercules_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# OLAP
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ db_config['dbs']['zoneS-olap']['host'] }}:{{ db_config['dbs']['zoneS-olap']['port'] }}"
+  interval = "60s"
+  collection_jitter="20s"
+# vim: ft=toml

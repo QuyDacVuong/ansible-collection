@@ -1,0 +1,238 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+service_start_mode: "auto"
+service_state: "started"
+
+noncritical_stats_comm: |
+  name=AppFactory
+  identification={{ stationname }}.C_STATS
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  alias=ip:localhost:2349
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2350
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2349
+  alias=ip:*:2350
+  rule=ip:auxolap:port pyrtcp0://{{ olap_host }}:2348
+  rule=ip:127.0.0.1:5447 pyrtcp0://127.0.0.1:5447
+  rule=ip:*:* pyrtcp0://$0:$1
+  performance=1
+  trafficprintlast=0
+
+noncritical_stats_tcp: |
+  type=tcp
+  port=2348
+  option.islocal=1
+  option.compressbits=0
+  option.logfile=d:\apps\logs\c_stats\protolocal.log
+  option.keepalive=30000/180000
+  gatherstatistic=2
+
+noncritical_stats_tcpd: |
+  type=tcp
+  port=2350
+  option.islocal=1
+  option.logfile=d:\apps\logs\c_stats\protolocald.log
+  option.keepalive=30000/180000
+  gatherstatistic=2
+
+noncritical_stats_tcpmux: |
+  type=tcpmux
+  port=2349
+  gatherstatistic=2
+
+noncritical_stats_smem: |
+  port=2348
+  gatherstatistic=2
+
+noncritical_stats_smemmux: |
+  type=smemmux
+  port=2349
+  gatherstatistic=2
+
+noncritical_stats_exe: |
+  handhistory=d:\apps\bin\c_stats\auxhhserver.exe;d:\apps\logs\c_stats\
+  LobbyStats=d:\apps\bin\c_stats\auxlobbystatsserver.exe;d:\apps\logs\c_stats\
+  tablemonitor=d:\apps\bin\c_stats\auxtablemonitorserver.exe;d:\apps\logs\c_stats\
+  auxdbd=d:\apps\bin\c_stats\auxdbd.exe;d:\apps\logs\c_stats\
+  auxemailserver=d:\apps\bin\c_stats\auxemailserver.exe;d:\apps\logs\c_stats\
+  gamemonitor=d:\apps\bin\c_stats\auxgamemonitorserver.exe;d:\apps\logs\c_stats\
+  momentsticker=d:\apps\bin\c_stats\auxmomentsticker.exe;d:\apps\logs\c_stats\
+
+noncritical_stats_start: |
+  handhistory=handHistoryInstance;ver=1;[ini_path=D:\apps\configs\c_stats\;station_name={{ stationname }}.C_STATS.AuxHandHistoryServer;service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone_settings.ini]
+  LobbyStats=AuxLobbyStatsInstance;ver=1;[ini_path=D:\apps\configs\c_stats\;station_name={{ stationname }}.C_STATS.AuxLobbyStats;service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone_settings.ini]
+  tablemonitor=AuxTableMonitorServerInstance;ver=1;[ini_path=D:\apps\configs\c_stats\;station_name={{ stationname }}.C_STATS.TableMonitorServer;service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone_settings.ini]
+
+  auxdbd=AuxMainDbdServerInstance;s=d:\\apps\\configs\\c_stats\\
+  auxdbd=AuxGamingDbdServerInstance;s=d:\\apps\\configs\\c_stats\\gamedbd\\
+  auxdbd=AuxLoginDbdServerInstance;s=d:\\apps\\configs\\c_stats\\logindbd\\
+  auxdbd=AuxAdminDbdServerInstance;s=d:\\apps\\configs\\c_stats\\auxadmindbd\\
+  auxdbd=AuxJackpotDbdServerInstance;s=d:\\apps\\configs\\c_stats\\jackpotdbd\\
+  auxdbd=AuxAutomationDbdServerInstance;s=d:\\apps\\configs\\c_stats\\automationdbd\\
+  auxdbd=AuxEmailDbdServerInstance;s=d:\\apps\\configs\\c_stats\\emaildbd\\
+  auxdbd=AuxJackpotReportDbdServerInstance;s=d:\\apps\\configs\\c_stats\\jackpotreportdbd\\
+  auxdbd=AuxRaceDbdServerInstance;s=d:\\apps\\configs\\c_stats\\racedbd\\
+
+  auxemailserver=AuxEmailServerInstance;ver=1;[ini_path=D:\apps\configs\c_stats\;station_name={{ stationname }}.C_STATS.AuxEmailServer;service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone_settings.ini]
+  gamemonitor=AuxGameMonitorServerInstance;ver=1;[ini_path=D:\apps\configs\c_stats\;station_name={{ stationname }}.C_STATS.AuxGameServerMonitor;service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone_settings.ini]
+  momentsticker=MomentsTickerServerInstance;ver=1;[ini_path=D:\apps\configs\c_stats\;station_name={{ stationname }}.C_STATS.AuxMomentsTicker;service_path=D:\apps\configs\esl.json;zoneConfig=D:\apps\configs\zone_settings.ini]
+
+
+noncritical_stats_logger: |
+  server=ip:{{ hercules_host }}:9322
+  station={{ stationname }}.C_STATS.{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }}
+  UseLogger=1
+
+  [telemetry.targets]
+  hercules = true
+  gateway = true
+  [telemetry.gateway.conn-params]
+  address = ip:127.0.0.1:5447
+  instance = TelgatewayInstance
+  [telemetry.metrics.tags]
+  application = C_STATS
+  environment = {{ hostvars[inventory_hostname].tags.Environment }}
+  name = {{ hostvars[inventory_hostname].tags.Name }}
+  instanceid = {{ hostvars[inventory_hostname].instance_id }}
+  platform = {{ hostvars[inventory_hostname].tags.Platform }}
+  zone = {{ hostvars[inventory_hostname].tags.Zone }}
+  station_name = {{ stationname }}.C_STATS.{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }}
+  service_name = C_STATS
+  [telemetry.metrics.filters.1]
+  regex = .*
+
+noncritical_reef_comm: |
+  name=AppFactory
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:3348
+  alias=ip:*:3350
+  rule=ip:127.0.0.1:5447 pyrtcp0://127.0.0.1:5447
+  rule=ip:*:* pyrtcp0://$0:$1
+
+noncritical_reef_tcpmux: |
+  port=3350
+
+noncritical_reef_tcp: |
+  port=3348
+  option.islocal=1
+  ;option.protocol=3
+  option.compressbits=0
+  option.logfile=d:\apps\logs\c_reef_stats\protolocal.log
+  option.keepalive=0/0
+  gatherstatistic=1
+
+noncritical_reef_smem: |
+  port=3348
+
+noncritical_reef_smemmux: |
+  port=3350
+
+noncritical_reef_exe: |
+  reef=d:\apps\bin\c_reef_stats\auxreef.exe;d:\apps\logs\c_reef_stats\;0/0;R240
+
+noncritical_reef_start: |
+  reef=AuxReefReplicaInstance1;s=D:\\apps\\configs\\c_reef_stats\\replica1\\
+
+noncritical_reef_logger: |
+  server=ip:{{ hercules_host }}:9322
+  station={{ stationname }}.C_STATS.REEF_STATS-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }}
+  UseLogger=1
+
+  [telemetry.targets]
+  hercules = true
+  gateway = true
+  [telemetry.gateway.conn-params]
+  address = ip:127.0.0.1:5447
+  instance = TelgatewayInstance
+  [telemetry.metrics.tags]
+  application = REEF_STATS
+  environment = {{ hostvars[inventory_hostname].tags.Environment }}
+  name = {{ hostvars[inventory_hostname].tags.Name }}
+  instanceid = {{ hostvars[inventory_hostname].instance_id }}
+  platform = {{ hostvars[inventory_hostname].tags.Platform }}
+  zone = {{ hostvars[inventory_hostname].tags.Zone }}
+  station_name = {{ stationname }}.C_STATS.REEF_STATS-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }}
+  service_name = REEF_STATS
+  [telemetry.metrics.filters.1]
+  regex = .*
+
+noncritical_automationdbd_jobs: |
+  [jobs]
+  ;emailStuckSessions=0
+  resolveStuckSessions=0
+  ;sendAlertEmail=0
+  finalizeIdleGames=0
+
+noncritical_automationdbd_sendAlertEmail: |
+  [;sendAlertEmail]
+  type=stuckgame
+  queryDbm=ROOltp
+  processDbm=templateServer
+  pmThreshold=15
+  rmThreshold=15
+  countRange=4hour-
+  emailNotify=from:casinosupportep|casinosupportep@pokerstars.com;to:danielj@pyrsoftware.com,supportodm@pokerstars.com,casinosupportep@pokerstars.com
+  schedule=/1hour
+  procedureLink=https://rational-group.metafaq.com/knowledge/en/en-casino/casino-refund-third-party
+
+noncritical_automationdbd_emailStuckSessions: |
+  [;emailStuckSessions]
+  daemonlogdbm=daemonLogDbm
+  queryDbm=ROOltp
+  processDbm=admin
+  schedule=08:00
+
+noncritical_emaildbd_sendAlertEmail: |
+  [;sendAlertEmail]
+  type=interruptedgame
+  queryDbm=dbm
+  processDbm=templateServer
+  pmThreshold=20
+  rmThreshold=20
+  countRange=4hour-24hour
+  emailNotify=from:casinosupportep|casinosupportep@pokerstars.com;to:danielj@pyrsoftware.com,supportodm@pokerstars.com,casinosupportep@pokerstars.com
+  schedule=/1hour
+  procedureLink=https://rational-group.metafaq.com/knowledge/en/en-casino/casino-refund-third-party
+
+noncritical_binaries:
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/{{ coresever_bin_branch }}/disp64/
+    dest_path: D:\apps\c_stats\
+  - binary: pyr164.exe
+    url_path: build-results/coreserver/{{ coresever_bin_branch }}/disp164/
+    dest_path: D:\apps\c_reef_stats\
+  - binary: pyr264.exe
+    url_path: build-results/coreserver/{{ coresever_bin_branch }}/disp264/
+    dest_path: D:\apps\c_auxwingman\
+  - binary: auxwingman.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxwingman/
+    dest_path: D:\apps\bin\c_auxwingman\
+  - binary: auxdbd.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxracedbd/
+    dest_path: D:\apps\bin\c_stats\
+  - binary: auxemailserver.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxemailserver/
+    dest_path: D:\apps\bin\c_stats\
+  - binary: auxgamemonitorserver.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxgamemonitorserver/
+    dest_path: D:\apps\bin\c_stats\
+  - binary: auxhhserver.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxhhserver/
+    dest_path: D:\apps\bin\c_stats\
+  - binary: auxlobbystatsserver.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxlobbystatsserver/
+    dest_path: D:\apps\bin\c_stats\
+  - binary: auxmomentsticker.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxmomentsticker/
+    dest_path: D:\apps\bin\c_stats\
+  - binary: auxtablemonitorserver.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxtablemonitorserver/
+    dest_path: D:\apps\bin\c_stats\
+  - binary: auxreef.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxreef/
+    dest_path: D:\apps\bin\c_reef_stats\
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push

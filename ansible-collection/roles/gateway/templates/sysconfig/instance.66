@@ -1,0 +1,8 @@
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true $JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m  \
+-DlistenPort=8145 -DserverPort=8070"
+
+export SBGGW_HOME=/bigdisk0/tomcat/conf/sbgbackofficegateway
+
+export TOMCAT_VERSION=/software/tomcat8
+
+export JAVA_HOME=/software/jre11

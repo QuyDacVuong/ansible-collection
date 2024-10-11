@@ -1,0 +1,39 @@
+---
+ggn_application_logs_bucket: "ggn-uki-infra-zone1-development-ggn-application-logs"
+ggn_application_logs_path: "/bigdisk0/apache-tomcat/logs"
+
+common_esl_source: "esl.json"
+
+# Shared Zone
+C_ZNS_LOBBY: "ip:127.0.46.73:2348"
+C_ZNS_REEF_LOBBY: "ip:127.0.46.73:9348"
+C_ZNS_OLAP: "ip:127.0.46.27:2348"
+C_ZNS_OLTP: "ip:127.0.46.24:2348"
+C_ZNS_OLAP_BROKER_IP: "127.0.46.227:2348"
+C_TEMPLATESERVER: "ip:127.0.20.81:3348"
+
+# Zone 0
+C_ZN_ADAPTOR: "ip:127.0.46.11:2348"
+C_ZN_GDK2: "ip:127.0.46.14:2348"
+C_ZN_LOBBY: "ip:127.0.46.3:2348"
+C_ZN_ITGATEWAY: "ip:127.0.46.72:2348"
+C_ZN_RGS: "ip:127.0.46.3:3348"
+C_ZN_STATS: "ip:127.0.46.7:2348"
+
+# Poker
+ICE_OS: "ip:127.0.20.30:3348"
+LOGINDBM: "ip:127.0.20.212:2348"
+PYRHUB: "ip:127.0.20.81:4348"
+TEMPLATESERVER: "ip:127.0.20.81:3348"
+
+region: eu-west-1
+
+sharedzone_crm: 127.0.20.3
+sharedzone_olap: 127.0.46.27
+sharedzone_olap_port: 2348
+
+common_node_exporter_version: 1.7.0
+common_telegraf_version: 1.27.2-1
+common_windows_vim_version: 8.2.4975
+common_windows_exporter_version: 0.24.0
+env: unittest

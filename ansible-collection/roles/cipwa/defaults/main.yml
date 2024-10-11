@@ -1,0 +1,177 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+aws_tags:
+  - Key: CreatedBy
+    Value: "Ansible"
+get_url_force_basic_auth: false
+public_domain: example.com
+env: development
+cipwa_version: 1.2302.170
+
+cipwa_allowed_origins:
+  - https://cdn.{{ public_domain }}
+  - https://origin.{{ public_domain }}
+
+cipwa_same_origin: |
+  http://127.0.0.1:8080,http://127.0.0.1:49651,http://127.0.0.1:50332,http://127.0.0.1:52703,http://127.0.0.1:53444,http://127.0.0.1:56765,http://127.0.0.1:59846,http://127.0.0.1:60427,http://127.0.0.1:61908,http://127.0.0.1:64339,http://localhost:8080,http://localhost:49651,http://localhost:50332,http://localhost:52703,http://localhost:53444,http://localhost:56765,http://localhost:59846,http://localhost:60427,http://localhost:61908,http://localhost:64339,http://localhost.charlesproxy.com:8080,http://localhost.charlesproxy.com
+
+cipwa_tomcat_version: 8.5.96
+tomcat_directory: /bigdisk0/tomcat
+tomcat_non_ssl_connector_port: 8080
+
+log_level_warn: "debug"
+log_level_info: "debug"
+zip_logs: ".gz"
+
+certificate_domain: cipwa-{{ env }}.csr.pstars-{{ region }}-intermediate
+stationname: "DEV"
+
+concentrator_hosts: ["127.0.0.70"]
+lobby_host: "127.0.0.136"
+hercules_host: "127.0.0.145"
+ip2country_host: "{{ lobby_host }}"
+advertise_host: "127.0.0.133"
+
+resolver_port: "4348"
+
+cipwa_max_messages_per_minute: "100000"
+cipwa_max_connections_per_websocket: "100000"
+cipwa_max_resolver_messages_per_minute: "10000"
+cipwa_max_websocket_sessions_from_same_ip: "10000"
+cipwa_max_failed_connection_requests_per_ip: "10000"
+cipwa_staticconnect_extra_options: ""
+cipwa_staticsettings_extra_options: ""
+cipwa_extra_options: ""
+# QA only, please do not set the server=AuxLobby in production.
+cipwa_servers:
+  - AuxLobby
+  - AuxLobbyPubl
+  - AuxShadowLobbyPubl
+  - AuxTable
+  - AuxRace
+
+cipwa_auxlobby_option: |
+  name=lobby
+  type=P2P
+  serverAddr=ip:{{ lobby_host }}:2348
+  serverInstance=AuxLobbyServerInstance
+  multiInstance=false
+  P2P_0=auxlobby-unauth,auth_type_no_token
+  P2P_1=CPA.auxlobby,auth_type_host_token
+  P2P_2=CLI.ugc,auth_type_aux_token
+  P2P_3=CPA.webugc,auth_type_host_token
+  P2P_4=CPA.webauxlobby,auth_type_host_token
+  P2P_5=CPA.webauxlobbyetc,auth_type_aux_token,@ip:{{ lobby_host }}:2348/AuxLobbyEtcServerInstance
+  P2P_6=CPA.webauxlobbyetc.ige,auth_type_host_token,@ip:{{ lobby_host }}:2348/AuxLobbyEtcServerInstance
+
+  RoundTripMonitorGroup=lobby;P2P_1,P2P_2,P2P_3,P2P_4
+  RoundTripMonitorGroup2=lobbyEtc;P2P_5,P2P_6
+
+cipwa_auxtable: |
+  name=table
+  serverInstance=auxtable
+  serverType=hash_mod
+  serverOrder={{ ( (groups[gdk_role] | default([])) + (groups[non_gdk_role] | default([])) ) | sort | map('to_factory') | join(',') }}
+  P2P_0=CPA.client,Auth_Type_Aux_Token,AUTH_TYPE_HOST_WITH_XC_TOKEN
+  Publication_0=atable_pub
+  Publication_1=atable_events
+
+  RoundTripMonitorGroup=table;P2P_0
+
+cipwa_publications: |
+  Publication_0=Global
+  Publication_1=TableTypes
+  Publication_2=VendorStatus
+  Publication_3=GameStats
+  Publication_4=Jackpot|inJackpotList
+  Publication_104=PM.BJ.SP
+  Publication_105=PM.BJ.MP
+  Publication_106=PM.BJ.SNG
+  Publication_107=PM.BJ.TOURN
+  Publication_108=RM.BJ.SP
+  Publication_109=RM.BJ.MP
+  Publication_110=RM.BJ.SNG
+  Publication_111=RM.BJ.TOURN
+  Publication_112=PM.ROULETTE.SP
+  Publication_113=PM.ROULETTE.MP
+  Publication_114=RM.ROULETTE.SP
+  Publication_115=RM.ROULETTE.MP
+  Publication_116=PM.BACCARAT.SP
+  Publication_117=PM.BACCARAT.MP
+  Publication_118=RM.BACCARAT.SP
+  Publication_119=RM.BACCARAT.MP
+  Publication_200=PM.RG
+  Publication_201=RM.RG
+  Publication_300=ALL.TableTypes
+  Publication_301=ALL.PM.BJ.SP
+  Publication_302=ALL.PM.BJ.MP
+  Publication_303=ALL.PM.BJ.SNG
+  Publication_304=ALL.PM.BJ.TOURN
+  Publication_305=ALL.RM.BJ.SP
+  Publication_306=ALL.RM.BJ.MP
+  Publication_307=ALL.RM.BJ.SNG
+  Publication_308=ALL.RM.BJ.TOURN
+  Publication_309=ALL.PM.ROULETTE.SP
+  Publication_400=ALL.PM.ROULETTE.MP
+  Publication_401=ALL.RM.ROULETTE.SP
+  Publication_402=ALL.RM.ROULETTE.MP
+  Publication_403=ALL.PM.DB.ROULETTE.SP
+  Publication_404=ALL.PM.DB.ROULETTE.MP
+  Publication_405=ALL.RM.DB.ROULETTE.SP
+  Publication_406=ALL.RM.DB.ROULETTE.MP
+  Publication_407=ALL.PM.HU.HOLDEM.SP
+  Publication_408=ALL.PM.HU.HOLDEM.MP
+  Publication_409=ALL.RM.HU.HOLDEM.SP
+  Publication_410=ALL.RM.HU.HOLDEM.MP
+  Publication_411=ALL.PM.BACCARAT.SP
+  Publication_412=ALL.PM.BACCARAT.MP
+  Publication_413=ALL.RM.BACCARAT.SP
+  Publication_414=ALL.RM.BACCARAT.MP
+  Publication_415=ALL.PM.RG
+  Publication_416=ALL.RM.RG
+  Publication_417=ALL.PM.MP
+  Publication_418=ALL.RM.MP
+  Publication_419=VtTickers.PM
+  Publication_420=VtTickers.RM
+  Publication_500=Races
+  Publication_510=GDKGameNotif|inGroupNameList
+
+cipwa_monitorgroup: |
+  RoundTripMonitorGroup=table;P2P_0
+
+cipwa_rules_list: |
+  #jinja2:lstrip_blocks: True
+  ip:{{ hercules_host }}:9322=ip:{{ hercules_host }}:9322
+  {% set ip_port_list = [] %}
+   {% for host in concentrator_hosts %}
+   {% set _ = ip_port_list.append(host + ':7348') %}
+  {% endfor %}
+  *:*={{ ip_port_list | join(',') }}
+
+cipwa_tomcat_instances:
+  - name: cipwa
+    version: "{{ cipwa_tomcat_version }}"
+    src: "{{ artifactory_baseurl }}/ggn-applications/apache-tomcat/apache-tomcat-{{ cipwa_tomcat_version }}.tar.gz"
+    environment_variables:
+      - TOMCAT_CFG_LOADED=1
+      - JAVA_OPTS=$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m
+      - CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC
+      - CATALINA_PID=/var/run/apache-tomcat-cipwa/run.pid
+      - SECURITY_MANAGER=false
+      - CIPWA_HOME={{ tomcat_directory }}/cipwa/conf
+    config_files:
+      - src: CipwaServer.ini
+        mode: "0644"
+        dest: config
+      - src: log4j2.xml
+        mode: "0644"
+        dest: config
+    wars:
+      - url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/cipwa/cipwa-{{ cipwa_version }}.war"
+        name: cipwa
+
+starsweb_environment: ""
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push

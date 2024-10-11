@@ -1,0 +1,18 @@
+[Unit]
+Description=Apache Tomcat Instance {{ instance_name }}
+After=syslog.target network.target
+
+[Service]
+Type=forking
+User={{ instance.user | default(tomcat_user) }}
+Group={{ instance.group | default(tomcat_group) }}
+LimitNOFILE=65535
+{% for v in instance.environment_variables | default(tomcat_environment_variables) %}
+Environment="{{ v }}"
+{% endfor %}
+ExecStart={{ tomcat_directory }}/{{ instance.name }}/bin/startup.sh
+ExecStop={{ tomcat_directory }}/{{ instance.name }}/bin/shutdown.sh
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,84 @@
+[parameters]
+item=\Cache\Data Map Hits %, name=Cache - Data Map Hits percent
+item=\Cache\Pin Read Hits %, name=Cache - Pin Read Hits percent
+
+item=\Memory\% Committed Bytes in Use, name=Memory - Committed Bytes in Use percent
+item=\Memory\Available MBytes, name=Memory - Available MBytes
+item=\Memory\Committed Bytes, name=Memory - Committed Bytes
+item=\Memory\Page Faults/sec, name=Memory - Page Faults per sec
+item=\Memory\Page Reads/sec, name=Memory - Page Reads per sec
+item=\Memory\Page Writes/sec, name=Memory - Page Writes per sec
+item=\Memory\Pages Input/sec, name=Memory - Pages Input per sec
+item=\Memory\Pages Output/sec, name=Memory - Pages Output per sec
+item=\Memory\Pages/sec, name=Memory - Pages per sec
+item=\Memory\System Cache Resident Bytes, name=Memory - System Cache Resident Bytes
+item=\Memory\Pool Nonpaged Bytes, name=Memory - Pool Nonpaged Bytes
+item=\Memory\Pool Paged Bytes, name=Memory - Pool Paged Bytes
+
+item=\System\Processor Queue Length, name=System - Processor Queue Length
+item=\System\System Up Time, name=System - System Up time
+item=\System\Context Switches/sec, name=System - Context Switches per sec
+item=\System\System Calls/sec, name=System - System Calls per sec
+
+item=\TCPv4\Segments Retransmitted/sec, name=TCP - Segments Retransmitted per sec
+item=\TCPv4\Segments Sent/sec, name=TCP - Segments Sent per sec
+
+item=\Process(HeSender64)\% Processor Time, name=HeSender64 - Processor Time percent
+item=\Process(HeSender64)\Working Set, name=HeSender64 - Working Set
+
+item=\Process(db2syscs)\Page Faults/sec, name=DB2 System Controller - Page Faults/sec
+item=\Process(db2syscs)\Working Set, name=DB2 System Controller - Working Set
+item=\Process(db2syscs)\Virtual Bytes, name=DB2 System Controller - Virtual Bytes
+item=\Process(db2syscs)\% Processor Time, name=DB2 System Controller - Processor Time percent
+
+item=\process(db2syscs)\Thread Count, name=DB2SysCs - Thread Count
+item=\process(db2syscs)\Handle Count, name=DB2SysCs - Handle Count
+
+item=\Process(_Total)\Pool Paged Bytes, name=Process - Pool Paged Bytes - _Total
+item=\Process(_Total)\Pool Nonpaged Bytes, name=Process - Pool Nonpaged Bytes - _Total
+item=\Process(_Total)\Working Set, name=Process - Working Set - _Total
+item=\Process(_Total)\Page File Bytes, name=Process - Page File Bytes - _Total
+
+
+item=\DB2 Database Manager(DB2                 )\Remote connections, name=DB2 - Remote connections
+item=\DB2 Database Manager(DB2                 )\Local connections, name=DB2 - Local connections
+item=\DB2 Database Manager(DB2                 )\Stolen Agents, name=DB2 - Stolen Agents
+item=\DB2 Database Manager(DB2                 )\Agents Assigned from Pool, name=DB2 - Agents from Pool
+item=\DB2 Database Manager(DB2                 )\Agents created due to empty agent pool, name=DB2 - Agents created
+
+[LogicalDisks]
+item=\LogicalDisk(?)\Current Disk Queue Length, name=Disk ? - Current Disk Queue Length
+item=\LogicalDisk(?)\% Disk Read Time, name=Disk ? - Read Time percent
+item=\LogicalDisk(?)\% Disk Write Time, name=Disk ? - Write Time percent
+item=\LogicalDisk(?)\Disk Write Bytes/sec, name=Disk ? - Disk Write Bytes per sec
+item=\LogicalDisk(?)\Disk Read Bytes/sec, name=Disk ? - Disk Read Bytes per sec
+item=\LogicalDisk(?)\Free Megabytes,name=FreeSpaceMb_?
+item=\LogicalDisk(?)\% Free Space,name=FreeSpacePercent_?
+
+
+item=\LogicalDisk(?)\Disk Reads/sec, name=Disk ? - Read IOPS
+item=\LogicalDisk(?)\Disk Writes/sec, name=Disk ? - Write IOPS
+item=\LogicalDisk(?)\Disk Transfers/sec, name=Disk ? - Combined IOPS
+
+item=\LogicalDisk(?)\Avg. Disk sec/Read, name=Disk ? - Read Latency
+item=\LogicalDisk(?)\Avg. Disk sec/Write, name=Disk ? - Write Latency
+item=\LogicalDisk(?)\Avg. Disk sec/Transfer, name=Disk ? - Combined Latency
+
+item=\LogicalDisk(?)\Avg. Disk Read Queue Length, name=Disk ? - Read Queue Length
+item=\LogicalDisk(?)\Avg. Disk Write Queue Length, name=Disk ? - Write Queue Length
+item=\LogicalDisk(?)\Avg. Disk Queue Length, name=Disk ? - Combined Queue Length
+item=\LogicalDisk(?)\Current Disk Queue Length, name=Disk ? - Momentary peak Queue Length
+
+item=\LogicalDisk(?)\% Disk Time, name=Disk ? - Total Busy Time percent
+item=\LogicalDisk(?)\% Idle Time, name=Disk ? - Total Idle Time percent
+
+item=\LogicalDisk(?)\Avg. Disk Bytes/Read, name=Disk ? - Read Block Size
+item=\LogicalDisk(?)\Avg. Disk Bytes/Write, name=Disk ? - Write Block Size
+item=\LogicalDisk(?)\Avg. Disk Bytes/Transfer, name=Disk ? - Combined Block Size
+
+item=\LogicalDisk(?)\Split IO/Sec, name=Disk ? - Split IOs per second
+
+[processors]
+item=\Processor(?)\% Processor Time , name=Processor - Processor ? Time percent
+item=\Processor(_Total)\Interrupts/sec, name=Processor - Total Interrupts per sec
+

@@ -1,0 +1,73 @@
+---
+- name: Validate binaries
+  ansible.builtin.fail:
+    msg: "Refusing to deploy {{ item.binary }} to production"
+  loop: "{{ win_deploy_bins }}"
+  when: item.binary in ["pyrdgeentropysmem.exe"] and env in ["prod", "fips-casino-production"]
+
+- name: Create directory to store downloaded files in
+  ansible.windows.win_file:
+    path: D:\software
+    state: directory
+
+- name: Download {{ item.binary }}
+  ansible.windows.win_get_url:
+    url: "{{ [artifactory_baseurl, item.url_path, item.binary] | path_join }}"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+    dest: "D:\\software\\{{ item.url_path | regex_replace('/', '_') }}-{{ item.binary }}"
+  loop: "{{ win_deploy_bins }}"
+- name: Deploy downloaded items
+  block:
+    - name: Copy downloaded file to running {{ item.binary }}
+      ansible.windows.win_copy:
+        remote_src: true
+        src: "D:\\software\\{{ item.url_path | regex_replace('/', '_') }}-{{ item.binary }}"
+        dest: "{{ item.dest_path }}\\{{ item.binary }}"
+        force: true  # only performs a copy if the two files are different
+      loop: "{{ win_deploy_bins }}"
+      notify:
+        - Restart services  # only notifies if the copy actually happened
+  rescue:
+    # if the above copy failed due to a running service using it
+    - name: Warn that we can't stop the service
+      ansible.builtin.debug:
+        msg: "Need to stop services to deploy {{ item.binary }} but refusing to do so since skip-tags=launch is set"
+      when: "'launch' in ansible_skip_tags"
+    - name: Stop services
+      ansible.windows.win_service:
+        name: "{{ item }}"
+        state: stopped
+      tags:
+        - launch
+      loop: "{{ win_deploy_services }}"
+    - name: Copy downloaded file to running {{ item.binary }}
+      ansible.windows.win_copy:
+        remote_src: true
+        src: "D:\\software\\{{ item.url_path | regex_replace('/', '_') }}-{{ item.binary }}"
+        dest: "{{ item.dest_path }}\\{{ item.binary }}"
+        force: true  # only performs a copy if the two files are different
+      loop: "{{ win_deploy_bins }}"
+
+- name: Self-document
+  ansible.windows.win_template:
+    src: inventory.json.j2
+    dest: "D:\\software\\{{ win_deploy_id }}_win_deploy.json"
+
+- name: Finalise inventory
+  ansible.windows.win_powershell:
+    script: |
+      $directoryPath = "D:\software"
+      $jsonFiles = Get-ChildItem -Path $directoryPath -Filter "*_win_deploy.json"
+      $mergedContent = @()
+      foreach ($file in $jsonFiles) {
+          $content = Get-Content -Path $file.FullName -Raw
+          $psObject = $content | ConvertFrom-Json
+          $mergedContent += $psObject.Content
+      }
+      $finalContent = Get-Content -Path $jsonFiles[0].FullName -Raw
+      $finalPsObject = $finalContent | ConvertFrom-Json
+      $finalPsObject.Content = $mergedContent
+      $finalPsObject | ConvertTo-Json -Depth 100 | Set-Content -Path "C:\ProgramData\Amazon\SSM\InstanceData\{{ hostvars[inventory_hostname].instance_id }}\inventory\custom\win_deploy.json"
+      $Ansible.Changed = $false

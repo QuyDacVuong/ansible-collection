@@ -1,0 +1,16 @@
+---
+- name: Restart Monitor service
+  ansible.windows.win_service:
+    name: PYR_C_MONITORMAIN
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart promtail
+  ansible.windows.win_service:
+    name: Promtail
+    state: restarted
+
+- name: Restart Telegraf
+  ansible.windows.win_service:
+    name: Telegraf
+    state: restarted

@@ -1,0 +1,35 @@
+---
+- name: war | Stat war file
+  ansible.builtin.stat:
+    path: "{{ tomcat_directory }}//{{ instance.name }}/webapps/{{ war.name }}.war"
+  register: st
+- name: war | Perform a HEAD on the remote file to read sha1
+  ansible.builtin.uri:
+    url: "{{ war.url }}"
+    method: HEAD
+    timeout: 60
+  register: remote_war_head
+  when:
+    - war.url is defined
+- name: war | Delete war if checksums mismatch
+  ansible.builtin.file:
+    path: "{{ tomcat_directory }}/{{ instance.name }}/webapps/{{ war.name }}.war"
+    state: absent
+  when: st.stat.checksum | default('') != remote_war_head.x_checksum_sha1 | default('dryrun')
+- name: war | Delete war directory if checksums mismatch
+  ansible.builtin.file:
+    path: "{{ tomcat_directory }}/{{ instance.name }}/webapps/{{ war.name }}"
+    state: absent
+  when: st.stat.checksum | default('') != remote_war_head.x_checksum_sha1 | default('dryrun')
+- name: war | Deploy war url
+  ansible.builtin.get_url:
+    url: "{{ war.url }}"
+    dest: "{{ tomcat_directory }}/{{ instance.name }}/webapps/{{ war.name }}.war"
+    owner: "{{ instance.tomcat_user | default(tomcat_user) }}"
+    group: "{{ instance.tomcat_group | default(tomcat_group) }}"
+    mode: "0640"
+  register: download_result
+  when:
+    - war.url is defined
+  notify:
+    - Restart tomcat instance

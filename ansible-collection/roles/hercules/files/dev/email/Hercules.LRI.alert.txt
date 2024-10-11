@@ -1,0 +1,3 @@
+Station <STATION> reported long time ago.
+
+Now is <DATETIME>.

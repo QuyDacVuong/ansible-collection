@@ -1,0 +1,8 @@
+---
+- name: Install tomcat instances
+  ansible.builtin.include_tasks:
+    file: instance.yml
+  loop: "{{ tomcat_instances }}"
+  loop_control:
+    label: "{{ instance.name }}"
+    loop_var: instance

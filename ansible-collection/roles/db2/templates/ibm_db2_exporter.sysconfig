@@ -1,0 +1,4 @@
+DB2INSTANCE="db2"
+IBM_DB2_EXPORTER_DB="{{ db2_dbname }}"
+IBM_DB2_EXPORTER_DSN="DATABASE={{ db2_dbname }};HOSTNAME=localhost;PORT=50000;UID={{ db2_exporter_username }};PWD={{ lookup('amazon.aws.secretsmanager_secret', '{{ env }}/db2/db2-exporter-password', region='eu-west-1') }};"
+LD_LIBRARY_PATH="/bigdisk0/db2/sqllib/lib64:/bigdisk0/db2/sqllib/lib64/gskit:/bigdisk0/db2/sqllib/lib32"

@@ -1,0 +1,147 @@
+---
+- name: Create base Resolver (IP2Country) folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps\bin\c_ip2country
+    - D:\apps\c_ip2country
+    - D:\apps\configs\c_ip2country
+    - D:\apps\logs\c_ip2country
+    - D:\apps\resolver
+    - D:\resolver
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ ip2country_binaries }}"
+    win_deploy_id: "ip2country"
+    win_deploy_services:
+      - PYR_C_IP2COUNTRY
+
+# Download data needed in D:\apps\configs\c_ip2country
+- name: Download ip2country data files
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/casino-devops/lobby_setup/{{ item.url }}"
+    dest: "{{ item.dest }}"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+  loop:
+    - url: GeoIP2/GeoIP.dat
+      dest: D:\apps\configs\c_ip2country\GeoIP.dat
+    - url: GeoIP2/GeoIP2-City.mmdb
+      dest: D:\apps\configs\c_ip2country\GeoIP2-City.mmdb
+    - url: GeoIP2/GeoIP2-Connection-Type.mmdb
+      dest: D:\apps\configs\c_ip2country\GeoIP2-Connection-Type.mmdb
+    - url: GeoIP2/GeoIP2-Country.mmdb
+      dest: D:\apps\configs\c_ip2country\GeoIP2-Country.mmdb
+    - url: GeoIP2/GeoIP2-Domain.mmdb
+      dest: D:\apps\configs\c_ip2country\GeoIP2-Domain.mmdb
+    - url: GeoIP2/GeoIP2-ISP.mmdb
+      dest: D:\apps\configs\c_ip2country\GeoIP2-ISP.mmdb
+    - url: GeoIP2/GeoIPCity.dat
+      dest: D:\apps\configs\c_ip2country\GeoIPCity.dat
+    - url: GeoIP2/GeoIPCountry.csv
+      dest: D:\apps\configs\c_ip2country\GeoIPCountry.csv
+    - url: GeoIP2/GeoIPISP.dat
+      dest: D:\apps\configs\c_ip2country\GeoIPISP.dat
+    - url: GeoIP2/GeoIPOrg.dat
+      dest: D:\apps\configs\c_ip2country\GeoIPOrg.dat
+    - url: GeoIP2/GeoIPRegion.dat
+      dest: D:\apps\configs\c_ip2country\GeoIPRegion.dat
+    - url: GeoIP2/md5.txt
+      dest: D:\apps\configs\c_ip2country\md5.txt
+
+# Copy over other config files
+- name: Copy config for IP2Country
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: apps/c_ip2country/dispatcher.ini
+      dest: D:\apps\c_ip2country\dispatcher.ini
+    - src: apps/c_ip2country/sanity.ip2country.limit
+      dest: D:\apps\c_ip2country\sanity.ip2country.limit
+    - src: configs/c_ip2country/dispatcher.ini
+      dest: D:\apps\configs\c_ip2country\dispatcher.ini
+    - src: configs/c_ip2country/sanity.ip2country.limit
+      dest: D:\apps\configs\c_ip2country\sanity.ip2country.limit
+    - src: configs/c_ip2country/ip2country.ini
+      dest: D:\apps\configs\c_ip2country\ip2country.ini
+  notify:
+    - Restart ip2country service
+
+# Create Windows Services for the apps
+- name: Create IP2Country service
+  ansible.windows.win_service:
+    name: PYR_C_IP2COUNTRY
+    path: D:\apps\c_ip2country\pyr64.exe
+    display_name: PYR_C_IP2COUNTRY
+    description: Service for GGN IP2Country  - PYR_C_IP2COUNTRY
+
+# Start app Windows Services
+- name: Start IP2Country service
+  ansible.windows.win_service:
+    name: PYR_C_IP2COUNTRY
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch
+
+- name: Feed resolver
+  block:
+    - name: Create resolver ssh key
+      ansible.windows.win_copy:
+        dest: D:\resolver\resolver.key
+        content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/lobby/resolver.key') }}"
+
+    - name: Create download_and_import.ini
+      ansible.windows.win_template:
+        src: resolver/download_and_import.ini
+        dest: D:\resolver\download_and_import.ini
+
+    # get these host keys by manually running the following
+    # plink.exe resolver@10.42.17.39 -P 2222
+    # reg export HKCU\Software\SimonTatham\PuTTY\SshHostKeys ssh.reg
+    # cat ssh.reg
+    # rm ssh.reg
+    - name: Create resolver run script
+      ansible.windows.win_copy:
+        content: |
+          reg add "HKCU\Software\SimonTatham\PuTTY\SshHostKeys" /v "rsa2@2222:10.30.20.135" /t REG_SZ /d "0x10001,0xa6294107ae099f657b0e238cc839a0c4eb11eebfbf2494cd2c54bc22a9945dbfd6b0b9205e23397422b62a74325b9478ffdcd2179e48ca76eba3d95f43f479e381e851030afe23ac7660f1a2d1fdc7175001aeae486d96dd2b2a5fa13183fefc4731fe68a75d61b95a12a579c53e62e85811f2882ddbe22e27ec1c9643802f89403b98d3336caae351c47290299b81a3e4a104cc542ebf46eb40a8abe52117f90f2d4ea3b09a8ae9fe2e139ac2ba5aacbb0b18f731a8008bc07eb402a0f3e4c7ac4d7b5ed10206e2dd00fb7ff0135a9b6a0ac578a785418998228e05bc5cf8d7fca634248b3d0ee3ddd89c2c34caf99837eeec78639543ed6bd9f0c17535af57" /f
+          reg add "HKCU\Software\SimonTatham\PuTTY\SshHostKeys" /v "rsa2@2222:10.42.17.39" /t REG_SZ /d "0x10001,0xcb52bf8b06cabf54282530674d6a6934130c788665316d21c29d73b6f6193378e1d94bea67158d01e06deae9d7a62c2321b45cdab027ad7ea0475ff6c54824bb0769bbeee73201685e45287f1acc7f6aa4e1de7ddcc0cb6e67656682792330ae3ccc4e09ac1e95d86631d1b0d6b390ee8d6a31eff7d7ce05eee87befbbbbff879318f0e1b1556b3a45b356d70d0c3a895cc7432c4a559bbe6eb8c92c7559abde4e96421e4b36ed207ca3a1791d2bb59c1fcb82e91d7a1466bd9aafa008dc302f87cbf4b2e63618948050d77da1192f1ab0a44d754efe944aeb9f90fc66d0fe2071e7c78388a501e87131056c5d09b03294edd0d209477f4ce229255957472c53" /f
+          D:\resolver\download_and_import.exe D:\resolver\download_and_import.ini
+        dest: D:\resolver\run_resolver.bat
+
+    - name: Create resolver config script
+      ansible.windows.win_template:
+        src: resolver/deploy_resolver_config.bat
+        dest: D:\resolver\deploy_resolver_config.bat
+
+    - name: Monitor data files
+      ansible.windows.win_template:
+        src: resolver/resolver.conf
+        dest: C:\ProgramData\Telegraf\resolver.conf
+      notify:
+        - Restart Telegraf
+
+    # Run every 10 minutes after June 14th 2022
+    - name: Schedule download of latest resolver rules
+      community.windows.win_scheduled_task:
+        name: resolver
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        logon_type: s4u
+        run_level: highest
+        triggers:
+          - type: daily
+            start_boundary: '2022-06-14T11:20:00'
+            repetition:
+              interval: PT10M  # https://durat.io/?q=10+minutes
+              duration: P1D  # https://durat.io/?q=1+day
+        actions:
+          - path: D:\resolver\run_resolver.bat
+            working_directory: D:\resolver
+...

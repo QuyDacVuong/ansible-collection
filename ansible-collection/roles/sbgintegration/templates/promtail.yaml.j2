@@ -1,0 +1,55 @@
+#jinja2:variable_start_string:'[%', variable_end_string:'%]', trim_blocks: False
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /bigdisk0/monitoring/promtail-positions.yaml
+
+clients:
+  - url: [% loki_url %]
+    external_labels:
+      environment: [% hostvars[inventory_hostname].tags.CasinoEnvironment %]
+      name: [% hostvars[inventory_hostname].tags.Name %]
+      instanceid: [% hostvars[inventory_hostname].instance_id %]
+      platform: [% hostvars[inventory_hostname].tags.Platform %]
+      zone: [% hostvars[inventory_hostname].tags.Zone %]
+    tenant_id: casino
+
+scrape_configs:
+  - job_name: journal
+    journal:
+      max_age: 12h
+      labels:
+         job: systemd-journal
+    relabel_configs:
+      - source_labels: ["__journal__systemd_unit"]
+        target_label: "unit"
+  
+  - job_name: tomcat-logs
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        job: tomcat
+        __path__: /bigdisk0/tomcat/sbgintegration/logs/*.log
+    pipeline_stages:
+    - match:
+        selector: '{job="tomcat"}'
+        stages:
+        - regex:
+            expression: '(?P<extractedtimestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}) (?P<loglevel>DEBUG|ERROR|INFO)'
+        - template:
+            source: extractedtimestamp
+            template: '{{ Replace .Value "T" " " 1 }}'
+        - template:
+            source: extractedtimestamp
+            template: '{{ Replace .Value "," "." 1 }}'
+        - timestamp:
+            source: extractedtimestamp
+            format: '2006-01-02 15:04:05.000'
+            location: 'Etc/GMT-0'
+        - labels:
+            loglevel:
+    - drop:
+        older_than: 24h

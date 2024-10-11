@@ -1,0 +1,45 @@
+Port 22
+ListenAddress 0.0.0.0
+Protocol 2
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+AllowTcpForwarding no
+Compression no
+AllowAgentForwarding no
+SyslogFacility AUTH
+LogLevel ERROR
+ClientAliveInterval 5m
+ClientAliveCountMax 0
+LoginGraceTime 60
+PermitRootLogin no
+StrictModes yes
+MaxAuthTries 2
+MaxSessions 2
+PubkeyAuthentication yes
+AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys
+AuthorizedKeysCommandUser nobody
+IgnoreRhosts yes
+HostbasedAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+PasswordAuthentication no
+KerberosAuthentication no
+GSSAPIAuthentication yes
+GSSAPICleanupCredentials yes
+X11Forwarding no
+X11DisplayOffset 10
+PrintMotd no
+PrintLastLog yes
+TCPKeepAlive no
+Banner /etc/issue.net
+AcceptEnv LANG LC_* XMODIFIERS
+Subsystem sftp    /usr/libexec/openssh/sftp-server
+UsePAM yes
+UseDNS no
+DenyUsers no-ssh-access
+AllowGroups adm wheel
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa,ssh-dss
+KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256
+MACs hmac-sha2-256,hmac-sha2-512

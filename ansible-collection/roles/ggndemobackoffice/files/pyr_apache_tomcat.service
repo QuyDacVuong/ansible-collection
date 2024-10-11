@@ -1,0 +1,15 @@
+[Unit]
+Description=Apache Tomcat Web Application Container
+After=syslog.target network.target
+
+[Service]
+Type=forking
+User=tomcat
+Group=tomcat
+LimitNOFILE=65535
+EnvironmentFile=/etc/sysconfig/tomcat
+ExecStart=/bigdisk0/apache-tomcat/bin/startup.sh
+ExecStop=/bigdisk0/apache-tomcat/bin/shutdown.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,317 @@
+---
+- name: Create base oltp folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps
+    - D:\apps\bin
+    - D:\apps\bin\c_oltp
+    - D:\apps\bin\c_reef_oltp
+    - D:\apps\bin\c_tobrelay
+    - D:\apps\c_oltp
+    - D:\apps\c_reef_oltp
+    - D:\apps\c_tobrelay
+    - D:\apps\configs\c_oltp
+    - D:\apps\configs\c_reef_oltp
+    - D:\apps\configs\c_tobrelay
+    - D:\apps\logs\c_oltp
+    - D:\apps\logs\c_reef_oltp
+    - D:\apps\logs\c_tobrelay
+    - D:\apps\olapSaverFiles
+    - D:\apps\configs\c_reef_oltp\replica0
+    - D:\apps\configs\c_reef_oltp\backup1
+    - D:\apps\configs\c_oltp\AbeDbmProxy
+    - D:\apps\configs\c_oltp\bdua
+    - D:\apps\configs\c_oltp\bdua\dbm1
+    - D:\apps\configs\c_oltp\bdua\dbm2
+    - D:\apps\configs\c_oltp\CdlDbmProxy
+    - D:\apps\configs\c_oltp\hhicetabledbm
+    - D:\apps\configs\c_oltp\IsDbmProxy
+    - D:\apps\configs\c_oltp\ithhicetabledbm
+    - D:\apps\configs\c_oltp\ittabledbm
+    - D:\apps\configs\c_oltp\login
+    - D:\apps\configs\c_oltp\NotificationDbmProxy
+    - D:\apps\configs\c_oltp\OS124
+    - D:\apps\configs\c_oltp\OS127
+    - D:\apps\configs\c_oltp\OS128
+    - D:\apps\configs\c_oltp\RaceDbmProxy
+    - D:\apps\configs\c_oltp\ROAbeDbmProxy
+    - D:\apps\configs\c_oltp\RoNotificationDbmProxy
+    - D:\apps\configs\c_oltp\ROdbm
+    - D:\apps\configs\c_oltp\ROlogin
+    - D:\apps\configs\c_tobrelay\loginis
+    - D:\apps\configs\c_tobrelay\loginis\sql
+    - D:\apps\configs\c_tobrelay\hhice
+    - D:\apps\configs\c_tobrelay\hhice\sql
+    - D:\apps\configs\c_tobrelay\main
+    - D:\apps\configs\c_tobrelay\main\sql
+    - D:\apps\configs\c_tobrelay\gameis
+    - D:\apps\configs\c_tobrelay\gameis\sql
+    - D:\apps\configs\c_tobrelay\abe
+    - D:\apps\configs\c_tobrelay\abe\sql
+    - D:\apps\configs\c_tobrelay\ithhice
+    - D:\apps\configs\c_tobrelay\ithhice\sql
+    - D:\apps\configs\c_tobrelay\notification
+    - D:\apps\configs\c_tobrelay\notification\sql
+    - D:\apps\configs\c_tobrelay\race
+    - D:\apps\configs\c_tobrelay\race\sql
+    - C:\ProgramData\IBM\DB2\DB2COPY1\cfg\
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ oltp_binaries }}"
+    win_deploy_services:
+      - PYR_C_OLTP
+      - PYR_C_REEF_OLTP
+      - PYR_C_TOBRELAY
+
+- name: Create tobrelay gameis instance directories
+  ansible.windows.win_file:
+    path: D:\apps\configs\c_tobrelay\gameis\gameis{{ item }}
+    state: directory
+  with_sequence: start=0 end={{ oltp_gameis_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay abe instance directories
+  ansible.windows.win_file:
+    path: D:\apps\configs\c_tobrelay\abe\abe{{ item }}
+    state: directory
+  with_sequence: start=0 end={{ oltp_abe_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay hhice instance directories
+  ansible.windows.win_file:
+    path: D:\apps\configs\c_tobrelay\hhice\hhice{{ item }}
+    state: directory
+  with_sequence: start=0 end={{ oltp_hhice_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay ithhice instance directories
+  ansible.windows.win_file:
+    path: D:\apps\configs\c_tobrelay\ithhice\ithhice{{ item }}
+    state: directory
+  with_sequence: start=0 end={{ oltp_ithhice_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay notification instance directories
+  ansible.windows.win_file:
+    path: D:\apps\configs\c_tobrelay\notification\notif{{ item }}
+    state: directory
+  with_sequence: start=0 end={{ oltp_notif_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay race instance directories
+  ansible.windows.win_file:
+    path: D:\apps\configs\c_tobrelay\race\race{{ item }}
+    state: directory
+  with_sequence: start=0 end={{ oltp_race_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Copy pyr64.exe everywhere
+  ansible.windows.win_copy:
+    src: D:\apps\bin\c_oltp\pyr64.exe
+    dest: "{{ item }}"
+    remote_src: true
+    force: true  # only performs a copy if the two files are different
+  loop:
+    - D:\apps\c_oltp\pyr64.exe
+    - D:\apps\c_reef_oltp\pyr164.exe
+    - D:\apps\c_tobrelay\pyr264.exe
+  notify:
+    - Restart OLTP service  # only notifies if the copy actually happened
+    - Restart REEF service  # only notifies if the copy actually happened
+    - Restart TOBRELAY service  # only notifies if the copy actually happened
+
+- name: Create dispatcher.ini links
+  community.windows.win_lineinfile:
+    path: D:\apps\{{ item.path }}\dispatcher.ini
+    line: "{{ item.content }}"
+    create: true
+  loop:
+    - path: c_oltp
+      content: "@d:/apps/configs/c_oltp/dispatcher.ini"
+    - path: c_reef_oltp
+      content: "@d:/apps/configs/c_reef_oltp/dispatcher.ini"
+    - path: c_tobrelay
+      content: "@d:/apps/configs/c_tobrelay/dispatcher.ini"
+  notify:
+    - Restart OLTP service  # only notifies if the copy actually happened
+    - Restart REEF service  # only notifies if the copy actually happened
+    - Restart TOBRELAY service  # only notifies if the copy actually happened
+
+- name: Zone0 config files
+  ansible.windows.win_template:
+    src: "apps/configs/zone0/{{ item.src }}"
+    dest: "D:\\apps\\configs\\{{ item.dest }}"
+  loop:
+    - src: c_reef_oltp/replica0/auxreef.ini
+      dest: c_reef_oltp\replica0\auxreef.ini
+    - src: c_reef_oltp/dispatcher.ini
+      dest: c_reef_oltp\dispatcher.ini
+    - src: c_reef_oltp/backup1/auxreef.ini
+      dest: c_reef_oltp\backup1\auxreef.ini
+    - src: c_oltp/AuxDbm.ini
+      dest: c_oltp\AuxDbm.ini
+    - src: c_oltp/AuxStatsDbm.ini
+      dest: c_oltp\AuxStatsDbm.ini
+    - src: c_oltp/AuxTableDbm.ini
+      dest: c_oltp\AuxTableDbm.ini
+    - src: c_oltp/auxstatsserver.ini
+      dest: c_oltp\auxstatsserver.ini
+    - src: c_oltp/auxdeliveryserver.ini
+      dest: c_oltp\auxdeliveryserver.ini
+    - src: c_oltp/auxnotificationserver.ini
+      dest: c_oltp\auxnotificationserver.ini
+    - src: c_oltp/dispatcher.ini
+      dest: c_oltp\dispatcher.ini
+    - src: c_oltp/olapsaver.ini
+      dest: c_oltp\olapsaver.ini
+    - src: c_oltp/sharedOLAPs.ini
+      dest: c_oltp\sharedOLAPs.ini
+    - src: c_oltp/ROdbm/AuxDbm.ini
+      dest: c_oltp\ROdbm\AuxDbm.ini
+    - src: c_oltp/ROAbeDbmProxy/AuxAbeDbm.ini
+      dest: c_oltp\ROAbeDbmProxy\AuxAbeDbm.ini
+    - src: c_oltp/ROAbeDbmProxy/auxproxyserver.ini
+      dest: c_oltp\ROAbeDbmProxy\auxproxyserver.ini
+    - src: c_oltp/CdlDbmProxy/auxproxyserver.ini
+      dest: c_oltp\CdlDbmProxy\auxproxyserver.ini
+    - src: c_oltp/CdlDbmProxy/auxcdldbm.ini
+      dest: c_oltp\CdlDbmProxy\auxcdldbm.ini
+    - src: c_oltp/bdua/dbmproxy2.ini
+      dest: c_oltp\bdua\dbmproxy2.ini
+    - src: c_oltp/bdua/dbm1/etcdbm.ini
+      dest: c_oltp\bdua\dbm1\etcdbm.ini
+    - src: c_oltp/bdua/dbm2/etcdbm.ini
+      dest: c_oltp\bdua\dbm2\etcdbm.ini
+    - src: c_oltp/RoNotificationDbmProxy/AuxNotificationDbm.ini
+      dest: c_oltp\RoNotificationDbmProxy\AuxNotificationDbm.ini
+    - src: c_oltp/RoNotificationDbmProxy/auxproxyserver.ini
+      dest: c_oltp\RoNotificationDbmProxy\auxproxyserver.ini
+    - src: c_oltp/IsDbmProxy/auxproxyserver.ini
+      dest: c_oltp\IsDbmProxy\auxproxyserver.ini
+    - src: c_oltp/IsDbmProxy/IntegrationDbm.ini
+      dest: c_oltp\IsDbmProxy\IntegrationDbm.ini
+    - src: c_oltp/OS127/olapsaver.ini
+      dest: c_oltp\OS127\olapsaver.ini
+    - src: c_oltp/NotificationDbmProxy/AuxNotificationDbm.ini
+      dest: c_oltp\NotificationDbmProxy\AuxNotificationDbm.ini
+    - src: c_oltp/NotificationDbmProxy/auxproxyserver.ini
+      dest: c_oltp\NotificationDbmProxy\auxproxyserver.ini
+    - src: c_oltp/OS128/olapsaver.ini
+      dest: c_oltp\OS128\olapsaver.ini
+    - src: c_oltp/ithhicetabledbm/AuxTableDbm.ini
+      dest: c_oltp\ithhicetabledbm\AuxTableDbm.ini
+    - src: c_oltp/ithhicetabledbm/auxproxyserver.ini
+      dest: c_oltp\ithhicetabledbm\auxproxyserver.ini
+    - src: c_oltp/RaceDbmProxy/AuxRaceDbm.ini
+      dest: c_oltp\RaceDbmProxy\AuxRaceDbm.ini
+    - src: c_oltp/RaceDbmProxy/auxproxyserver.ini
+      dest: c_oltp\RaceDbmProxy\auxproxyserver.ini
+    - src: c_oltp/ROlogin/IntegrationDbm.ini
+      dest: c_oltp\ROlogin\IntegrationDbm.ini
+    - src: c_oltp/ittabledbm/AuxTableDbm.ini
+      dest: c_oltp\ittabledbm\AuxTableDbm.ini
+    - src: c_oltp/hhicetabledbm/AuxTableDbm.ini
+      dest: c_oltp\hhicetabledbm\AuxTableDbm.ini
+    - src: c_oltp/hhicetabledbm/auxproxyserver.ini
+      dest: c_oltp\hhicetabledbm\auxproxyserver.ini
+    - src: c_oltp/AbeDbmProxy/AuxAbeDbm.ini
+      dest: c_oltp\AbeDbmProxy\AuxAbeDbm.ini
+    - src: c_oltp/AbeDbmProxy/auxproxyserver.ini
+      dest: c_oltp\AbeDbmProxy\auxproxyserver.ini
+    - src: c_oltp/OS124/olapsaver.ini
+      dest: c_oltp\OS124\olapsaver.ini
+    - src: c_oltp/login/IntegrationDbm.ini
+      dest: c_oltp\login\IntegrationDbm.ini
+    - src: c_tobrelay/dispatcher.ini
+      dest: c_tobrelay\dispatcher.ini
+    - src: c_tobrelay/loginis/tobrelay.ini
+      dest: c_tobrelay\loginis\tobrelay.ini
+    - src: c_tobrelay/main/tobrelay.ini
+      dest: c_tobrelay\main\tobrelay.ini
+  notify:
+    - Restart OLTP service  # only notifies if the copy actually happened
+    - Restart REEF service  # only notifies if the copy actually happened
+    - Restart TOBRELAY service  # only notifies if the copy actually happened
+
+- name: Create tobrelay gameis ini files
+  ansible.windows.win_template:
+    src: apps/configs/zone0/c_tobrelay/gameis/gameisN/tobrelay.ini
+    dest: D:\apps\configs\c_tobrelay\gameis\gameis{{ item }}\tobrelay.ini
+  with_sequence: start=0 end={{ oltp_gameis_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay abe ini files
+  ansible.windows.win_template:
+    src: apps/configs/zone0/c_tobrelay/abe/abeN/tobrelay.ini
+    dest: D:\apps\configs\c_tobrelay\abe\abe{{ item }}\tobrelay.ini
+  with_sequence: start=0 end={{ oltp_abe_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay hhice ini files
+  ansible.windows.win_template:
+    src: apps/configs/zone0/c_tobrelay/hhice/hhiceN/tobrelay.ini
+    dest: D:\apps\configs\c_tobrelay\hhice\hhice{{ item }}\tobrelay.ini
+  with_sequence: start=0 end={{ oltp_hhice_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay ithhice ini files
+  ansible.windows.win_template:
+    src: apps/configs/zone0/c_tobrelay/ithhice/ithhiceN/tobrelay.ini
+    dest: D:\apps\configs\c_tobrelay\ithhice\ithhice{{ item }}\tobrelay.ini
+  with_sequence: start=0 end={{ oltp_ithhice_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay notification ini files
+  ansible.windows.win_template:
+    src: apps/configs/zone0/c_tobrelay/notification/notifN/tobrelay.ini
+    dest: D:\apps\configs\c_tobrelay\notification\notif{{ item }}\tobrelay.ini
+  with_sequence: start=0 end={{ oltp_notif_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create tobrelay race ini files
+  ansible.windows.win_template:
+    src: apps/configs/zone0/c_tobrelay/race/raceN/tobrelay.ini
+    dest: D:\apps\configs\c_tobrelay\race\race{{ item }}\tobrelay.ini
+  with_sequence: start=0 end={{ oltp_race_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create and start services
+  block:
+    - name: Create services
+      ansible.windows.win_service:
+        name: "PYR_{{ item.name }}"
+        path: D:\apps\{{ item.name }}\{{ item.bin_name }}
+        display_name: "PYR_{{ item.name }}"
+      loop:
+        - {name: 'C_OLTP', bin_name: 'pyr64.exe'}
+        - {name: 'C_TOBRELAY', bin_name: 'pyr264.exe'}
+        - {name: 'C_REEF_OLTP', bin_name: 'pyr164.exe'}
+
+    - name: Start services
+      ansible.windows.win_service:
+        name: "PYR_{{ item }}"
+        start_mode: "{{ service_start_mode }}"
+        state: "{{ service_state }}"
+      loop:
+        - C_OLTP
+        - C_REEF_OLTP
+        - C_TOBRELAY
+      tags:
+        - launch

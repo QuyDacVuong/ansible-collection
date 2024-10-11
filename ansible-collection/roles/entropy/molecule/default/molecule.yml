@@ -1,0 +1,30 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: entropy
+    image: "ghcr.io/alicekaerast/docker-${MOLECULE_DISTRO:-amazonlinux2023}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /run
+    cgroupns_mode: host
+    pre_build_image: true
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
+  inventory:
+    group_vars:
+      all:
+        env: "unittest"
+        instance_id: i-abc123
+        tags:
+          CasinoEnvironment: unittest
+          Name: entropy
+          Platform: Linux
+          Zone: zone1

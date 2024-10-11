@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+
+# OLTP
+{{ db_config['dbs']['zone0-oltp'] | casino.server.to_db_net_response }}
+
+# OLAP
+{{ db_config['dbs']['zoneS-olap'] | casino.server.to_db_net_response }}
+
+# olap servers
+{% set db_hosts = (db_config['dbs']['axl-olap'], db_config['dbs']['axl-audit'], db_config['dbs']['pyrdoc'], db_config['dbs']['star']) | casino.server.to_unique_db_hosts %}
+{% for db in db_hosts %}
+# {{ db['dbname'] }}
+{{ db | casino.server.to_db_net_response }}
+{% endfor %}
+
+# AWS_ZONE1_LOBBY
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ AWS_ZONE1_LOBBY }}:2348"
+  interval = "60s"
+  collection_jitter = "20s"
+
+# vim: ft=toml

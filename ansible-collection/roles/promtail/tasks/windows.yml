@@ -1,0 +1,67 @@
+---
+- name: Configure promtail
+  ansible.builtin.set_fact:
+    promtail_config_positions:
+      filename: "D:\\promtail-positions.yml"
+    promtail_config_clients:
+      - url: "{{ loki_url }}/loki/api/v1/push"
+        tenant_id: casino
+        external_labels:
+          environment: "{{ hostvars[inventory_hostname].tags.CasinoEnvironment }}"
+          name: "{{ hostvars[inventory_hostname].tags.Name }}"
+          instanceid: "{{ hostvars[inventory_hostname].instance_id }}"
+          platform: "{{ hostvars[inventory_hostname].tags.Platform }}"
+          zone: "{{ hostvars[inventory_hostname].tags.Zone }}"
+- name: Add standard scrapes
+  ansible.builtin.set_fact:
+    promtail_config_scrape_configs: "{{ promtail_config_scrape_configs + [item] }}"
+  loop:
+    - job_name: windows-eventlog-system
+      windows_events:
+        use_incoming_timestamp: true
+        bookmark_path: "./bookmark.xml"
+        eventlog_name: System
+        labels:
+          job: windows-eventlog
+      relabel_configs:
+        - source_labels: ['computer']
+          target_label: 'host'
+- name: Create directory
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - C:\ProgramData\Promtail
+    - 'C:\Program Files\WinSW'
+    - C:\ProgramData\WinSW\Services
+
+- name: Download promtail
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/ggn-applications/promtail-windows-amd64.exe.zip"
+    dest: C:\software\promtail-windows-amd64.exe.zip
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+- name: Unzip promtail
+  community.windows.win_unzip:
+    src: C:\software\promtail-windows-amd64.exe.zip
+    dest: 'C:\Program Files\Promtail'
+    creates: 'C:\Program Files\Promtail\promtail-windows-amd64.exe'
+# promtail wasn't written to run as a service, so we have to use a wrapper
+- name: Install winsw
+  ansible.windows.win_get_url:
+    url: https://github.com/winsw/winsw/releases/download/v3.0.0-alpha.10/WinSW-x64.exe
+    dest: 'C:\Program Files\WinSW\WinSW.exe'
+- name: Configure promtail service
+  ansible.windows.win_copy:
+    src: windows/promtail.xml
+    dest: C:\ProgramData\WinSW\Services\promtail.xml
+- name: Manage promtail service
+  ansible.windows.win_service:
+    name: Promtail
+    path: '"C:\Program Files\WinSW\WinSW.exe" "C:\ProgramData\WinSW\Services\promtail.xml"'
+- name: Configure promtail
+  ansible.windows.win_template:
+    src: config.yml.j2
+    dest: "{{ promtail_config_file }}"
+  notify:
+    - Restart Windows promtail

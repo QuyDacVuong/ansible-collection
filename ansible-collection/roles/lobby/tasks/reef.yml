@@ -1,0 +1,45 @@
+---
+- name: Create base reef folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps\bin\c_reef_lobby
+    - D:\apps\c_reef_lobby
+    - D:\apps\configs\c_reef_lobby
+    - D:\apps\configs\c_reef_lobby\backup0
+    - D:\apps\configs\c_reef_lobby\master
+    - D:\apps\logs\c_reef_lobby
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ lobby_reef_binaries }}"
+    win_deploy_id: "lobby"
+    win_deploy_services:
+      - PYR_C_REEF_LOBBY
+
+# Copy over other config files
+- name: Copy config for lobby
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop: "{{ lobby_reef_configs }}"
+  notify:
+    - Restart reef service
+
+- name: Create Reef Lobby service
+  ansible.windows.win_service:
+    name: PYR_C_REEF_LOBBY
+    path: D:\apps\c_reef_lobby\pyr64.exe
+    display_name: PYR_C_REEF_LOBBY
+    description: Service for GGN Casino Reef Lobby
+
+- name: Start Reef Lobby service
+  ansible.windows.win_service:
+    name: PYR_C_REEF_LOBBY
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch

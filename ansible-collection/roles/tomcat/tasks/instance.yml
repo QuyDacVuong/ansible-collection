@@ -1,0 +1,152 @@
+---
+- name: instance | Ensure instance group exists
+  ansible.builtin.group:
+    name: "{{ instance.group | default(tomcat_group) }}"
+    state: present
+- name: instance | Ensure instance user exists
+  ansible.builtin.user:
+    name: "{{ instance.user | default(tomcat_user) }}"
+    state: present
+    group: "{{ instance.group | default(tomcat_group) }}"
+    createhome: false
+    system: true
+- name: instance | Create run directory
+  ansible.builtin.file:
+    path: /var/run/apache-tomcat-{{ instance.name }}
+    state: directory
+    owner: "{{ instance.user | default(tomcat_user) }}"
+    group: "{{ instance.group | default(tomcat_group) }}"
+    mode: "0700"
+- name: Create tomcat directory
+  ansible.builtin.file:
+    path: "{{ tomcat_directory }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+- name: instance | Download tomcat source
+  ansible.builtin.get_url:
+    url: "{{ instance.src }}"
+    dest: "{{ tomcat_directory }}/tomcat-{{ instance.version }}.tar.gz"
+    mode: "440"
+- name: instance | Create versioned directory
+  ansible.builtin.file:
+    path: "{{ tomcat_directory }}/{{ instance.name }}-{{ instance.version }}"
+    mode: "0755"
+    owner: "{{ instance.user | default(tomcat_user) }}"
+    group: "{{ instance.group | default(tomcat_group) }}"
+    state: directory
+- name: instance | Install tomcat instance
+  ansible.builtin.unarchive:
+    src: "{{ tomcat_directory }}/tomcat-{{ instance.version }}.tar.gz"
+    dest: "{{ tomcat_directory }}/{{ instance.name }}-{{ instance.version }}"
+    owner: "{{ instance.user | default(tomcat_user) }}"
+    group: "{{ instance.group | default(tomcat_group) }}"
+    remote_src: true
+    extra_opts: "--strip-components=1"
+    creates: "{{ tomcat_directory }}/{{ instance.name }}-{{ instance.version }}/bin"
+    mode: "0755"
+
+- name: instance | Create symlink to current version
+  ansible.builtin.file:
+    src: "{{ tomcat_directory }}/{{ instance.name }}-{{ instance.version }}"
+    dest: "{{ tomcat_directory }}/{{ instance.name }}"
+    state: link
+
+- name: instance | Save instance name
+  ansible.builtin.set_fact:
+    instance_name: "{{ instance.name }}"
+
+- name: instance | Configure tomcat instance - server.xml
+  ansible.builtin.template:
+    src: server.xml.j2
+    dest: "{{ tomcat_directory }}/{{ instance.name }}/conf/server.xml"
+    mode: "0644"
+  notify:
+    - Restart tomcat instance
+
+- name: instance | Write environment file
+  ansible.builtin.copy:
+    dest: "{{ tomcat_directory }}/{{ instance.name }}/.envrc"
+    content: |
+      {% for item in instance.environment_variables %}
+      export {{ item }}
+      {% endfor %}
+    mode: 0644
+
+- name: instance | Loop over config_files
+  ansible.builtin.include_tasks:
+    file: config_file.yml
+  loop: "{{ instance.config_files }}"
+  loop_control:
+    loop_var: config_file
+  when:
+    - instance.config_files is defined
+- name: instance | Remove default tomcat sites
+  ansible.builtin.file:
+    path: "{{ tomcat_directory }}/{{ instance.name }}/webapps/{{ item }}"
+    state: absent
+  loop:
+    - docs
+    - examples
+    - host-manager
+    - manager
+    - ROOT
+  notify: Restart tomcat instance
+- name: instance | Loop over wars
+  ansible.builtin.include_tasks:
+    file: war.yml
+  loop: "{{ instance.wars }}"
+  loop_control:
+    loop_var: war
+  when:
+    - instance.wars is defined
+- name: instance | Create systemd entry
+  ansible.builtin.template:
+    src: tomcat.service.j2
+    dest: /etc/systemd/system/pyr_tomcat_{{ instance_name }}.service
+    owner: root
+    group: root
+    mode: "0600"
+  notify:
+    - Systemctl daemon-reload
+    - Restart tomcat instance
+
+- name: instance | Start
+  ansible.builtin.systemd:
+    name: pyr_tomcat_{{ instance_name }}
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags:
+    - launch
+
+- name: instance | Check if promtail user exists
+  ansible.builtin.getent:
+    database: passwd
+    key: promtail
+  register: promtail_user
+  failed_when: false
+- name: instance | Let promtail see tomcat logs
+  ansible.builtin.user:
+    name: promtail
+    groups: "{{ instance.group | default(tomcat_group) }}"
+    append: true
+  notify:
+    - Restart promtail
+  when: ansible_facts.getent_passwd is defined
+
+- name: instance | Check if telegraf is installed
+  ansible.builtin.stat:
+    path: /etc/telegraf/telegraf.d
+  register: telegraf_dir
+- name: instance | Add healthchecks
+  ansible.builtin.copy:
+    content: |
+      [[inputs.http_response]]
+        urls = {{ instance.healthchecks | to_json }}
+    dest: "/etc/telegraf/telegraf.d/http_tomcat_{{ instance.name }}.conf"
+    mode: "0644"
+  when: instance.healthchecks is defined and telegraf_dir.stat.exists
+  notify:
+    - Restart telegraf

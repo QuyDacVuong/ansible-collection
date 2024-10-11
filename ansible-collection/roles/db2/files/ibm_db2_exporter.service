@@ -1,0 +1,14 @@
+[Unit]
+Description=IBM DB2 Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=db2_exporter
+Group=db2_exporter
+Type=simple
+EnvironmentFile=/etc/sysconfig/ibm_db2_exporter
+ExecStart=/usr/local/bin/ibm_db2_exporter 
+
+[Install]
+WantedBy=multi-user.target

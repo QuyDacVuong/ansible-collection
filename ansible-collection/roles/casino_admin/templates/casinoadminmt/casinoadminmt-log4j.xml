@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration strict="true">
+	<Properties>
+		<Property name="logPath">d:/logs/casinoadminmt</Property>
+	</Properties>
+	<Appenders>
+		<!-- Appenders -->
+		<appender 
+			type="RollingFile" 
+			name="stacktracelog" 
+			fileName="${logPath}/stacktrace.log"
+			filePattern="${logPath}/stacktrace.%d{yyyy-MM-dd}.log"
+			append="true">
+			<ThresholdFilter level="all"/>
+			<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			<Layout type="PatternLayout" pattern="\[%d{yyyy/MM/dd HH:mm:ss}\]%n%d{HH:mm:ss} [%5p] (%c:%F:%M:%L) - [%t] %m%rEx{full}%n" />
+		</appender>
+		<appender 
+			type="RollingFile"
+			name="fileappender" 
+			fileName="${logPath}/pyrcasinoadminmt.log"
+			filePattern="${logPath}/pyrcasinoadminmt.%d{yyyy-MM-dd}.log"
+			append="true">
+			<!-- 
+			<param name="Threshold" value="info"/>
+			<param name="maxFileSize" value="5KB" />
+			<param name="maxBackupIndex" value="100" /> -->
+			<ThresholdFilter level="all"/>
+			<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			<Layout type="PatternLayout" pattern="\[%d{yyyy/MM/dd HH:mm:ss}\] [%5p] (%c:%F:%M:%L) - [%t] %m%n" />
+		</appender>
+		<appender 
+			type="RollingFile"
+			name="devsqlappender" 
+			fileName="${logPath}/pyrcasinoadminmtSQL.log"
+			filePattern="${logPath}/pyrcasinoadminmtSQL.%d{yyyy-MM-dd}.log"
+			append="true">
+			<!-- 
+			filePattern="${logPath}/pyrcasinoadminSQL\'.\'yyyyMMdd.log"
+			<param name="maxFileSize" value="5KB" />
+			<param name="maxBackupIndex" value="100" /> -->
+			<ThresholdFilter level="all"/>
+			<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			<Layout type="PatternLayout" pattern="\[%d{yyyy/MM/dd HH:mm:ss}\] [%5p] (%c:%F:%M:%L) - [%t] %m%n" />
+		</appender>   
+		<appender name="console" type="Console" target="SYSTEM_OUT"> 
+			<!--<param name="Threshold" value="warn"/>
+			<param name="Target" value="System.out"/> -->
+			<ThresholdFilter level="all"/>
+			<Layout type="PatternLayout" pattern="\[%d{yyyy/MM/dd HH:mm:ss}\] [%5p] (%c:%F:%M:%L) - [%t] %m%n" />
+		</appender> 
+	</Appenders>
+	
+	<Loggers>
+
+
+		<Logger name="StackTrace" level="ALL" additivity="false">
+			<AppenderRef ref="stacktracelog"/>
+		</Logger>	
+			<!--
+
+
+		<Logger name="java.lang.Exception" level="ALL" additivity="false">
+			<AppenderRef ref="stacktracelog"/>
+		</Logger>
+			
+		<Logger name="stacktrace" additivity="false">
+			<AppenderRef ref="stacktracelog"/>
+		</Logger>
+			
+			
+		# SqlMap logging configuration.
+		#log4j.logger.com.ibatis=DEBUG
+		#log4j.logger.com.ibatis.common.jdbc.SimpleDataSource=DEBUG
+		#log4j.logger.com.ibatis.common.jdbc.ScriptRunner=DEBUG
+		#log4j.logger.com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate=DEBUG
+		#log4j.logger.java.sql=DEBUG
+		#log4j.logger.java.sql.Connection=DEBUG
+		#log4j.logger.java.sql.Statement=DEBUG
+		#log4j.logger.java.sql.PreparedStatement=DEBUG
+		#log4j.logger.java.sql.ResultSet=DEBUG
+			-->
+		
+		<Logger name="com.ps.securityini.**.mapper" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="org.mybatis.spring" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="org.hibernate.type" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="org.hibernate.SQL" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="com.ibatis" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="java.sql" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="java.sql.Connection" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="java.sql.Statement" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="java.sql.PreparedStatement" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="java.sql.ResultSet" level="ALL" additivity="false">
+			<AppenderRef ref="devsqlappender"/>
+		</Logger>
+		
+		<Logger name="org.springframework.security.web" level="ALL" additivity="false">
+			<AppenderRef ref="console" />
+		</Logger>
+		
+		<Logger name="org.springframework.security.web.FilterChainProxy" level="ALL" additivity="false">
+			<AppenderRef ref="console" />
+		</Logger>
+
+		<!-- Root Logger -->
+		<Root level="all">
+			<AppenderRef ref="fileappender" />
+			<AppenderRef ref="console" />
+		</Root>
+	</Loggers>
+</Configuration>

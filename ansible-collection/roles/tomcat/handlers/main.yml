@@ -1,0 +1,22 @@
+---
+- name: Systemctl daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart tomcat instance
+  ansible.builtin.service:
+    name: "pyr_tomcat_{{ instance_name }}"
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart promtail
+  ansible.builtin.systemd:
+    name: promtail
+    state: restarted
+  when: molecule_yml is undefined
+
+- name: Restart telegraf
+  ansible.builtin.systemd:
+    name: telegraf
+    state: restarted
+  when: molecule_yml is undefined

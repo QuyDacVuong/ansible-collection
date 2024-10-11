@@ -1,0 +1,45 @@
+---
+- name: Install java
+  ansible.builtin.include_role:
+    name: casino.server.java
+  vars:
+    java_version: jdk-17.0.6+10
+    java_package: OpenJDK17U-jdk_x64_linux_hotspot_17.0.6_10.tar.gz
+
+- name: Install tomcat
+  ansible.builtin.include_role:
+    name: casino.server.tomcat
+  vars:
+    tomcat_instances:
+      - name: ggndemobackoffice
+        version: "{{ ggndemobackoffice_tomcat_version }}"
+        src: "{{ artifactory_baseurl }}/ggn-applications/apache-tomcat/apache-tomcat-{{ ggndemobackoffice_tomcat_version }}.tar.gz"
+        environment_variables:
+          - TOMCAT_CFG_LOADED=1
+          - JAVA_OPTS=$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m
+          - CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC
+          - CATALINA_PID=/var/run/apache-tomcat-cipwa/run.pid
+          - SECURITY_MANAGER=false
+          - GGNDEMOBACKOFFICE_HOME={{ tomcat_directory }}/ggndemobackoffice/conf/ggndemobackoffice
+        config_files:
+          - src: ggndemobackoffice.ini
+            dest: ggndemobackoffice/config
+          - src: log4j2.xml
+            dest: ggndemobackoffice/config
+        wars:
+          - url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/ggndemobackoffice/ggndemobackoffice-{{ ggndemobackoffice_version }}.war"
+            name: ggndemobackoffice
+
+- name: Install and configure nginx
+  ansible.builtin.include_tasks:
+    file: nginx.yml
+
+- name: Configure Log ingestion
+  ansible.builtin.template:
+    src: promtail.yaml.j2
+    dest: /etc/promtail/promtail.yaml
+    owner: promtail
+    group: promtail
+    mode: "0644"
+  notify:
+    - Restart promtail

@@ -1,0 +1,25 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+tomcat_group: tomcat
+tomcat_user: tomcat
+tomcat_directory: /bigdisk0/tomcat
+tomcat_shutdown_port: 8005
+tomcat_shutdown_pass: "SHUTDOWN"
+tomcat_non_ssl_connector_port: 8080
+tomcat_ssl_connector_port: 8443
+tomcat_environment_variables: []
+tomcat_instances:
+  - name: default
+    version: 8.5.96
+    src: "{{ artifactory_baseurl }}/ggn-applications/apache-tomcat/apache-tomcat-8.5.96.tar.gz"
+    environment_variables:
+      - TOMCAT_CFG_LOADED=1
+      - JAVA_OPTS=$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m
+      - CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC
+      - CATALINA_PID=/var/run/apache-tomcat-default/run.pid
+      - SECURITY_MANAGER=false
+      - JAVA_HOME=/usr

@@ -1,0 +1,5 @@
+[[inputs.http_response]]
+  urls = ["{{ SBGGatewayUrl | ansible.builtin.urlsplit("scheme") }}://{{ SBGGatewayUrl | ansible.builtin.urlsplit("netloc") }}/health"]
+  interval="60s"
+  collection_jitter="20s"
+  response_status_code = 200

@@ -1,0 +1,11 @@
+---
+coreserver_bin_branch: "TAG/2401E"
+olapbroker_binaries:
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/{{ coreserver_bin_branch }}/disp64/
+    dest_path: D:\apps\c_olap_broker
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+
+service_start_mode: "auto"
+service_state: "started"

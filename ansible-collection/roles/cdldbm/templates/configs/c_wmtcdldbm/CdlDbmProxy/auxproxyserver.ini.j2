@@ -1,0 +1,63 @@
+; {{ ansible_managed }}
+[DYNAMICCONNECT]
+
+[STATICCONNECT]
+
+[DYNAMICSETTINGS]
+logAllMessage=1
+
+DispatchBy=InstanceLoad
+
+instanceAutoRestartEnable=1
+instanceRestartDelayInSec=5
+instanceRestartMaxRetries=5
+
+[CONNECTION.AuxLobby]
+type=auxLobby
+traceMarker=LB
+
+[CONNECTION.CDL]
+type=cdl
+traceMarker=CDL
+
+[CONNECTION.ADM]
+type=auxadmininternal
+traceMarker=ADM
+
+[broadcast]
+msgId=7011
+
+[STATICSETTINGS]
+numOfInstances=16
+instancePrefix=CdlDbmInstance
+
+AppFactoryAddr=ip:{{ cdl_host }}:3348
+AppFactory=cdldbm
+InitDir=D:/apps/configs/c_wmtcdldbm/CdlDbmProxy/
+LogStationPrefix={{ stationname }}.WMTCDLDBM.AUXCDLDBM
+
+;roundRobin=1
+
+[LOGGER]
+LoggerAddress=ip:{{ hercules_host }}:9322
+LogStationName={{ stationname }}.WMTCDLDBM.AUXCDLDBMPROXY
+UseLogger=1
+
+[telemetry.targets]
+hercules = true
+gateway = true
+panoptic = false
+[telemetry.gateway.conn-params]
+address = ip:127.0.0.1:5447
+instance = TelgatewayInstance
+[telemetry.metrics.tags]
+application = WMTCDLDBM
+environment = {{ hostvars[inventory_hostname].tags.Environment }}
+name = {{ hostvars[inventory_hostname].tags.Name }}
+instanceid = {{ hostvars[inventory_hostname].instance_id }}
+platform = {{ hostvars[inventory_hostname].tags.Platform }}
+zone = {{ hostvars[inventory_hostname].tags.Zone }}
+station_name = {{ stationname }}.WMTCDLDBM.AUXCDLDBMPROXY-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }} # set this to something similar to the name reported to Hercules
+service_name = AUXCDLDBMPROXY
+[telemetry.metrics.filters.1]
+regex = .*  # send all metrics

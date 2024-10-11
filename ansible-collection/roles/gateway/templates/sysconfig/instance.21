@@ -1,0 +1,13 @@
+# we can setup memory ajustments here ... and everything else
+
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true -XX:MaxPermSize=1024m -Xss1m -Xms512m -Xmx4096m \
+-DlistenPort=8100 -DserverPort=9025"
+
+export CASINOSERVICES_HOME=/bigdisk0/tomcat/conf/cs-common
+export CASINOSERVICESTEST_HOME=/bigdisk0/tomcat/conf/cs-common-test
+export CS_JPF_HOME=/bigdisk0/tomcat/conf/cs-jpf-high5
+export VENDOR=HIGH5
+export VENDOR_ID=21
+export JAVA_HOME=/software/jre11
+ 
+export TOMCAT_VERSION=/software/tomcat8

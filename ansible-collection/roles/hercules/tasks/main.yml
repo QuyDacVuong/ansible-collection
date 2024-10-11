@@ -1,0 +1,174 @@
+---
+- name: Create base hercules folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps
+    - D:\apps\c_monitormain
+    - D:\apps\credentials
+    - D:\apps\configs\c_monitormain
+    - D:\apps\configs\c_monitormain\email
+    - D:\apps\configs\c_monitormain\laws
+    - D:\apps\configs\c_monitormain\sender.templates
+    - D:\apps\logs
+    - D:\apps\logs\c_monitormain
+    - D:\apps\monitoring
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ hercules_binaries }}"
+    win_deploy_baseurl: "{{ artifactory_baseurl }}"
+    win_deploy_services:
+      - PYR_C_MONITORMAIN
+
+- name: Copy configs and files
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: dispatcher.ini
+      dest: D:\apps\c_monitormain\dispatcher.ini
+    - src: dispatcher_config.ini
+      dest: D:\apps\configs\c_monitormain\dispatcher.ini
+    - src: HeDataServer.ini
+      dest: D:\apps\configs\c_monitormain\HeDataServer.ini
+    - src: HeEmailServer.ini
+      dest: D:\apps\configs\c_monitormain\HeEmailServer.ini
+    - src: HeHttpServer.ini
+      dest: D:\apps\configs\c_monitormain\HeHttpServer.ini
+    - src: HeInfoServer.ini
+      dest: D:\apps\configs\c_monitormain\HeInfoServer.ini
+    - src: HeJudge.ini
+      dest: D:\apps\configs\c_monitormain\HeJudge.ini
+    - src: HeMngm.ini
+      dest: D:\apps\configs\c_monitormain\HeMngm.ini
+    - src: HeReception.ini
+      dest: D:\apps\configs\c_monitormain\HeReception.ini
+    - src: statussender.ini
+      dest: D:\apps\configs\c_monitormain\statussender.ini
+  notify:
+    - Restart Monitor service
+
+- name: Copy configs and files emails
+  ansible.windows.win_copy:
+    src: "{{ hercules_environment }}/email/{{ item }}"
+    dest: "D:\\apps\\configs\\c_monitormain\\email\\{{ item }}"
+  loop:
+    - Hercules.entropy.alert.txt
+    - Hercules.FreeSpaceMb.alert.DBA.txt
+    - Hercules.FreeSpaceMb.alert.txt
+    - Hercules.GROUPALERT.alert.txt
+    - Hercules.LRI.alert.txt
+    - Hercules.ProcessMemoryCritical.alert.txt
+    - Hercules.PYRADMIN.alert.txt
+    - Hercules.PYRADMIN.alerttest.txt
+    - Hercules.Short.alert.txt
+    - Hercules.VENDOR.alert.txt
+  notify:
+    - Restart Monitor service
+
+- name: Configure law
+  ansible.windows.win_template:
+    src: "{{ hercules_environment }}/helaw.ini"
+    dest: "D:\\apps\\configs\\c_monitormain\\laws\\helaw.ini"
+  notify:
+    - Restart Monitor service
+
+- name: Copy other configs and files laws
+  ansible.windows.win_copy:
+    src: "{{ hercules_environment }}/laws/{{ item }}"
+    dest: "D:\\apps\\configs\\c_monitormain\\laws\\{{ item }}"
+  loop:
+    - heSuspensions.ini
+    - iom_cdl_tpl.ini
+    - iom_cipwa_tpl_zone0.ini
+    - iom_cipwa_tpl_zone1.ini
+    - iom_cipwa_tpl.ini
+    - iom_default_serv_tpl_temp.ini
+    - iom_default_serv_tpl.ini
+    - iom_disks_free_space_all_serv_tpl.ini
+    - iom_disks_free_space_db2_active_logs_tpl.ini
+    - iom_disks_free_space_tpl.ini
+    - iom_entropy_serv_tpl.ini
+    - iom_gateway_tpl.ini
+    - IOM_linuxes_serv_tpl.ini
+    - iom_lobby_serv_tpl.ini
+    - IOM_majordomo_serv_tpl.ini
+    - IOM_olapsavers_serv_tpl.ini
+    - IOMxx_Disp_serv_tpl.ini
+    - IOMxx_OlapDbm_serv_tpl.ini
+    - Substitution.inc
+  notify:
+    - Restart Monitor service
+
+- name: Copy configs and files sender.templates
+  ansible.windows.win_copy:
+    src: "{{ hercules_environment }}/sender.templates/{{ item }}"
+    dest: "D:\\apps\\configs\\c_monitormain\\sender.templates\\{{ item }}"
+  loop:
+    - all.template
+    - db_boxes.template
+    - db2_dynamic.template
+    - dispatchers.template
+    - dispatchers64_new.template
+    - dispatchers64.template
+    - HeTmpl.TEST.ini
+    - IOM41.template
+    - no_db_dynamic.template
+    - olap.template
+    - others.template
+  notify:
+    - Restart Monitor service
+
+- name: Create dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_MONITORMAIN
+    path: D:\apps\c_monitormain\pyrdisp.exe
+
+- name: Start dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_MONITORMAIN
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch
+
+- name: Install Hercules Viewer
+  block:
+    - name: Create monitor_client directory
+      ansible.windows.win_file:
+        path: D:\monitor_client
+        state: directory
+    - name: Download heviewer.exe
+      ansible.windows.win_get_url:
+        url: "{{ artifactory_baseurl }}/ggn-applications/HeViewer.exe"
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        force_basic_auth: "{{ get_url_force_basic_auth }}"
+        dest: D:\monitor_client\heviewer.exe
+    - name: Create Hercules.ini
+      ansible.windows.win_template:
+        src: Hercules.ini
+        dest: D:\monitor_client\Hercules.ini
+    - name: Create shortcut to heviewer
+      community.windows.win_shortcut:
+        src: 'D:\monitor_client\HeViewer.exe'
+        dest: '%Public%\Desktop\HeViewer.lnk'
+        icon: 'D:\monitor_client\HeViewer.exe,0'
+        directory: D:\monitor_client
+
+- name: Configure Log Aggregation
+  ansible.windows.win_template:
+    src: promtail.yaml.j2
+    dest: "C:\\ProgramData\\Promtail\\promtail.yaml"
+  notify:
+    - Restart promtail
+
+- name: Configure net_response metrics
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify: Restart Telegraf

@@ -1,0 +1,38 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: ggndemobackoffice
+    image: "ghcr.io/alicekaerast/docker-${MOLECULE_DISTRO:-amazonlinux2023}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /run
+    privileged: true
+    cgroupns_mode: host
+    pre_build_image: true
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
+  host_vars:
+    stationname: "TEST"
+    lobby_host: "127.0.10.136"
+    hercules_host: "127.0.10.145"
+    advertise_host: "127.0.10.133"
+  inventory:
+    group_vars:
+      all:
+        artifactory_username: ${ARTIFACTORY_USERNAME:-"anonymous"}
+        artifactory_password: ${ARTIFACTORY_PASSWORD:-"password"}
+        get_url_force_basic_auth: false
+        env: unittest
+        instance_id: i-abc123
+        tags:
+          CasinoEnvironment: unittest
+          Name: ggndemo
+          Platform: Linux
+          Zone: zone-1

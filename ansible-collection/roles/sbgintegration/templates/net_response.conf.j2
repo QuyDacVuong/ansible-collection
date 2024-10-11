@@ -1,0 +1,21 @@
+# Hercules
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hercules_host }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+
+# Lobby
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ lobby_host }}:2348"
+  interval="60s"
+  collection_jitter="20s"
+
+[[inputs.http_response]]
+  urls = ["http://localhost:8080/sbgbackofficegateway/version"]
+  response_timeout = "5s"
+  response_string_match = "SBG Backoffice Gateway .*"
+  response_status_code = 200
+
+# vim: ft=toml

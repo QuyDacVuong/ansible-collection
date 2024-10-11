@@ -1,0 +1,14 @@
+# smtp_host
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ smtp_host }}:25"
+  interval="60s"
+  collection_jitter="20s"
+
+# C_TEMPLATESERVER
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ C_TEMPLATESERVER.split(":")[1] }}:{{ C_TEMPLATESERVER.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+# vim: ft=toml

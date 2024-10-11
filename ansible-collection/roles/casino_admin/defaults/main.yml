@@ -1,0 +1,28 @@
+---
+# defaults file for casino.casinoadmintool
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+java_package: jdk-17.zip
+java_version: jdk-17
+
+casino_admin_apps:
+  - name: casinoadmin
+    port: 8083
+    war_version: 2.0.689
+    log: log4j
+  - name: casinolobbyadmin
+    port: 8087
+    war_version: 1.0.301
+    log: log4j2
+  - name: casinoreports
+    port: 8089
+    war_version: 2.0.24
+    log: log4j
+  - name: casinoadminmt
+    port: 8099
+    war_version: 1.0.132
+    log: log4j

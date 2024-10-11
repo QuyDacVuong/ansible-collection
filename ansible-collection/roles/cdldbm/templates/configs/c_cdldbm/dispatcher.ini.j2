@@ -1,0 +1,65 @@
+; {{ ansible_managed }}
+[comm]
+name=AppFactory
+identification={{ stationname }}-CDLDBM
+alias=ip:{{ cdl_host }}:2348
+alias=ip:{{ cdl_host }}:2349
+alias=ip:*:2350
+rule=ip:*:* pyrtcp0://$0:$1
+performance=1
+
+[tcp]
+type=tcp
+port=2348
+option.islocal=1
+option.compressbits=0
+option.logfile=d:\apps\c_cdldbm\protolocal.log
+option.keepalive=30000/180000
+gatherstatistic=3
+option.maxconnectionsperthread=5
+
+[tcpmux]
+port=2350
+gatherstatistic=3
+
+[smem]
+port=2348
+gatherstatistic=3
+
+[smemmux]
+port=2350
+gatherstatistic=3
+option.maxconnectionsperthread=1
+
+
+[exe]
+IntegrationDbmProxy=d:\apps\bin\c_cdldbm\auxproxyserver.exe;d:\apps\logs\c_cdldbm;0/0;R240
+cdldbm=d:\apps\bin\c_cdldbm\auxcdldbm.exe;d:\apps\logs\c_cdldbm;0/0;R240
+
+[start]
+IntegrationDbmProxy=AuxCDLProxyInstance;s=d:\\apps\\configs\\c_cdldbm\\CdlDbmProxy
+
+
+[logger]
+server=ip:{{ hercules_host }}:9322
+station={{ stationname }}.CDLDBM
+reportseh=1
+
+[telemetry.targets]
+hercules = true
+gateway = true
+panoptic = false
+[telemetry.gateway.conn-params]
+address = ip:127.0.0.1:5447
+instance = TelgatewayInstance
+[telemetry.metrics.tags]
+application = CDLDBM
+environment = {{ hostvars[inventory_hostname].tags.Environment }}
+name = {{ hostvars[inventory_hostname].tags.Name }}
+instanceid = {{ hostvars[inventory_hostname].instance_id }}
+platform = {{ hostvars[inventory_hostname].tags.Platform }}
+zone = {{ hostvars[inventory_hostname].tags.Zone }}
+station_name = {{ stationname }}.CDLDBM-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }} # set this to something similar to the name reported to Hercules
+service_name = CDLDBM
+[telemetry.metrics.filters.1]
+regex = .*  # send all metrics

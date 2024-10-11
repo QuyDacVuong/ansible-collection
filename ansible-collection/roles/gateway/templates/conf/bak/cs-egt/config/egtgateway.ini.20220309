@@ -1,0 +1,19 @@
+
+
+[STATICCONNECT]
+RgRouterServerAddress={{ C_RGS }}
+RgRouterServerInstance=AuxRgMessageRouterInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+TimeOutInSeconds=120
+ConnectTimeoutInSeconds=10
+EgtUserName=egtdevel
+EgtPassword=add-aws-lookup-here
+EgtNativeSystemCode=Pokerstars_STG2
+EgtBaseUrl=https://spg-staging.egtmgs.com:17575/
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.EGTGW
+ReportInterval=10

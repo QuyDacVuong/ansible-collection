@@ -1,0 +1,13 @@
+# we can setup memory ajustments here ... and everything else
+
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true -XX:MaxPermSize=1024m -Xss1m -Xms2048m -Xmx4096m \
+-DlistenPort=8083 -DserverPort=8008"
+
+export VENDOR=NETENT
+
+export CS_NETENT_HOME=/bigdisk0/tomcat/conf/cs-netent
+export CASINOSERVICES_HOME=/bigdisk0/tomcat/conf/cs-common
+export CS_JPF_HOME=/bigdisk0/tomcat/conf/cs-jpf-netent
+export JAVA_HOME=/software/jre11
+ 
+export TOMCAT_VERSION=/software/tomcat8

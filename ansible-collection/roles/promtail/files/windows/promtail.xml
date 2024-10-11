@@ -1,0 +1,8 @@
+<service>
+  <id>promtail</id>
+  <name>Promtail</name>
+  <description>Promtail is an agent which ships logs to Loki</description>
+  <executable>"C:\Program Files\Promtail\promtail-windows-amd64.exe"</executable>
+  <arguments>--config.file "C:\ProgramData\Promtail\promtail.yaml"</arguments>
+  <log mode="roll"></log>
+</service>

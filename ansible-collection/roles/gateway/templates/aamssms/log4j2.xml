@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration strict="true" monitorInterval="30">
+
+   <Properties>
+      <Property name="logs_dir">${sys:catalina.base}/logs</Property>
+      <Property name="app">aamssms</Property>
+      <Property name="pattern">%d{ISO8601} %-5p %c - [%t] %msg%n</Property>
+   </Properties>
+
+   <Appenders>
+      <RollingFile name="file">
+         <!-- Rotate every [interval]. -->
+         <FileName>${logs_dir}/${app}.log</FileName>
+         <FilePattern>${logs_dir}/${app}.log.%d{yyyyMMdd}</FilePattern>
+         <PatternLayout>
+            <Pattern>${pattern}</Pattern>
+         </PatternLayout>
+         <Policies>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+         </Policies>
+      </RollingFile>
+
+   </Appenders>
+
+   <Loggers>
+      <Root level="all">
+         <AppenderRef ref="file" level="{{ gateway_log_level }}" />
+      </Root>
+
+   </Loggers>
+
+</Configuration>

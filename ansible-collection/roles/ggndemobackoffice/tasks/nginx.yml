@@ -1,0 +1,127 @@
+---
+- name: Enable amazon-extras nginx repo
+  ansible.builtin.shell: |
+    amazon-linux-extras enable nginx1
+  changed_when: false
+  when: (ansible_distribution=="Amazon") and (ansible_distribution_version=="2")
+
+- name: Install nginx
+  ansible.builtin.yum:
+    name: nginx
+    state: present
+
+- name: Create www directory
+  ansible.builtin.file:
+    path: /var/www
+    state: directory
+    owner: nginx
+    group: nginx
+    mode: 0755
+
+- name: Create tls directory for certificates
+  ansible.builtin.file:
+    path: /etc/nginx/tls
+    state: directory
+    mode: "0755"
+
+- name: Copy passphrase file
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.password', '/dev/null', length=15, chars=['ascii_letters', 'digits'], seed=inventory_hostname)
+      }}"
+    dest: /etc/nginx/tls/server.passphrase
+    mode: "0644"
+  diff: false  # this file contains a TLS key passphrase
+
+- name: Download Signed CA certs from ACM
+  ansible.builtin.shell: |
+    /bin/aws acm export-certificate \
+    --region {{ region }} \
+    --certificate-arn {{ certificate_arn }} \
+    --passphrase $(cat /etc/nginx/tls/server.passphrase)
+  register: acm_certs
+  no_log: true
+  tags: notest
+  when: not ansible_check_mode
+  changed_when: false
+
+- name: Copy tls key
+  ansible.builtin.copy:
+    content: "{{ (acm_certs.stdout | from_json).PrivateKey }}"
+    dest: /etc/nginx/tls/server.key
+    mode: "0644"
+  notify: Reload nginx
+  tags: notest
+  when: not ansible_check_mode
+
+- name: Copy tls cert
+  ansible.builtin.copy:
+    content: "{{ (acm_certs.stdout | from_json).Certificate }}{{ (acm_certs.stdout | from_json).CertificateChain }}"
+    dest: /etc/nginx/tls/server-bundle.crt
+    mode: "0644"
+  notify: Reload nginx
+  tags: notest
+  when: not ansible_check_mode
+
+- name: Create favicon.ico
+  ansible.builtin.copy:
+    src: favicon.ico
+    dest: /var/www/favicon.ico
+    mode: "0644"
+    owner: nginx
+    group: nginx
+
+- name: Create nginx configuration
+  ansible.builtin.template:
+    src: nginx.conf
+    dest: /etc/nginx/conf.d/tomcat.conf
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Validate nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+  tags: notest
+
+- name: Start nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: true
+  tags:
+    - launch
+    - notest
+
+# Required for telegraf to connect to nginx_status
+- name: Add certificate_domain to hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "127.0.0.80  {{ certificate_domain }}"
+  tags: notest
+
+- name: Monitor nginx traffic
+  ansible.builtin.template:
+    src: x509_input.conf.j2
+    dest: /etc/telegraf/telegraf.d/x509_input.conf
+    mode: "0644"
+  notify: Reload telegraf
+
+- name: Monitor nginx traffic
+  ansible.builtin.template:
+    src: nginx_input.conf.j2
+    dest: /etc/telegraf/telegraf.d/nginx_input.conf
+    mode: "0644"
+  notify: Reload telegraf
+
+- name: Allow nginx group to read nginx logs
+  ansible.builtin.file:
+    path: /var/log/nginx
+    state: directory
+    group: nginx
+    mode: g+rx  # allow nginx group to read and execute
+- name: Allow promtail to read nginx logs
+  ansible.builtin.user:
+    name: promtail
+    groups: nginx
+    append: true
+  notify:
+    - Restart promtail

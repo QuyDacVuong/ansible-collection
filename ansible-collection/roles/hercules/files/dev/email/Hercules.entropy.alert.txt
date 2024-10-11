@@ -1,0 +1,1 @@
+Entropy server <STATION> down, reboot and start of monitor & pyr services required.

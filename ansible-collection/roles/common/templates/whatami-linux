@@ -1,0 +1,21 @@
+echo
+echo "Hostname: {{ansible_hostname}}"
+echo "FQDN: {{ansible_fqdn}}"
+echo "IP Address: {{ansible_eth0.ipv4.address}}"
+echo "Instance ID: $(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
+echo
+echo "Environment: {{ env }}"
+echo
+echo "CPUs: $(grep -c ^processor /proc/cpuinfo)"
+echo "Memory Total: $(awk '/MemTotal/ { printf "%.3f \n", $2/1024/1024 }' /proc/meminfo)" GB
+echo "Machine Type: {{ansible_system_vendor}}"
+echo
+echo "OS Platform: {{ansible_distribution}}"
+echo "OS Platform Major Version: {{ansible_distribution_major_version}}"
+echo "OS Platform Kernel: $(uname -r)"
+echo "AMI: $(curl -s http://169.254.169.254/latest/meta-data/ami-id)"
+echo
+echo "Security Groups: $(curl -s http://169.254.169.254/latest/meta-data/security-groups)"
+echo
+echo "Ansible Playbooks: https://github.com/FlutterInt/ggn-uki-ansible"
+echo

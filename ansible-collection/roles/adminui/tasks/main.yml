@@ -1,0 +1,27 @@
+---
+- name: Get bucket
+  amazon.aws.s3_bucket_info:
+    name_filter: adminui
+  register: result
+- name: Create temp directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: adminui
+  register: build_dir
+- name: Loop over downloads
+  ansible.builtin.include_tasks:
+    file: download.yml
+  loop: "{{ adminui_content }}"
+  loop_control:
+    loop_var: download
+- name: Deploy adminui
+  community.aws.s3_sync:
+    bucket: "{{ result['buckets'][0]['name'] }}"
+    delete: true
+    file_root: "{{ build_dir.path }}"
+- name: Cleanup build directory
+  ansible.builtin.file:
+    path: "{{ build_dir.path }}"
+    state: absent
+  when: build_dir.path is defined
+...

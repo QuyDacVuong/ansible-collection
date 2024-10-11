@@ -1,0 +1,39 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+casinoserver_bin_branch: "TAG/AUX2401"
+coreserver_bin_branch: "TAG/2401E"
+olap_binaries:
+  - binary: auxolapdbm.exe
+    url_path: build-results/casinoserver/{{ casinoserver_bin_branch }}/auxolapdbm/
+    dest_path: D:\apps\bin\c_olap
+  - binary: auxproxyserver.exe
+    url_path: build-results/casinoserver/{{ casinoserver_bin_branch }}/auxproxyserver/
+    dest_path: D:\apps\bin\c_olap
+  - binary: auxrodbm.exe
+    url_path: build-results/casinoserver/{{ casinoserver_bin_branch }}/auxrodbm/
+    dest_path: D:\apps\bin\c_olap
+  - binary: auxwmolapdbm.exe
+    url_path: build-results/casinoserver/{{ casinoserver_bin_branch }}/auxwmolapdbm/
+    dest_path: D:\apps\bin\c_olap
+  - binary: pyrm2nproxysmem.exe
+    url_path: build-results/coreserver/{{ coreserver_bin_branch }}/m2nproxy/
+    dest_path: D:\apps\bin\c_olap
+  - binary: pyrdbmproxy2smem.exe
+    url_path: build-results/coreserver/{{ coreserver_bin_branch }}/dbmproxy2/
+    dest_path: D:\apps\bin\c_olap
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/{{ coreserver_bin_branch }}/disp64/
+    dest_path: D:\apps\c_olap
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+region: eu-west-1
+service_start_mode: "auto"
+service_state: "started"
+
+olap_wmolap_server_instances: 16
+olap_aux_OlapServer_instance: 5

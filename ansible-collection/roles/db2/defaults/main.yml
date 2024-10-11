@@ -1,0 +1,7 @@
+---
+db2_dbname: "RZN1CMQA"
+db2_exporter_username: "db2_exporter"
+db2_exporter_group: "db2_exporter"
+db2_exporter_groups: "pyrro"
+
+artifactory_baseurl: https://artifactory.pyrsoftware.ca/artifactory

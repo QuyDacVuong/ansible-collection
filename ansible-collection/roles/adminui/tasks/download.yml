@@ -1,0 +1,35 @@
+---
+- name: download | Stat local file
+  ansible.builtin.stat:
+    path: "/tmp/{{ download.url | basename }}"
+  register: st
+- name: download | Perform a HEAD on the remote file to read sha1
+  ansible.builtin.uri:
+    url: "{{ download.url }}"
+    method: HEAD
+    timeout: 60
+  register: remote_download_head
+- name: download | Delete file if checksums mismatch
+  ansible.builtin.file:
+    path: "/tmp/{{ download.url | basename }}"
+    state: absent
+  when: st.stat.checksum | default('') != remote_download_head.x_checksum_sha1
+- name: download | Delete directory if checksums mismatch
+  ansible.builtin.file:
+    path: "{{ build_dir.path }}/{{ download.name }}"
+    state: absent
+  when: st.stat.checksum | default('') != remote_download_head.x_checksum_sha1
+- name: download | Download archive
+  ansible.builtin.get_url:
+    url: "{{ download.url }}"
+    dest: "/tmp/{{ download.url | basename }}"
+    mode: 0640
+- name: download | Create target directory
+  ansible.builtin.file:
+    path: "{{ build_dir.path }}/{{ download.name }}"
+    state: directory
+- name: download | Extract archive
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ download.url | basename }}"
+    dest: "{{ build_dir.path }}/{{ download.name }}"
+...

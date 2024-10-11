@@ -1,0 +1,67 @@
+---
+# Playbook to generated signed CA certs by Private CA shared across domains
+# Need to pass certificate_domain
+
+- name: Get ACM Certificate
+  ansible.builtin.debug:
+    msg: "Getting/Creating ACM Certificate for {{ certificate_domain }}"
+
+- name: Unset(ish) facts, in case this is the second time we've run this
+  ansible.builtin.set_fact:
+    certificate_arn: ""
+    certificate_status: ""
+
+- name: Obtain all information for a single ACM certificate
+  community.aws.acm_certificate_info:
+    domain_name: "{{ certificate_domain }}"
+    region: "{{ region }}"
+  register: output
+  delegate_to: 127.0.0.1
+  no_log: true
+- name: Register certificate ARN
+  ansible.builtin.set_fact:  # noqa: jinja[invalid]
+    certificate_arn: "{{ output | json_query('certificates[*].certificate_arn') | first }}"
+    certificate_status: "ISSUED"
+  when: output | json_query('certificates[*]') | length != 0
+
+# When we don't have a certificate at all, get a new one
+- name: Send ACM request if needed
+  ansible.windows.win_command:
+    argv:
+      - C:\Program Files\Amazon\AWSCLIV2\aws.exe
+      - acm
+      - request-certificate
+      - --region
+      - "{{ region }}"
+      - --domain-name
+      - "{{ certificate_domain }}"
+      - --certificate-authority-arn
+      - "{{ certificate_authority_arn }}"
+      - --tags
+      - '{{ aws_tags | to_json }}'
+  register: acm
+  when: certificate_arn is not defined or certificate_arn == ""
+  become: false
+
+- name: Set certificate ARN fact
+  ansible.builtin.set_fact:
+    certificate_arn: "{{ (acm.stdout | from_json).CertificateArn }}"
+    certificate_status: "PENDING_VALIDATION"
+  when: certificate_arn is not defined or certificate_arn == ""
+
+# Now wait for the certificate to validate itself. This can take some time but it's usually pretty quick
+- name: Wait for certificate to be validated
+  ansible.windows.win_command:
+    argv:
+      - C:\Program Files\Amazon\AWSCLIV2\aws.exe
+      - acm
+      - describe-certificate
+      - --certificate-arn
+      - "{{ certificate_arn }}"
+      - --region
+      - "{{ region }}"
+  register: result
+  retries: 180  # 30 mins. Hopefully it won't take this long!
+  delay: 10
+  until: (result.stdout|from_json).Certificate.Status == "ISSUED"
+  when: certificate_status == "PENDING_VALIDATION"

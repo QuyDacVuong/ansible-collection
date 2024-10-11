@@ -1,0 +1,64 @@
+
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+TimeOutInSeconds=120
+EnableHostnameVerifier=0
+EnableSimulator=1
+
+;default 10
+AsyncThreadCorePoolSize=50
+
+;default 1000
+AsyncThreadPoolMaxSize=500
+
+MessageTimeOutSec=11
+
+
+;default 10, timeout when requesting a connection from the connection manager
+;PPBRequestTimeoutSec=30
+
+;default 10, timeout when connection is established
+;PPBConnectTimeoutSec=30
+
+;default 60,
+;PPBSocketTimeoutSec=60
+
+;default 300,
+;PPBKeepAliveTimeSec=300
+
+;default 10, max connection in the connection pool
+;PPBMaxConnectionsInPool=50
+
+;default 300, connection idle timeout
+;PPBConnectionIdleTimeoutSec=300
+
+[STATICCONNECT]
+AuxPPBAdaptorAddress=&C_ADAPTOR&
+AuxPPBAdaptorInstance=AuxPPBAdaptorInstance
+
+[BACKOFFICE_BETFAIR]
+BGIURL=https://bgi.betfair.com/BetfairGamingInterfaceService/v1.0
+RgsUser=Ggn
+;RgsPassword=add-aws-lookup-here
+RgsPassword=add-aws-lookup-here
+KeyStore=bf-ggn-all-com.pfx
+KeyStorePass=JBA75C2IW1qWatbiHwpMZslIRGrtaQ
+TrustStore=truststore-prod.jks
+StorePass=i5bCsBM0QIDGST9Jrb0aCs0iUOXR7Q
+
+[BACKOFFICE_PADDYPOWER]
+BGIURL=https://bgi.paddypower.com/BetfairGamingInterfaceService/v1.0
+RgsUser=Ggn
+;RgsPassword=add-aws-lookup-here
+RgsPassword=add-aws-lookup-here
+KeyStore=pp-ggn-all-com.pfx
+KeyStorePass=JBA75C2IW1qWatbiHwpMZslIRGrtaQ
+TrustStore=truststore-prod.jks
+StorePass=i5bCsBM0QIDGST9Jrb0aCs0iUOXR7Q
+;StorePass=03QN4PL$3U8lIR39C0hi7o0EQ9sgGw
+
+[Hercules]
+HerculesServerAddress=&C_MONITORMAIN&
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.PPB
+ReportInterval=10

@@ -1,0 +1,88 @@
+---
+- name: Install java
+  ansible.builtin.include_role:
+    name: casino.server.java
+
+- name: Install tomcat
+  ansible.builtin.include_role:
+    name: casino.server.tomcat
+  vars:
+    tomcat_instances:
+      - name: sbgintegration
+        version: "{{ sbgintegration_tomcat_version }}"
+        src: "{{ artifactory_baseurl }}/ggn-applications/apache-tomcat/apache-tomcat-{{ sbgintegration_tomcat_version }}.tar.gz"
+        environment_variables:
+          - TOMCAT_CFG_LOADED=1
+          - JAVA_OPTS=-Djava.security.egd=file:/dev/./urandom -Ddb2.jcc.charsetDecoderEncoder=3 -Xss1m -Xms512m -Xmx2048m -DlistenPort=8145 -DserverPort=9070 -DAPP_LOG_ROOT=/bigdisk0/tomcat/sbgintegration/logs
+          - INSTANCE=pyr_tomcat_sbgbackofficegateway
+          - INSTANCE_NAME=pyr_tomcat_sbgbackofficegateway
+          - CATALINA_OUT=/dev/null
+          - UMASK=0022
+          - LOGGING_MANAGER=-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+          - SBGGW_HOME=/bigdisk0/tomcat/sbgintegration/conf/sbgintegration
+        wars:
+          - url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/sbgbackofficegateway/sbgbackofficegateway-{{ sbgbackofficegateway_version }}.war"
+            name: sbgbackofficegateway
+        config_files:
+          - src: config/log4j2.xml
+            dest: sbgintegration/config
+          - src: config/vault-root.crt
+            dest: sbgintegration/config
+          - src: config/AuxGateSchema.xsd
+            dest: sbgintegration
+          - src: config/SBGGateway.ini
+            dest: sbgintegration/config/
+
+- name: Load internal root CA
+  community.general.java_cert:
+    cert_path: /usr/share/pki/ca-trust-source/anchors/pki-csr-pstars-eu-west-1-intermediate.pem
+    keystore_path: /software/{{ java_version }}/lib/security/cacerts
+    keystore_pass: changeit
+    executable: "/software/{{ java_version }}/bin/keytool"
+    state: present
+    cert_alias: csr_pstars
+    trust_cacert: true
+  tags:
+    - notest
+
+- name: Configure Log ingestion
+  ansible.builtin.template:
+    src: promtail.yaml.j2
+    dest: /etc/promtail/promtail.yaml
+    owner: promtail
+    group: promtail
+    mode: "0644"
+  notify:
+    - Restart promtail
+
+- name: Monitor connectivity
+  ansible.builtin.template:
+    src: net_response.conf.j2
+    dest: /etc/telegraf/telegraf.d/net_response.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+  notify:
+    - Restart telegraf
+
+- name: Monitor http connectivity
+  ansible.builtin.template:
+    src: http_response.conf.j2
+    dest: /etc/telegraf/telegraf.d/http_response.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+  notify:
+    - Restart telegraf
+
+# note this doesn't get deleted if we switch back to an http input (demo back office) because we still care about the real endpoint
+- name: Monitor certificates
+  ansible.builtin.template:
+    src: x509_input.conf.j2
+    dest: /etc/telegraf/telegraf.d/x509_input.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+  when: SBGGatewayUrl is regex("^https.*")
+  notify:
+    - Restart telegraf

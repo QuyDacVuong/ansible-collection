@@ -1,0 +1,33 @@
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_OLTP }}
+JackpotServerInstance=JackpotServerInstance
+
+#[Vendor.Netent]
+#Id=4
+#Account=netent
+#SecKeys=redacted
+
+[Vendor.Netentcom]
+Id=4
+Account=netent
+SecKeys=redacted
+Sites=578
+ 
+[Vendor.Netentit]
+Id=4
+Account=netent_it
+SecKeys=redacted
+Sites=256
+
+[Vendor.Netentse]
+Id=4
+Account=netent_se
+SecKeys=redacted
+Sites=524288
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.NETENT
+ReportInterval=10

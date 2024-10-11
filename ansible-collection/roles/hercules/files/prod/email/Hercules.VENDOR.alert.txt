@@ -1,0 +1,11 @@
+This is an auto-generated alert from PokerStars system.
+There is a problem with the server you have to report immediately.
+Please call the personnel according to the emergency procedure.
+
+This is the error message you should convey:
+
+[ The <PARAM> on station <STATION> has value <VALUE> since <DATETIME>. ]
+
+
+If the software personnel cannot be reached, call support line management
+immediately.

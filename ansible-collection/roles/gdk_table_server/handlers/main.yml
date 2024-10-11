@@ -1,0 +1,28 @@
+---
+- name: Restart GDK service
+  ansible.windows.win_service:
+    name: PYR_C_GDK
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart HESENDER service
+  ansible.windows.win_service:
+    name: PYR_HESENDER
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart MEMSENDER service
+  ansible.windows.win_service:
+    name: PYR_MEMSENDER
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart promtail
+  ansible.windows.win_service:
+    name: Promtail
+    state: restarted
+
+- name: Restart telegraf
+  ansible.windows.win_service:
+    name: telegraf
+    state: restarted

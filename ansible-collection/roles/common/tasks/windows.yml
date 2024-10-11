@@ -1,0 +1,118 @@
+---
+- name: Configure ESL
+  when: "('role_ggn_hercules' not in group_names) and ('role_casino0_monitor' not in group_names)"
+  block:
+    - name: Create config directory
+      ansible.windows.win_file:
+        path: "D:\\apps\\configs"
+        state: directory
+
+    - name: Create esl.json
+      ansible.windows.win_template:
+        src: "{{ common_esl_source }}"
+        dest: D:\apps\configs\esl.json
+
+    # Credentials
+    - name: Create credentials directory
+      ansible.windows.win_file:
+        path: "D:\\apps\\credentials"
+        state: directory
+    - name: Create credentials files
+      ansible.windows.win_template:
+        src: "apps/credentials/{{ item }}"
+        dest: "D:\\apps\\credentials\\{{ item }}"
+      loop:
+        - db.json
+        - db2_cdl.inc
+        - db2_ro.inc
+        - db2_rw.inc
+
+    - name: Copy zone ini files
+      ansible.windows.win_template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - src: zone_settings.ini
+          dest: D:\apps\configs\zone_settings.ini
+        - src: zone1_settings.ini
+          dest: D:\apps\configs\zone1_settings.ini
+        - src: zoneS_settings.ini
+          dest: D:\apps\configs\zoneS_settings.ini
+
+- name: Configure monitoring apps
+  when: "('role_ggn_hercules' not in group_names) and ('role_casino0_monitor' not in group_names)"
+  block:
+    # Create monitor client folder
+    - name: Create monitor_client folder
+      ansible.windows.win_file:
+        path: D:\apps\monitor_client
+        state: directory
+
+    # Download Files needed for monitoring
+    - name: Download hesender64.exe
+      ansible.windows.win_get_url:
+        url: "{{ artifactory_baseurl }}/releasesrawserver/coreserver/TAG/PA_PROD_2023_02_2302H/hesender64.exe"
+        dest: D:\apps\monitor_client\hesender64.exe
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        force_basic_auth: "{{ get_url_force_basic_auth }}"
+      changed_when: false  # because setting the password forces a change every run
+
+    - name: Download pyrmemsender64.exe
+      ansible.windows.win_get_url:
+        url: "{{ artifactory_baseurl }}/releasesrawserver/coreserver/TAG/PA_PROD_2023_02_2302H/pyrmemsender64.exe"
+        dest: D:\apps\monitor_client\pyrmemsender64.exe
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        force_basic_auth: "{{ get_url_force_basic_auth }}"
+
+    # Create monitoring service
+    - name: Create hesender Monitoring service
+      ansible.windows.win_service:
+        name: PYR_HESENDER
+        path: D:\apps\monitor_client\hesender64.exe
+        display_name: PYR_HESENDER
+        description: Service for GGN Casino Monitoring - HESENDER
+
+    - name: Create memsender Monitoring service
+      ansible.windows.win_service:
+        name: PYR_MEMSENDER
+        path: D:\apps\monitor_client\pyrmemsender64.exe
+        display_name: PYR_MEMSENDER
+        description: Service for GGN Casino Monitoring - MEMSENDER
+
+    # Start monitoring service
+    - name: Start hesender Monitoring service
+      ansible.windows.win_service:
+        name: PYR_HESENDER
+        start_mode: auto
+        state: started
+
+    - name: Start memsender Monitoring service
+      ansible.windows.win_service:
+        name: PYR_MEMSENDER
+        start_mode: auto
+        state: started
+
+- name: Create log archiver script
+  ansible.windows.win_template:
+    src: archive_logs_win.ps1
+    dest: D:\software\archive_logs_win.ps1
+
+# Run every 6 hours
+- name: Schedule log upload to S3
+  community.windows.win_scheduled_task:
+    name: archive logs
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
+    logon_type: s4u
+    run_level: highest
+    description: Run a PowerShell script that moves logs to s3
+    triggers:
+      - type: daily
+        start_boundary: '2024-01-08T00:00:00'
+        repetition:
+          interval: PT6H  # https://durat.io/?q=5+hours
+    actions:
+      - path: powershell.exe
+        arguments: -ExecutionPolicy Unrestricted -NonInteractive -File D:\software\archive_logs_win.ps1

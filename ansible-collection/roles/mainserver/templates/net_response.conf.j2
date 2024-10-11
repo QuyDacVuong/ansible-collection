@@ -1,0 +1,18 @@
+# Hercules
+{% for host in groups[hercules_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# ZONE0_ENTROPY
+{% for host in groups[entropy_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:33303"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+# vim: ft=toml

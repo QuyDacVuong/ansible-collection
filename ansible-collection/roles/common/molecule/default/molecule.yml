@@ -1,0 +1,30 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: common
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-amazonlinux2}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
+  host_vars:
+    stationname: "TEST"
+    lobby_host: "127.0.10.136"
+    hercules_host: "127.0.10.145"
+    web_dispatcher_host: "127.0.10.135"
+    advertise_host: "127.0.10.133"
+  inventory:
+    group_vars:
+      all:
+        env: unittest
+        ggn_application_logs_bucket: 'ggn-unittest-s3'
+        ggn_application_logs_path: "/bigdisk0/logs"
+        artifactory_username: ${ARTIFACTORY_USERNAME:-"anonymous"}
+        artifactory_password: ${ARTIFACTORY_PASSWORD:-"password"}

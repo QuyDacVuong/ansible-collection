@@ -1,0 +1,63 @@
+# Hercules
+{% for host in groups[hercules_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# LOBBY
+{% for host in groups[lobby_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:2348"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# LOBBY
+{% for host in groups[lobby_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:2350"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# GDK
+{% for host in groups[gdk_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:2348"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# GDK
+{% for host in groups[gdk_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:2350"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# NONGDK
+{% for host in groups[non_gdk_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:2348"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# NONGDK
+{% for host in groups[non_gdk_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:2350"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+# vim: ft=toml

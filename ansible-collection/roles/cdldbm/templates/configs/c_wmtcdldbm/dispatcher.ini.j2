@@ -1,0 +1,66 @@
+; {{ ansible_managed }}
+[comm]
+name=AppFactory
+identification={{ stationname }}-WMTCDLDBM
+alias=ip:{{ cdl_host }}:3348
+alias=ip:casino_oltp:port
+alias=ip:{{ cdl_host }}:3349
+alias=ip:*:3350
+rule=ip:*:* pyrtcp0://$0:$1
+performance=1
+
+[tcp]
+type=tcp
+port=3348
+option.islocal=1
+option.compressbits=0
+option.logfile=d:\apps\c_wmtcdldbm\protolocal.log
+option.keepalive=30000/180000
+gatherstatistic=3
+option.maxconnectionsperthread=5
+
+[tcpmux]
+port=3350
+gatherstatistic=3
+
+[smem]
+port=3348
+gatherstatistic=3
+
+[smemmux]
+port=3350
+gatherstatistic=3
+option.maxconnectionsperthread=1
+
+
+[exe]
+IntegrationDbmProxy=d:\apps\bin\c_wmtcdldbm\auxproxyserver.exe;d:\apps\logs\c_wmtcdldbm;0/0;R240
+cdldbm=d:\apps\bin\c_wmtcdldbm\auxcdldbm.exe;d:\apps\logs\c_wmtcdldbm;0/0;R240
+
+[start]
+IntegrationDbmProxy=AuxCDLProxyInstance;s=d:\\apps\\configs\\c_wmtcdldbm\\CdlDbmProxy
+
+
+[logger]
+server=ip:{{ hercules_host }}:9322
+station={{ stationname }}.WMTCDLDBM
+reportseh=1
+
+[telemetry.targets]
+hercules = true
+gateway = true
+panoptic = false
+[telemetry.gateway.conn-params]
+address = ip:127.0.0.1:5447
+instance = TelgatewayInstance
+[telemetry.metrics.tags]
+application = WMTCDLDBM
+environment = {{ hostvars[inventory_hostname].tags.Environment }}
+name = {{ hostvars[inventory_hostname].tags.Name }}
+instanceid = {{ hostvars[inventory_hostname].instance_id }}
+platform = {{ hostvars[inventory_hostname].tags.Platform }}
+zone = {{ hostvars[inventory_hostname].tags.Zone }}
+station_name = {{ stationname }}.WMTCDLDBM-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }} # set this to something similar to the name reported to Hercules
+service_name = WMTCDLDBM
+[telemetry.metrics.filters.1]
+regex = .*  # send all metrics

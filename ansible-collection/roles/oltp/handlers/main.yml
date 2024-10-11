@@ -1,0 +1,33 @@
+---
+- name: Restart OLTP service
+  ansible.windows.win_service:
+    name: PYR_C_OLTP
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart REEF service
+  ansible.windows.win_service:
+    name: PYR_C_REEF_OLTP
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart TOBRELAY service
+  ansible.windows.win_service:
+    name: PYR_C_TOBRELAY
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart Telegraf
+  ansible.windows.win_service:
+    name: Telegraf
+    state: restarted
+
+- name: Restart DB2 service
+  ansible.windows.win_service:
+    name: DB2MGMTSVC_DB2COPY1
+    state: restarted
+
+- name: Restart promtail
+  ansible.windows.win_service:
+    name: Promtail
+    state: restarted

@@ -1,0 +1,24 @@
+---
+- name: Reload nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
+  when: molecule_yml is undefined
+
+- name: Restart promtail
+  ansible.builtin.service:
+    name: promtail
+    state: restarted
+  when: molecule_yml is undefined
+
+- name: Restart tomcat
+  ansible.builtin.service:
+    name: pyr_tomcat_cipwa
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Reload telegraf
+  ansible.builtin.service:
+    name: telegraf
+    state: reloaded
+  when: molecule_yml is undefined

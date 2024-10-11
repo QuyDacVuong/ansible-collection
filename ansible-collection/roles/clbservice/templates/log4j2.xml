@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- reload configuration every hour -->
+<Configuration strict="true" name="CLBServiceConfig" monitorInterval="10">
+        <Properties>
+        <Property name="logPath">${sys:catalina.base}/logs/casinolobby.log</Property>
+         <Property name="logPathRolling">${sys:catalina.base}/logs/rollinglogs/casinolobbyinfo.log</Property>
+    </Properties>
+    <Appenders>
+                <Appender type="Console" name="STDOUT">
+                        <Layout type="PatternLayout">
+                                <Pattern>%d{HH:mm:ss.SSS} %5p %c - [%t] %m%n</Pattern>
+                        </Layout>
+                </Appender>
+          <Appender type="RollingFile" name="LogFile" fileName="${sys:logPath}" filePattern="${sys:logPath}.%d{yyyyMMdd}" immediateFlush="false" append="true">
+            <Layout type="PatternLayout">
+                <Pattern>%d{HH:mm:ss, SSS} [%5p] (%c) - [%t] %m%n</Pattern>
+            </Layout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </Appender>
+        <Appender type="RollingFile" name="LogFileInfo" fileName="${sys:logPathRolling}" filePattern="${sys:logPathRolling}.%d{yyyyMMddHH}" immediateFlush="false" append="true">
+            <Layout type="PatternLayout">
+                <Pattern>%d{HH:mm:ss, SSS} [%5p] (%c) - [%t] %m%n</Pattern>
+            </Layout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="false"/>
+            </Policies>
+        <DefaultRolloverStrategy>
+           <Delete basePath="${sys:catalina.base}/logs/rollinglogs" maxDepth="1">
+                <IfAll>
+                    <IfAccumulatedFileCount exceeds="4" />
+                </IfAll>
+            </Delete>
+        </DefaultRolloverStrategy>
+        </Appender>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.ps.clb" level="warn"/>
+                <Logger name="com.ps.wmt" level="warn"/>
+                <Logger name="com.ps.wmt.service.stats" level="warn"/>
+                <Logger name="graphql" level="warn"/>
+                <Logger name="com.ps.clb.commlib.CommLibLogger" level="warn"/>
+        <Root level="info">
+            <AppenderRef ref="STDOUT" level="warn" />
+            <AppenderRef ref="LogFile" level="warn" />
+             <AppenderRef ref="LogFileInfo" level="info" />
+        </Root>
+    </Loggers>
+</Configuration>

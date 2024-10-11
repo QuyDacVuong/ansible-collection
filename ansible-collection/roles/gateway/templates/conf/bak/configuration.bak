@@ -1,0 +1,1539 @@
+[STATICCONNECT]
+aamsGateWayServerAddress=ip:10.96.90.71:5348
+aamsGateWayServerInstance=AuxAamsGatewayServerInstance
+
+[Hercules]
+HerculesServerAddress=ip:10.42.20.41:9322
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.AAMSSMS
+ReportInterval=60
+
+[LOG]
+#in production, set level to debug
+LEVEL=debug
+DESTINATIONS=console,file
+LOGFILEPATH=/bigdisk0/tomcat/catalina_base/7/logs
+
+[Vendors List]
+#list supported vendors line by line
+netent
+playtech
+microgaming
+nyx
+leander
+playngo
+pragmatic
+greentube
+thunderkick
+skywind
+blueprint
+yggdrasil
+igt
+elk
+
+[Vendor-NETENT]
+username=cdsUser_psit
+password=redacted
+
+[Vendor-NYX]
+username=nyx
+password=redacted
+
+[Vendor-PLAYTECH]
+username=playtech
+password=redacted
+
+[Vendor-MICROGAMING]
+username=microgaming
+password=redacted
+
+[Vendor-LEANDER]
+username=leander
+password=redacted
+
+[Vendor-PLAYNGO]
+username=playngo
+password=redacted
+
+[Vendor-PRAGMATIC]
+username=pragmatic
+password=redacted
+
+[Vendor-GREENTUBE]
+username=greentube
+password=redacted
+
+[Vendor-THUNDERKICK]
+username=thunderkick
+password=redacted
+
+[Vendor-SKYWIND]
+username=skywind
+password=redacted
+
+[Vendor-HIGH5]
+username=high5
+password=redacted
+
+[Vendor-BLUEPRINT]
+username=blueprint
+password=redacted
+
+[Vendor-RTG]
+username=rtg
+password=redacted
+
+[Vendor-YGGDRASIL]
+username=yggdrasil
+password=redacted
+
+[Vendor-IGT]
+username=igt
+password=redacted
+
+[Vendor-STAKELOGIC]
+username=stakelogic
+password=redacted
+
+[Vendor-INSPIRED]
+username=Inspired
+password=redacted
+
+[Vendor-RELAX]
+username=relax
+password=redacted
+
+[Vendor-ELK]
+username=elk
+password=redacted
+
+[Vendor-ISOFTBET]
+username=isoftbet
+password=redacted
+
+[Vendor-PUSH]
+username=pushgaming
+password=redacted
+
+
+
+[STATICCONNECT]
+RgRouterServerAddress={{ C_LOBBY }}
+RgRouterServerInstance=AuxRgMessageRouterInstance
+RgRouterConnType=RgsGateway2
+
+[STATICSETTINGS]
+TimeOutInSeconds=120
+ValidateXML=0
+
+EnableHhUrlDecode=33
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.%VENDOR%
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+EnableWalletApi=1
+RetrieveHandHistory=0
+EvToken=937fd3ef9a48eac865c038b2dc06e9a8
+
+RouterServerAddress={{ C_RGS }}
+RouterServerInstance=AuxRgMessageRouterInstance
+
+HandHistoryDbmAddress={{ C_OLTP }}
+HandHistoryDbmInstance=AuxTableDbmServerInstance
+
+# HOST_FULLTILT = 1,
+# HOST_POKERSTAR = 2,
+# HOST_SIMULATOR = 3,
+# HOST_SIMULATOR_PS = 4,
+# HOST_NEWFT = 5,
+# HOST_BETSTARS = 6,
+# HOST_STARSCASINO = 7,
+# HOST_POKERSTARSVEGAS = 8,
+# HOST_SKYBET = 9,
+#
+#GAMING_SITE_US_NJ = 1,
+#GAMING_SITE_COM = 2,
+#GAMING_SITE_NET = 3,
+#GAMING_SITE_ORG = 4,
+#GAMING_SITE_BETA = 5,
+#GAMING_SITE_FRANCE = 6,
+#GAMING_SITE_EU = 7,
+#GAMING_SITE_ES = 8,
+#GAMING_SITE_IT = 9,
+#GAMING_SITE_UK = 10,
+#GAMING_SITE_DK = 11,
+#GAMING_SITE_PT = 12,
+#GAMING_SITE_RO = 13,
+#
+
+Hosts=FullTilt:1,PS:2,Simulator:3,PsSimulator:4,FT:5,BS:6,SC:7,VG:8,SB:9,FB:10,SBV:11
+
+[EVSETTINGS_FT]
+HostSitePairs=H1S2,H1S3,H1S7,H1S10,H1S11
+UserAuthBaseUrl=https://livecasino.fulltilt.com/cgibin/UserAuthentication
+EvUserID=fulltilt00000001hhvqr6zwh7yusi30
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.fulltilt.com/admin
+EvUserLogoutUrl=https://livecasino.fulltilt.com/logout
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PS]
+HostSitePairs=H2S8,H7S8
+UserAuthBaseUrl=https://livecasino.pokerstars.es/cgibin/UserAuthentication
+EvUserID=pokerstarses00011xjn4g5zlitq8hbl
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.es/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.es/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.es/ua/v1/pokerstarses0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PAROLI]
+HostSitePairs=H2S2,H2S7,H2S10,H2S11,H2S14,H2S20,H2S27
+UserAuthBaseUrl=https://livecasino.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+# CLIENT_PLATFORM_TYPE_WINDOWS = 1;
+# CLIENT_PLATFORM_TYPE_MACHINTOSH = 2;
+# CLIENT_PLATFORM_TYPE_IOS = 3;
+# CLIENT_PLATFORM_TYPE_ANDROID = 4;
+# CLIENT_PLATFORM_TYPE_WEB = 5;
+# CLIENT_PLATFORM_TYPE_LINUX = 6;
+
+[EVSETTINGS_PR4M]
+HostSitePairs=H2S2P3,H2S2P4,H2S7P3,H2S7P4,H2S10P3,H2S10P4,H2S11P3,H2S11P4,H2S14P3,H2S14P4,H2S20P3,H2S20P4,H9S7P3,H9S7P4,H2S27P3,H2S27P4
+UserAuthBaseUrl=https://livecasino.casinogames.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.casinogames.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_FT4M]
+HostSitePairs=H1S2P3,H1S2P4,H1S7P3,H1S7P4,H1S10P3,H1S10P4
+UserAuthBaseUrl=https://livecasino.casinogames-as.fulltilt.com/cgibin/UserAuthentication
+EvUserID=fulltilt00000001hhvqr6zwh7yusi30
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames-as.fulltilt.com/admin
+EvUserLogoutUrl=https://livecasino.casinogames-as.fulltilt.com/logout
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PSES4M]
+HostSitePairs=H2S8P3,H2S8P4,H2S8P8,H7S8P3,H7S8P4,H7S8P8,H6S8P3,H6S8P4
+UserAuthBaseUrl=https://livecasino.casinogames.pokerstars.es/cgibin/UserAuthentication
+EvUserID=pokerstarses00011xjn4g5zlitq8hbl
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames.pokerstars.es/admin
+EvUserLogoutUrl=https:/livecasino.casinogames.pokerstars.es/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.casinogames.pokerstars.es/ua/v1/pokerstarses0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PSIT]
+HostSitePairs=H2S9,H7S9,H6S9P3,H6S9P4,H9S9P3,H9S9P4
+UserAuthBaseUrl=https://livecasino-it.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarsit00017ujieern4hfcjrei
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino-it.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino-it.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino-it.pokerstars.com/ua/v1/pokerstarsit0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+#BETSTARS, PAROLI
+[EVSETTINGS_BS_PR]
+HostSitePairs=H6S2,H6S7,H6S10,H6S11,H6S14,H6S20
+UserAuthBaseUrl=https://livecasino.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+
+[EVSETTINGS_NEWFT_PR]
+HostSitePairs=H5S2,H5S7,H5S10,H5S11,H5S20
+UserAuthBaseUrl=https://livecasino.fulltilt.com/cgibin/UserAuthentication
+EvUserID=fulltilt00000001hhvqr6zwh7yusi30
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.fulltilt.com/admin
+EvUserLogoutUrl=https://livecasino.fulltilt.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.fulltilt.com/ua/v1/fulltilt00000001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_NEWFT_PR4M]
+HostSitePairs=H5S2P3,H5S7P3,H5S10P3,H5S11P3,H5S20P3,H5S2P4,H5S7P4,H5S10P4,H5S11P4,H5S20P4,H5S2P8,H5S7P8,H5S10P8,H5S11P8,H5S20P8
+UserAuthBaseUrl=https://livecasino.casinogames-as.fulltilt.com/cgibin/UserAuthentication
+EvUserID=fulltilt00000001hhvqr6zwh7yusi30
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames-as.fulltilt.com/admin
+EvUserLogoutUrl=https://livecasino.casinogames-as.fulltilt.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.fulltilt.com/ua/v1/fulltilt00000001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_CS_PR]
+HostSitePairs=H7S2,H7S7,H7S10,H7S11,H7S14,H7S20,H7S27
+UserAuthBaseUrl=https://livecasino.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PS_RO]
+HostSitePairs=H2S13,H7S13
+UserAuthBaseUrl=https://livecasino.pokerstars.ro/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.ro/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.ro/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.ro/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PS_RO4M]
+HostSitePairs=H2S13P3,H2S13P4,H2S13P8,H7S13P8,H6S13
+UserAuthBaseUrl=https://livecasino.casinogames.pokerstars.ro/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames.pokerstars.ro/admin
+EvUserLogoutUrl=https://livecasino.casinogames.pokerstars.ro/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.casinogames.pokerstars.ro/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_CS_PR4M]
+HostSitePairs=H7S2P3,H7S2P4,H7S7P3,H7S7P4,H7S10P3,H7S10P4,H7S11P3,H7S11P4,H7S14P3,H7S14P4,H7S2P8,H7S7P8,H7S10P8,H7S11P8,H7S20P3,H7S20P4,H7S20P8,H7S27P3,H7S27P4
+UserAuthBaseUrl=https://livecasino.casinogames.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.casinogames.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_GR]
+HostSitePairs=H2S24,H7S24
+EvCsrHandHistoryUrl=https://pokerstarsgr.evo-games.com/admin
+EvUserLogoutUrl=https://pokerstarsgr.evo-games.com/service/controller/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://pokerstarsgr.evo-games.com/ua/v1/pokerstarsgr0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_GR4M]
+HostSitePairs=H8S24P3,H7S24P3,H8S24P4,H7S24P4,H8S24P8,H7S24P8
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.gr/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.gr/service/controller/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.gr/ua/v1/pokerstarsgr0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.%VENDOR%
+ReportInterval=60
+
+[LOG]
+LEVEL=debug
+DESTINATIONS=file
+#LOGFILEPATH=${catalina.base}/logs/
+LOGFILEPATH=/bigdisk0/tomcat/catalina_base/3/logs/
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Blueprint]
+Id=23
+Account=blueprint
+SecKeys=redacted
+Sites=578
+
+[Vendor.Blueprintit]
+Id=23
+Account=blueprint_it
+SecKeys=redacted
+Sites=256
+
+[Vendor.Blueprintes]
+Id=23
+Account=blueprint_es
+SecKeys=redacted
+Sites=128
+
+[Vendor.Blueprintdkse]
+Id=23
+Account=blueprint_dkse
+SecKeys=redacted
+Sites=525312
+
+[Vendor.Blueprintpt]
+Id=23
+Account=blueprint_pt
+SecKeys=redacted
+Sites=2048
+
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.BLUEPRINT
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Greentube]
+Id=9
+Account=greentube
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.GREENTUBE
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.High5]
+Id=21
+Account=high5
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.HIGH5
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Leander]
+Id=1
+Account=leander
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.LEANDER
+ReportInterval=10
+
+[LOG]
+LEVEL=debug
+DESTINATIONS=file
+LOGFILEPATH=/bigdisk0/tomcat/catalina_base/1/logs/
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Playtech]
+Id=10
+Account=microgaming
+SecKeys=redacted
+
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.MICROGAMING
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+#[Vendor.Netent]
+#Id=4
+#Account=netent
+#SecKeys=redacted
+
+[Vendor.Netentcom]
+Id=4
+Account=netent
+SecKeys=redacted
+Sites=578
+ 
+[Vendor.Netentit]
+Id=4
+Account=netent_it
+SecKeys=redacted
+Sites=256
+
+[Vendor.Netentse]
+Id=4
+Account=netent_se
+SecKeys=redacted
+Sites=524288
+
+[Vendor.NetEntdk]
+Id=4
+Account=netent_dk
+SecKeys=redacted
+Sites=1024
+
+[Vendor.NetEntro]
+Id=4
+Account=netent_ro
+SecKeys=redacted
+Sites=4096
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.NETENT
+ReportInterval=10
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Playngo]
+Id=12
+Account=playngo
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.PLAYNGO
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Playtech]
+Id=8
+Account=playtech
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.PLAYTECH
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Pragmatic]
+Id=16
+Account=pragmatic
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.PRAGMATIC
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Skywind]
+Id=19
+Account=skywind
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.SKYWIND
+ReportInterval=10
+
+
+
+
+[STATICCONNECT]
+RgRouterServerAddress={{ C_LOBBY }}
+RgRouterServerInstance=AuxRgMessageRouterInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+TimeOutInSeconds=120
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.PTLDGW
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+RouterServerAddress={{ C_RGS }}
+#RouterServerAddress=ip:10.42.47.3:3348
+RouterServerInstance=AuxRgMessageRouterInstance
+#AuxRGRouterConnType=RgsGateway2
+
+
+;/vendor/cgibin/UserAuthentication/error_unavailable	Returns unavailable response
+;/vendor/cgibin/UserAuthentication/error_unknown	Return an  error the GW is not expecting
+;/vendor/cgibin/UserAuthentication/error_missing_FgReqId	Return a response without the FgReqId filed
+;/vendor/cgibin/UserAuthentication/error_missing_errorcode	Return response without error code field
+;/vendor/cgibin/UserAuthentication/error_missing_errordetails	Return response without error detail filed
+;/vendor/cgibin/UserAuthentication/error_bad_xml	Returns a bad xml
+
+#[VENDORSETTINGS_LEANDER]
+#VendorId=1
+#VendorName=Leander
+#VendorURL=https://assets.qa3.leandergames.com/sessionBroker/connectors/Pyr/FinalizeGame
+
+#[VENDORSETTINGS_NETENT]
+#VendorId=4
+#VendorName=Netent
+#VendorURL=https://10.30.46.250/vendor/cgibin/UserAuthentication/error_missing_errordetails
+
+#[VENDORSETTINGS_NYX]
+#VendorId=7
+#VendorName=NYX
+#VendorURL=https://cit-fulltilt.evolutiongaming.com/cgibin/UserAuthentication
+
+#[VENDORSETTINGS_PLAYTECH]
+#VendorId=8
+#VendorName=Playtech
+#VendorURL=https://cit-fulltilt.evolutiongaming.com/cgibin/UserAuthentication
+
+#[VENDORSETTINGS_GREENTUBE]
+#VendorId=9
+#VendorName=Greentube
+#VendorURL=https://cit-fulltilt.evolutiongaming.com/cgibin/UserAuthentication
+
+#[VENDORSETTINGS_MICROGAMING]
+#VendorId=10
+#VendorName=Microgaming
+#VendorURL=http://webserver8.pokerstarsqa1.installprogram.eu:80/Orion/VanguardAdmin/XML
+#User=Microgaming_User
+#Password=add-aws-lookup-here
+
+#[VENDORSETTINGS_PLAYNGO]
+#VendorId=12
+#VendorName=Playngo
+#VendorURL=http://172.29.32.73:15000/pokerstars/finalizegame
+
+[VENDORSETTINGS_THUNDERKICK]
+VendorId=15
+VendorName=thunderkick
+#VendorURL=https://pyr-qa-api.thunderkick.com/pokerstars-session-web/finalizegame
+VendorURL=https://stars-api.thunderkick.com/pokerstars-session-web/finalizegame
+
+[VENDORSETTINGS_PRAGMATIC]
+VendorId=16
+VendorName=Pragmatic
+VendorURL=https://api-xc.pragmaticplay.net/IntegrationService/xc/http/FinalizationAPI/
+
+[VENDORSETTINGS_SKYWIND]
+VendorId=19
+VendorName=Skywind
+VendorURL=https://skywind-ps-eu.sw420101.com/pokerstars-session-web/finalizegame
+
+[VENDORSETTINGS_HIGH5]
+VendorId=21
+VendorName=High5
+VendorURL=https://ps-ws.ma.h5grgs.com/finalizationService/v1/finalizeGame
+
+[VENDORSETTINGS_BLUEPRINT]
+VendorId=23
+VendorName=Blueprint
+VendorURL=https://sapirgsldn.blueprintgaming.com/Pokerstars/PokerstarsSAPI/FinalizeGameRequest
+#VendorURL=https://sapi5rgs.blueprintgaming.com/pokerstars/PokerstarsSAPI/FinalizeGameRequest
+
+[BLUEPRINT_PS_IT]
+HostSite=H2S9,H6S9,H7S9,H9S9
+VendorURL=https://sapirgsams.blueprintgaming.com/PokerstarsItaly/PokerstarsSAPI/FinalizeGameRequest
+#HostSite=H2S9,H4S9,H6S9,H7S9,H8S9,H9S9
+#VendorURL=https://sapi5rgs.blueprintgaming.com/PokerStarsItaly/PokerstarsSAPI/FinalizeGameRequest
+
+[BLUEPRINT_PS_ESDKPTSE]
+HostSite=H2S8,H2S11,H2S12,H2S20,H6S8,H6S11,H6S12,H6S20,H7S8,H7S11,H7S12,H7S20,H8S7
+VendorURL=https://sapirgsams.blueprintgaming.com/PokerstarsEU/PokerstarsSAPI/FinalizeGameRequest
+
+
+[VENDORSETTINGS_IGT]
+VendorId=26
+VendorName=IGT
+VendorURL=https://platform.rgsgames.com/ws-v2/finalizeGame?&landing=pksr
+AddHandId=1
+
+[VENDORSETTINGS_STAKELOGIC]
+VendorId=27
+VendorName=STAKELOGIC
+VendorURL=https://ps.gs-stakelogic.com/pokerstars/finalize
+AddHandId=1
+
+[VENDORSETTINGS_INSPIRED]
+VendorId=29
+VendorName=INSPIRED
+VendorURL=https://pokerstarsgcp-l1-ext.support.inspiredvirgo.com/support/finalizeGame
+AddHandId=1
+
+[INSPIRED_IT]
+HostSite=H2S9,H6S9,H7S9,H8S9,H9S9,H10S9,H11S9,H12S2,H13S9
+VendorURL=https://pokerstarsitaly-l1-ext.support.inspiredvirgo.com/support/finalizeGame
+
+[VENDORSETTINGS_RELAX]
+VendorId=31
+VendorName=RELAX
+VendorURL=https://mt-casino3-partner.api.relaxg.com:7000/papi/2.0/casino/pokerstars/finalize
+AddHandId=1
+User=pokerstars
+Password=add-aws-lookup-here
+
+
+[VENDORSETTINGS_SGD]
+VendorId=30
+VendorName=SGD
+HandHistoryURL=https://sapi.nyxmalta.com/
+HandHistoryURL.ro,dk,desh,es,gr,nl,pt,se=https://ogs-sapi-mt1p16.nyxop.net/
+HandHistoryURL.it=https://g360-web-pokerstars.nyxop.net/
+HandHistoryUserName=api@pokerstars.com
+HandHistoryPassword=add-aws-lookup-here
+
+[VENDORSETTINGS_ISOFTBET]
+VendorId=33
+VendorName=ISOFTBET
+AddHandId=1
+
+[VENDORSETTINGS_PUSH]
+VendorId=35
+VendorName=PUSH
+VendorURL=https://mesh.eu.regulated2.pushgaming.com/mesh/b2b/integration/pokerstars/finalizeGame
+User=pokerstars
+Password=add-aws-lookup-here
+AddHandId=1
+
+[PUSH_IT]
+HostSite=H2S9,H6S9,H7S9,H8S9,H9S9,H10S9,H11S9,H12S2,H13S9
+VendorURL=https://player.it.regulated.pushgaming.com/mesh/b2b/integration/pokerstars/finalizeGame
+User=pokerstars
+Password=add-aws-lookup-here
+
+[VENDORSETTINGS_PRAGMATIC_LIVE]
+VendorId=37
+VendorName=PRAGMATIC_LIVE
+HandHistoryURL=https://api-xc.pragmaticplay.net/IntegrationService/v3/http/HistoryAPI/OpenHistoryExtended/
+HandHistoryPassword=add-aws-lookup-here
+
+[ISOFTBET_COM]
+HostSite=H2S2,H6S2,H7S2,H8S2,H9S2,H10S2,H11S2,H12S2,H13S2
+VendorURL=https://gap-pokerstarscom.isoftbet.com:9443/reconxml/1329/FinalizeGameRequest
+
+[ISOFTBET_EU]
+HostSite=H2S7,H6S7,H7S7,H8S7,H9S7,H10S7,H11S7,H12S7,H13S7
+VendorURL=https://gap-pokerstarseu.isoftbet.com:9443/reconxml/1331/FinalizeGameRequest
+
+[ISOFTBET_UK]
+HostSite=H2S10,H6S10,H7S10,H8S10,H9S10,H10S10,H11S10,H12S10,H13S10
+VendorURL=https://gap-pokerstarsuk.isoftbet-aldn.com:9443/reconxml/1322/FinalizeGameRequest
+
+[ISOFTBET_IT]
+HostSite=H2S9,H6S9,H7S9,H8S9,H9S9,H10S9,H11S9,H12S2,H13S9
+VendorURL=https://gap-pokerstarscom.isoftbet.com:9443/reconxml/1367/FinalizeGameRequest
+
+[ISOFTBET_ES]
+HostSite=H2S8,H6S8,H7S8,H8S8,H9S8,H10S8,H11S8,H12S2,H13S8
+VendorURL=https://gap-pokerstarscom.isoftbet.com:9443/reconxml/1368/FinalizeGameRequest
+
+[ISOFTBET_DESH]
+HostSite=H2S22,H6S22,H7S22,H8S22,H9S22,H10S22,H11S22,H12S22,H13S22
+VendorURL=https://gap-pokerstarscom.isoftbet.com:9443/reconxml/1369/FinalizeGameRequest
+
+[ISOFTBET_NL]
+HostSite=H2S26,H6S26,H7S26,H8S26,H9S26,H10S26,H11S26,H12S26,H13S26
+VendorURL=https://gap-pokerstarscom.isoftbet.com:9443/reconxml/1370/FinalizeGameRequest
+
+[ISOFTBET_PT]
+HostSite=H2S12,H6S12,H7S12,H8S12,H9S12,H10S12,H11S12,H12S12,H13S12
+VendorURL=https://gap-pokerstarscom.isoftbet.com:9443/reconxml/1371/FinalizeGameRequest
+
+[ISOFTBET_SWE]
+HostSite=H2S20,H6S20,H7S20,H8S20,H9S20,H10S20,H11S20,H12S20,H13S20
+VendorURL=https://gap-pokerstarscom.isoftbet.com:9443/reconxml/1372/FinalizeGameRequest
+
+[ISOFTBET_RO]
+HostSite=H2S13,H6S13,H7S13,H8S13,H9S13,H10S13,H11S13,H12S13,H13S13
+VendorURL=https://gap-pokerstarscom.isoftbet.com:9443/reconxml/1373/FinalizeGameRequest
+
+[ISOFTBET_GR]
+HostSite=H2S24,H6S24,H7S24,H8S24,H9S24,H10S24,H11S24,H12S24,H13S24
+VendorURL=https://gap-pokerstarsgr.isoftbet.com:9443/reconxml/1374/FinalizeGameRequest
+
+[ISOFTBET_DK]
+HostSite=H2S11,H6S11,H7S11,H8S11,H9S11,H10S11,H11S11,H12S11,H13S11
+VendorURL=https://gap-pokerstarscom.isoftbet.com:9443/reconxml/1375/FinalizeGameRequest
+
+
+#[VENDORSETTINGS_YGGDRASIL]
+#VendorId=24
+#VendorName=Yggdrasil
+#SSLProtocol=TLSv1.2
+
+[VENDORSETTINGS_EGT]
+VendorId=36
+VendorName=EGT
+HandHistoryURL=https://accs3.egtmgs.com/gpcs-web-war/game_history
+HandHistoryUserName=pokerstars_user
+HandHistoryPassword=add-aws-lookup-here
+
+[VENDORSETTINGS_MGS]
+VendorId=38
+VendorName=MGS
+HandHistoryURL=https://redirector3.valueactive.eu/Casino/Default.aspx
+HandHistoryPassword=add-aws-lookup-here
+ExtraProp.OperatorSecurityURL=https://operatorsecurity.valueactive.eu/system/operatorsecurityweb/v1/operatortokens
+ExtraProp.CheckUserUrl=https://api2.api.valueactive.eu/account/v1/accounts/checkUserExists
+ExtraProp.PlayerImpersonationAPI=https://playcheck3.gameassists.co.uk/PlayerImpersonation/v1/tokens/generate
+ExtraProp.AuditUser=PokerStars
+
+[VENDORSETTINGS_RUBYPLAY]
+VendorId=39
+VendorName=RUBYPLAY
+VendorURL=https://srv.prrpeu2.com/aux/finalize-game
+AddHandId=1
+
+[MGS_HH_UK]
+HandHistorySites=uk
+HandHistoryURL=https://redirector3.valueactive.eu/Casino/Default.aspx
+HandHistoryPassword=add-aws-lookup-here
+ExtraProp.OperatorSecurityURL=https://operatorsecurity.valueactive.eu/system/operatorsecurityweb/v1/operatortokens
+ExtraProp.CheckUserUrl=https://api2.api.valueactive.eu/account/v1/accounts/checkUserExists
+ExtraProp.PlayerImpersonationAPI=https://playcheck3.gameassists.co.uk/PlayerImpersonation/v1/tokens/generate
+ExtraProp.AuditUser=PokerStars
+
+[MGS_HH_CAON]
+HandHistorySites=caon
+HandHistoryURL=https://playcheck-app1-pokerstarsqa.installprogram.eu/PlaycheckV3/default.asp
+HandHistoryPassword=add-aws-lookup-here
+ExtraProp.OperatorSecurityURL=https://webserver4-app1-pokerstarsqa.installprogram.eu/System/OperatorSecurity/v1/operatortokens
+ExtraProp.CheckUserUrl=https://webserver4-app1-pokerstarsqa.installprogram.eu/account/v1/accounts/checkUserExists
+ExtraProp.PlayerImpersonationAPI=https://playcheck3.gameassists.co.uk/PlayerImpersonation/v1/tokens/generate
+ExtraProp.AuditUser=PokerStars
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.3rdPartyVendorServiceGW
+ReportInterval=10
+
+[Rules List]
+{{ C_RGS }}={{ C_RGS }}
+{{ C_MONITORMAIN }}={{ C_MONITORMAIN }}
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Rtg]
+Id=20
+Account=rtg
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.RTG
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Yggdrasil]
+Id=24
+Account=yggdrasil
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.YGGDRASIL 
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+StarsServerAddress={{ C_ZN1_LOBBY }}
+StarsServerInstance=AuxSBGAdaptorInstance
+SBGGatewayUrl=https://gate.sbgservices.com/aux
+;SBGPassword=add-aws-lookup-here
+;SBGPassword=add-aws-lookup-here
+SBGPassword=add-aws-lookup-here
+SBGUsername=TSG
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.SBG
+ReportInterval=10
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.IGT]
+Id=26
+Account=igt
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.IGT
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.STAKELOGIC]
+Id=27
+Account=stakelogic
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.STAKELOGIC
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.Inspired]
+Id=29
+Account=Inspired
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.INSPIRED
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+TimeOutInSeconds=120
+EnableHostnameVerifier=0
+EnableSimulator=1
+
+;default 10
+AsyncThreadCorePoolSize=50
+
+;default 1000
+AsyncThreadPoolMaxSize=500
+
+MessageTimeOutSec=11
+
+
+;default 10, timeout when requesting a connection from the connection manager
+;PPBRequestTimeoutSec=30
+
+;default 10, timeout when connection is established
+;PPBConnectTimeoutSec=30
+
+;default 60,
+;PPBSocketTimeoutSec=60
+
+;default 300,
+;PPBKeepAliveTimeSec=300
+
+;default 10, max connection in the connection pool
+;PPBMaxConnectionsInPool=50
+
+;default 300, connection idle timeout
+;PPBConnectionIdleTimeoutSec=300
+
+[STATICCONNECT]
+AuxPPBAdaptorAddress={{ C_ZN1_LOBBY }}
+AuxPPBAdaptorInstance=AuxPPBAdaptorInstance
+
+[BACKOFFICE_BETFAIR]
+BGIURL=https://bgi.betfair.com/BetfairGamingInterfaceService/v1.0
+RgsUser=Ggn
+;RgsPassword=add-aws-lookup-here
+RgsPassword=add-aws-lookup-here
+KeyStore=bf-ggn-all-com.pfx
+KeyStorePass=redacted
+TrustStore=truststore-prod.jks
+StorePass=i5bCsBM0QIDGST9Jrb0aCs0iUOXR7Q
+
+[BACKOFFICE_PADDYPOWER]
+BGIURL=https://bgi.paddypower.com/BetfairGamingInterfaceService/v1.0
+RgsUser=Ggn
+;RgsPassword=add-aws-lookup-here
+RgsPassword=add-aws-lookup-here
+KeyStore=pp-ggn-all-com.pfx
+KeyStorePass=redacted
+TrustStore=truststore-prod.jks
+StorePass=i5bCsBM0QIDGST9Jrb0aCs0iUOXR7Q
+;StorePass=03QN4PL$3U8lIR39C0hi7o0EQ9sgGw
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.PPB
+ReportInterval=10
+
+
+
+
+[STATICCONNECT]
+RgRouterServerAddress={{ C_RGS }}
+RgRouterServerInstance=AuxRgMessageRouterInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+TimeOutInSeconds=120
+
+OgsLoginname=sgdogs
+OgsPassword=add-aws-lookup-here
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.SGDOGSGW
+ReportInterval=10
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[;Vendor.High5]
+;Id=21
+;Account=high5
+;SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.HIGH5
+ReportInterval=10
+
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.RELAX]
+Id=31
+Account=relax
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.PLAYTECH
+ReportInterval=10
+
+
+
+
+[STATICCONNECT]
+RgRouterServerAddress={{ C_RGS }}
+RgRouterServerInstance=AuxRgMessageRouterInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+TimeOutInSeconds=120
+ConnectTimeoutInSeconds=10
+EgtBaseUrl=https://s3.egtmgs.com:17575/
+EgtUserName=Pokerstars@EGT
+EgtPassword=add-aws-lookup-here
+EgtNativeSystemCode=Pokerstars
+;EgtBaseUrl=https://spg-staging.egtmgs.com:17575/
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.EGTGW
+ReportInterval=10
+
+
+[STATICCONNECT]
+AamsGateWayServerAddress={{ C_ITGATEWAY }}
+AamsGateWayServerInstance=AuxAamsGatewayServerInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+AuxReconnectIntervalInSeconds=15
+ChecksumCheckIntervalInMin=240
+;JackpotFeedCheckIntervalInSec=10
+;EnableWholeMessageLogging=1
+
+[VENDOR-Sgd]
+VendorId=30
+VendorName=Sgd
+ChecksumUrl=https://ogsitalyshaservice.game360.it/
+ChecksumUserName=PokerstarsItaly
+ChecksumUserPassword=add-aws-lookup-here
+ChecksumMapping=checksumMapping4Sgd.ini
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.CS-VendorServiceGateway-%VENDOR%
+ReportInterval=60
+;format: G<gameTypeId>V<varaintId>=<gameingCode>,<type>,<sgdGameId>
+;(ex) Doubleplay SuperBet : 12064 for AAMS, 70228 for GameId
+G1023V1=12064,2,70228
+G1023V2=66555,2,70529
+G1023V4=12068,2,70227
+G1023V5=25397,2,1070088
+G1023V75=58560,2,70543
+G1023V96=72769,2,2370006
+G1023V273=81563,2,182126
+G1023V349=72781,2,2370009
+G1023V350=72779,2,2370010
+G1023V367=72788,2,1070089
+G1023V386=25406,2,1070097
+G1023V270=81556,2,182118
+G1023V344=72772,2,2370003
+G1023V379=28975,2,1070226
+G1023V389=72787,2,1070059
+G1023V401=25402,2,1070099
+G1023V386 =25406,2,1070097
+G1023V277=81568,2,182111
+G1023V343=72771,2,2370002
+G1023V418=84723,2,70660
+G1023V420=84719,2,70674
+G1023V417=84718,2,70601
+G1023V305=84716,2,70679
+G1023V422=84720,2,70690
+G1023V423=84725,2,70680
+G1023V419=84717,2,70672
+G1023V304=84715,2,70670
+G1023V438=86825,2,70683
+G1023V421=86824,2,70643
+G1023V152=86827,2,70243
+G1023V532=87409,2,70678
+G1023V521=90437,2,70704
+G1023V436=86823,2,70714
+G1023V346=93715,2,2460092
+G1023V424=92876,2,182203
+G1023V425=92880,2,182211
+G1023V426=92881,2,182214
+G1023V427=92874,2,182209
+G1023V437=94622,2,70665
+G1023V446=92875,2,182136
+G1023V450=92879,2,182137
+G1023V452=81561,2,182044
+G1023V525=94618,2,70691
+G1023V540=94637,2,70700
+G1023V542=94640,2,70744
+G1023V554=94643,2,70698
+G1023V257=87833,2,1960088
+G1023V556=93719,2,2460079
+G1023V318=93736,2,2460057
+G1023V515=93728,2,2460142
+G1023V324=93723,2,2460063
+G1023V326=93717,2,2460065
+G1023V513=93722,2,2460138
+G1023V284=93833,2,780103
+G1023V519=93741,2,2460154
+G1023V559=97745,2,70708
+G1023V584=104870,2,70754
+G1023V588=104863,2,70682
+G1023V634=104866,2,70722
+G1023V650=97744,2,70707
+G1023V330=93720,2,2460070
+G1023V515=93728,2,2460142
+G1023V327=93716,2,2460066
+G1023V503=93718,2,2460108
+G1023V326=93717,2,2460065
+G1023V513=93722,2,2460138
+G1023V556=93719,2,2460079
+G1023V913=105261,2,182299
+G1023V574=103323,2,182263
+G1023V940=103324,2,182266
+G1023V666=103328,2,182281
+G1023V591=104865,2,70732
+G1023V547=103319,2,182259
+G1023V640=104869,2,70792
+G1023V655=110541,2,2460190
+
+
+[STATICCONNECT]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+AuxReconnectIntervalInSeconds=15
+JackpotFeedCheckIntervalInSec=10
+GetXRatesIntervalInMin=60
+
+[VENDOR-Egt]
+VendorId=36
+VendorName=EGT
+JackpotFeedUrl=https://stats.egtmgs.com/jackpot_Pokerstars_RON.json
+ExtraProp.SupportedCurrency=RON,EUR
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.CS-VendorServiceGateway-%VENDOR%
+ReportInterval=60
+
+
+
+[STATICCONNECT]
+RgRouterServerAddress={{ C_LOBBY }}
+RgRouterServerInstance=AuxRgMessageRouterInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+TimeOutInSeconds=120
+VendorSecretKey=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.PRAGMATIC_LIVE
+ReportInterval=10
+
+
+
+
+[STATICCONNECT]
+RgRouterServerAddress={{ C_RGS }}
+RgRouterServerInstance=AuxRgMessageRouterInstance
+
+[STATICSETTINGS]
+SupportedProtocols=TLS,TLSv1,TLSv1.1,TLSv1.2
+ReconnectInterval=1000
+TimeOutInSeconds=120
+ConnectTimeoutInSeconds=10
+MgsUserName=mgsprod
+MgsPassword=add-aws-lookup-here
+MgsUrl=
+MgsSSLProtocol=TLSv1.2
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.MGS
+ReportInterval=10
+
+
+
+[STATICCONNECT]
+AamsGateWayServerAddress={{ C_ITGATEWAY }}
+AamsGateWayServerInstance=AuxAamsGatewayServerInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+AuxReconnectIntervalInSeconds=15
+ChecksumCheckIntervalInMin=240
+
+[VENDOR-MGS]
+VendorId=38
+VendorName=MGS
+ChecksumUserName=mgs-aams
+ChecksumUserPassword=add-aws-lookup-here
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.CS-VendorServiceGateway-%VENDOR%
+ReportInterval=60
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.PUSHGAMING]
+Id=35
+Account=pushgaming
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.INSPIRED
+ReportInterval=10
+
+
+[STATICSETTINGS]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[Vendor.RUBYPLAY]
+Id=39
+Account=rubyplay
+SecKeys=redacted
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.JPF.INSPIRED
+ReportInterval=10
+;format: G<gameTypeId>V<varaintId>=<gameingCode>,<type>,<gameName>
+;game name can be found in the link - https://livecasino.evolutiongaming.com/service/controller/checksumReport
+G1002V1=10677,4,Blackjack
+G1002V13=21495,2,Dream Catcher
+G1002V15=23558,2,Lightning Roulette
+G1002V17=23641,2,American Roulette
+G1002V2=10676,2,Roulette
+G1002V3=10678,4,Baccarat
+G1002V4=10679,4,Casino Holdem
+G1002V5=13817,4,Three Card Poker
+G1002V6=13818,4,Caribbean Stud Poker
+G1002V7=14056,4,Ultimate Texas Holdem
+G1002V26=31161,2,2 Hand Casino Holdem
+G1002V25=31160,2,Deal or No Deal
+G1002V18=43723,2,Dragon Tiger
+G1002V27=48069,2,Free Bet Blackjack
+G1002V23=48022,2,Infinite Blackjack
+G1002V29=31163,2,Lightning Dice
+G1002V19=25881,2,Top Card
+G1002V24=31158,2,Monopoly Live
+G1002V30=31165,2,First Person Dream Catcher
+G1002V32=31166,2,First Person Lightning Roulette
+G1002V31=48070,2,Side Bet City Poker
+G1002V28=43694,2,Sic Bo
+G1002V16=34183,2,Texas Holdem Bonus Poker
+G1002V38=45007,2,Mega Ball
+
+[STATICCONNECT]
+AamsGateWayServerAddress={{ C_ITGATEWAY }}
+AamsGateWayServerInstance=AuxAamsGatewayServerInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+AuxReconnectIntervalInSeconds=15
+ChecksumCheckIntervalInMin=240
+;JackpotFeedCheckIntervalInSec=10
+;EnableWholeMessageLogging=1
+
+[VENDOR-Evolution]
+VendorId=3
+VendorName=Evolution
+ChecksumUrl=https://livecasino-it.pokerstars.com/service/controller/checksumReport
+;format: G<gameTypeId>V<varaintId>=<gameingCode>,<type>,<gameName>
+ChecksumMapping=gamecode2gametype.ini
+;ExtraProp.AamsType=JSON
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.CS-VendorServiceGateway-%VENDOR%
+ReportInterval=60
+
+[STATICCONNECT]
+AamsGateWayServerAddress={{ C_ITGATEWAY }}
+AamsGateWayServerInstance=AuxAamsGatewayServerInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+AuxReconnectIntervalInSeconds=15
+ChecksumCheckIntervalInMin=240
+;JackpotFeedCheckIntervalInSec=10
+;EnableWholeMessageLogging=1
+
+[VENDOR-Playtech_Live]
+VendorId=25
+VendorName=Playtech_Live
+ExtraProp.CasinoName=pokerstarsew5.it
+ChecksumUrl=https://webapi-pza.techonlinecorp.com/product/ums/service/regulator/operation/getSoftwareHash/
+ChecksumKeyFile=pokerstarsew5.it-20211015.p12
+ChecksumKeyPassword=add-aws-lookup-here
+SSLProtocol=TLSv1.2
+SNIEnabled=0
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.CS-VendorServiceGateway-%VENDOR%
+ReportInterval=60
+
+
+[STATICCONNECT]
+RgRouterServerAddress={{ C_RGS }}
+RgRouterServerInstance=AuxRgMessageRouterInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+MessageTimeOutInSeconds=120
+
+;format: name:id:bit,...
+;Hosts=FT:1:1,PS:2:2,SIM:3:4,SIMPS:4:8,NEWFT:5:16,BS:6:32,SC:7:64,PSV:8:128,SKB:9:256,FXB:10:512,SKBV:11:1024,BFAIR:12:2048,PPWR:13:4096,FDUEL:14:8192,SDUST:15:16384
+;Sites=nj:1:1,dotcom:2:2,dotnet:3:4,org:4:8,beta:5:16,france:6:32,eu:7:64,es:8:128,it:9:256,uk:10:512,dk:11:1024,pt:12:2048,ro:13:4096,bg:14:8192,be:15:16384,ee:16:32768,cz:17:65536,asia:18:131072,pa:19:262144,se:20:524288,ch:21:1048576,desh:22:2097152,arba:23:4194304,gr:24:8388608,mi:25:16777216,nl:26:33554432,caon:27:67108864,de:28:134217728
+
+VendorId=%VENDOR_ID%
+IncomingAuthToken=09KlslR76s19BwvYhpUiw65bfc1ZVJjHuQvyN755HnbheQlNgK0
+
+;default settings
+SSLProtocol=TLSv1.2
+;AddHostName2Nickname=false
+
+;format HostSite=<comma-separate-host-name>:<comma-separate-site-name>[:<comma-separate-platform-name>]
+;AuthUrl=https://{hostname}/ua/v1/{casino.key}/{api.token}
+;Casino.key and Api.token is provided by Evo
+
+[OSS_PS_COM_EU_UK]
+HostSite=PS,BS,SC,PSV,SKB:dotcom,eu,uk
+AuthUrl=https://pokerstars-co-uk.evo-games.com/ua/v1/
+Casino.key=redacted
+Api.token=redacted
+
+[OSS_PS_DK]
+HostSite=PS,SIMPS,BS,SC,PSV,SKB:dk
+AuthUrl=https://pokerstars-dk.evo-games.com/ua/v1/
+Casino.key=redacted
+Api.token=redacted
+
+[OSS_PS_PT]
+HostSite=PS,SIMPS,BS,SC,PSV,SKB:pt
+AuthUrl=https://pokerstars-pt.evo-games.com/ua/v1/
+Casino.key=redacted
+Api.token=redacted
+
+[OSS_PS_ES]
+HostSite=PS,SIMPS,BS,SC,PSV,SKB:es
+AuthUrl=https://pokerstars-es.evo-games.com/ua/v1/
+Casino.key=redacted
+Api.token=redacted
+
+[OSS_PS_DE]
+HostSite=PS,SIMPS,BS,SC,PSV,SKB:de
+AuthUrl=https://pokerstars-de.evo-games.com/ua/v1/
+Casino.key=redacted
+Api.token=redacted
+
+[OSS_PS_GR]
+HostSite=PS,SIMPS,BS,SC,PSV,SKB:gr
+AuthUrl=https://pokerstars-gr.evo-games.com/ua/v1/
+Casino.key=redacted
+Api.token=redacted
+
+[OSS_PS_SE]
+HostSite=PS,SIMPS,BS,SC,PSV,SKB:se
+AuthUrl=https://pokerstars-se.evo-games.com/ua/v1/
+Casino.key=redacted
+Api.token=redacted
+
+[OSS_PS_RO]
+HostSite=PS,SIMPS,BS,SC,PSV,SKB:ro
+AuthUrl=https://pokerstars-ro.evo-games.com/ua/v1/
+Casino.key=redacted
+Api.token=redacted
+
+[OSS_PS_IT]
+HostSite=PS,SIMPS,BS,SC,PSV,SKB:it
+AuthUrl=https://pokerstars-sl-it.evo-games.com/ua/v1/
+Casino.key=redacted
+Api.token=NRrRg8CmHlajvaGvbHJ4cCkubEsTPD0uahkG8rv8YaMXag8lE1lsyFelfbtBFzlaoJChUU8O
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.%VENDOR%
+
+
+
+[STATICCONNECT]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+;AamsGateWayServerAddress={{ C_ITGATEWAY }}
+;AamsGateWayServerInstance=AuxAamsGatewayServerInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+AuxReconnectIntervalInSeconds=15
+ChecksumCheckIntervalInMin=240
+JackpotFeedCheckIntervalInSec=10
+
+[VENDOR-OSS-COM_EU_UK_NL]
+VendorId=40
+VendorName=OSS
+JackpotFeedSites=dotcom,eu,uk,nl
+JackpotFeedUrl=https://pokerstars.evo-games.com/api/jackpot/v2/jackpot
+JackpotFeedUserName=pokerstarscom001
+JackpotFeedUserPassword=add-aws-lookup-here
+
+[VENDOR-OSS-DK]
+VendorId=40
+VendorName=OSS
+JackpotFeedSites=dk
+JackpotFeedUrl=https://pokerstars-dk.evo-games.com/api/jackpot/v2/jackpot
+JackpotFeedUserName=pokerstarsdk0001
+JackpotFeedUserPassword=add-aws-lookup-here
+
+[VENDOR-OSS-RO]
+VendorId=40
+VendorName=OSS
+JackpotFeedSites=ro
+JackpotFeedUrl=https://pokerstars-ro.evo-games.com/api/jackpot/v2/jackpot
+JackpotFeedUserName=pokerstarsro0001
+JackpotFeedUserPassword=add-aws-lookup-here
+
+[VENDOR-OSS-SE]
+VendorId=40
+VendorName=OSS
+JackpotFeedSites=se
+JackpotFeedUrl=https://pokerstars-se.evo-games.com/api/jackpot/v2/jackpot
+JackpotFeedUserName=pokerstarsse0001
+JackpotFeedUserPassword=add-aws-lookup-here
+
+[VENDOR-OSS-IT]
+VendorId=40
+VendorName=OSS
+JackpotFeedSites=it
+JackpotFeedUrl=https://pokerstars-sl-it.evo-games.com/api/jackpot/v2/jackpot
+JackpotFeedUserName=pokerstarsslit01
+JackpotFeedUserPassword=add-aws-lookup-here
+
+[VENDOR-OSS-GR]
+VendorId=40
+VendorName=OSS
+JackpotFeedSites=gr
+JackpotFeedUrl=https://pokerstars-gr.evo-games.com/api/jackpot/v2/jackpot
+JackpotFeedUserName=pokerstarsgr0001
+JackpotFeedUserPassword=add-aws-lookup-here
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.CS-VendorServiceGateway-%VENDOR%
+ReportInterval=60

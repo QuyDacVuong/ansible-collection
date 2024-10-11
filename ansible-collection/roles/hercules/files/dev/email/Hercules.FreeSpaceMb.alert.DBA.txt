@@ -1,0 +1,15 @@
+ATTENTION DATABASE TEAM!!!
+
+Parameter <PARAM> on station <STATION> is overlimited.
+
+Current value is <VALUE>.
+
+Limit is <LIMIT>.
+
+Now is <DATETIME>.
+
+Please contact technical support at +1 (647) 203-0338, attn: DBA Team.
+
+If the software personnel cannot be reached, call support line management
+immediately.
+

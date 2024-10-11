@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<configuration>
+  <databases>
+{% for db in db_config['dbs'].values() %}
+    <database host="{{ db['host'] }}" name="{{ db['dbname'] }}" port="{{ db['port'] }}"/>
+{% endfor %}
+  </databases>
+
+  <dsncollection>
+{% for db in db_config['dbs'].values() %}
+    <dsn alias="{{ db['dbname'] }}" host="{{ db['host'] }}" name="{{ db['dbname'] }}" port="{{ db['port'] }}"/>
+    <dsn alias="{{ db['dbname'] }}UR" host="{{ db['host'] }}" name="{{ db['dbname'] }}" port="{{ db['port'] }}"/>
+{% endfor %}
+  </dsncollection>
+
+  <parameters>
+{% for parameter in db_config['parameters'] %}
+    <parameter name="{{ parameter['name'] }}" value="{{ parameter['value'] }}"/>
+{% endfor %}
+  </parameters>
+</configuration>

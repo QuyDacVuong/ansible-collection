@@ -1,0 +1,74 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /bigdisk0/monitoring/promtail-positions.yaml
+
+clients:
+  - url: {{ loki_url }}
+    external_labels:
+      environment: {{ hostvars[inventory_hostname].tags.CasinoEnvironment }}
+      name: {{ hostvars[inventory_hostname].tags.Name }}
+      instanceid: {{ hostvars[inventory_hostname].instance_id }}
+      platform: {{ hostvars[inventory_hostname].tags.Platform }}
+      zone: {{ hostvars[inventory_hostname].tags.Zone }}
+    tenant_id: casino
+
+scrape_configs:
+  - job_name: journal
+    journal:
+      max_age: 12h
+      labels:
+         job: systemd-journal
+    relabel_configs:
+      - source_labels: ["__journal__systemd_unit"]
+        target_label: "unit"
+
+  - job_name: nginx-logs
+    pipeline_stages:
+    - match:
+        selector: '{job="nginx"}'
+        stages:
+        - regex:
+            expression: '^(?P<remote_addr>[\w\.]+) - (?P<remote_user>[^ ]*) \[(?P<time_local>.*)\] "(?P<method>[^ ]*) (?P<request>[^ ]*) (?P<protocol>[^ ]*)" (?P<status>[\d]+) (?P<body_bytes_sent>[\d]+) "(?P<http_referer>[^"]*)" "(?P<http_user_agent>[^"]*)"?'
+        - timestamp:
+            action_on_failure: skip
+            format: "02/Jan/2006:15:04:05 -0700"
+            source: time_local
+        - labels:
+            method:
+            status:
+    - drop:
+        older_than: 24h
+    static_configs:
+    - labels:
+        __path__: /var/log/nginx/*.log
+        job: nginx
+      targets:
+      - localhost
+  - job_name: tomcat-logs
+    pipeline_stages:
+    - regex:
+        expression: '(?P<extractedtimestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}) (?P<loglevel>DEBUG|ERROR|INFO)'
+    - template:
+        source: extractedtimestamp
+        template: '\{\{ Replace .Value "T" " " 1 \}\}'
+    - template:
+        source: extractedtimestamp
+        template: '\{\{ Replace .Value "," "." 1 \}\}'
+    - labels:
+        loglevel:
+    - timestamp:
+        format: '2006-01-02 15:04:05.000'
+        location: 'Etc/GMT-0'
+        source: extractedtimestamp
+    - drop:
+        older_than: 24h
+    static_configs:
+    - labels:
+        __path__: /bigdisk0/tomcat/cipwa/logs/*.log
+        job: tomcat
+      targets:
+      - localhost
+  

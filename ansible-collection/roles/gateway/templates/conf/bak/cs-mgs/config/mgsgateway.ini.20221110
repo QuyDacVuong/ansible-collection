@@ -1,0 +1,22 @@
+
+
+
+[STATICCONNECT]
+RgRouterServerAddress={{ C_RGS }}
+RgRouterServerInstance=AuxRgMessageRouterInstance
+
+[STATICSETTINGS]
+SupportedProtocols=TLS,TLSv1,TLSv1.1,TLSv1.2
+ReconnectInterval=1000
+TimeOutInSeconds=120
+ConnectTimeoutInSeconds=10
+MgsUserName=mgsprod
+MgsPassword=add-aws-lookup-here
+MgsUrl=
+MgsSSLProtocol=TLSv1.2
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.MGS
+ReportInterval=10
+

@@ -1,0 +1,201 @@
+---
+
+- name: Create directory
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\software
+    - C:\ProgramData\Telegraf
+    - C:\ProgramData\Promtail
+    - 'C:\Program Files\WinSW'
+    - C:\ProgramData\WinSW\Services
+
+- name: Download bginfo64.exe
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/ggn-applications/BGInfo.zip!/Bginfo64.exe"
+    dest: d:\software\bginfo64.exe
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+
+- name: Download environment BGI file with fallback
+  block:
+    - name: Get environment-specific BGI file
+      ansible.windows.win_get_url:
+        url: "{{ artifactory_baseurl }}/ggn-applications/bginfo/{{ env }}.bgi"
+        dest: C:\ProgramData\bginfo.bgi
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        force_basic_auth: "{{ get_url_force_basic_auth }}"
+  rescue:
+    - name: Task to remedy fail
+      ansible.windows.win_get_url:
+        url: "{{ artifactory_baseurl }}/ggn-applications/bginfo/base.bgi"
+        dest: C:\ProgramData\bginfo.bgi
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        force_basic_auth: "{{ get_url_force_basic_auth }}"
+
+- name: Start bginfo after login
+  ansible.windows.win_regedit:
+    path: 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+    name: bginfo
+    data: 'D:\software\bginfo64.exe C:\ProgramData\bginfo.bgi /silent /timer:0 /nolicprompt'
+
+- name: Configure searchlog
+  when: env=="qa1" or env=="preprod"
+  block:
+    - name: SearchLog | Install File and Storage Services
+      ansible.windows.win_feature:
+        name: FileAndStorage-Services
+        state: present
+
+    - name: SearchLog | Install SMB 1.0/CIFS Sharing Support
+      ansible.windows.win_feature:
+        name: FS-SMB1
+        state: present
+        include_sub_features: true
+      register: win_feature
+
+    - name: SearchLog | Reboot after installing Storage features
+      ansible.windows.win_reboot:
+      when: win_feature.reboot_required
+    - name: SearchLog | Wait for reboot
+      ansible.builtin.wait_for_connection:
+        timeout: 900
+
+    - name: SearchLog | Adding App Logs share
+      ansible.windows.win_share:
+        name: d
+        description: Application logs for SearchLog
+        path: D:\
+        caching_mode: none
+        list: true
+        read: Everyone
+
+- name: Ensure vim is in the PATH
+  ansible.windows.win_path:
+    elements:
+      - C:\Program Files\vim\vim82\
+  notify:
+    - Restart amazonssmagent
+
+- name: "Configure NTP server name"
+  ansible.windows.win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters
+    name: 'NtpServer'
+    data: '169.254.169.123,0x8'
+    type: string
+  notify: Restart w32time service
+- name: Start time service
+  ansible.windows.win_service:
+    name: w32time
+    state: started
+- name: Set timezone to UTC
+  community.windows.win_timezone:
+    timezone: UTC
+
+- name: Install AWS Command Line Interface v2
+  ansible.windows.win_command:
+    argv:
+      - msiexec
+      - /i
+      - "{{ artifactory_baseurl }}/ggn-applications/AWSCLIV2.msi"
+    creates: 'C:\Program Files\Amazon\AWSCLIV2'
+  notify:
+    - Restart amazonssmagent
+
+- name: Create EU CA certs
+  ansible.windows.win_copy:
+    src: pki-csr-pstars-eu-west-1-intermediate.pem
+    dest: C:\software\pki-csr-pstars-eu-west-1-intermediate.pem
+- name: Import EU CA certs
+  ansible.windows.win_certificate_store:
+    path: C:\software\pki-csr-pstars-eu-west-1-intermediate.pem
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Create US CA certs
+  ansible.windows.win_copy:
+    src: pki-csr-pstars-us-east-1-intermediate.pem
+    dest: C:\software\pki-csr-pstars-us-east-1-intermediate.pem
+- name: Import US CA certs
+  ansible.windows.win_certificate_store:
+    path: C:\software\pki-csr-pstars-us-east-1-intermediate.pem
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+
+# Get-WmiObject Win32_Product | Where Name -eq 'Far Manager 3 (x64)' | Format-Table IdentifyingNumber, Name
+- name: Install Far Manager 3 (x64)
+  ansible.windows.win_package:
+    path: "{{ artifactory_baseurl }}/ggn-applications/Far30b5959.x64.20220202.msi"
+    product_id: '{04A07BAB-7634-4072-A11E-32910EA7BF7F}'
+    arguments: /passive /quiet
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+
+# We don't manage promtail.yaml here, we expect individual services to configure that
+- name: Download promtail
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/ggn-applications/promtail-windows-amd64.exe.zip"
+    dest: C:\software\promtail-windows-amd64.exe.zip
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+- name: Unzip promtail
+  community.windows.win_unzip:
+    src: C:\software\promtail-windows-amd64.exe.zip
+    dest: 'C:\Program Files\Promtail'
+    creates: 'C:\Program Files\Promtail\promtail-windows-amd64.exe'
+# promtail wasn't written to run as a service, so we have to use a wrapper
+- name: Install winsw
+  ansible.windows.win_get_url:
+    url: https://github.com/winsw/winsw/releases/download/v3.0.0-alpha.10/WinSW-x64.exe
+    dest: 'C:\Program Files\WinSW\WinSW.exe'
+- name: Configure promtail service
+  ansible.windows.win_copy:
+    src: windows/promtail.xml
+    dest: C:\ProgramData\WinSW\Services\promtail.xml
+- name: Manage promtail service
+  ansible.windows.win_service:
+    name: Promtail
+    path: '"C:\Program Files\WinSW\WinSW.exe" "C:\ProgramData\WinSW\Services\promtail.xml"'
+
+- name: Configure telegraf
+  ansible.windows.win_copy:
+    src: windows/telegraf.conf
+    dest: C:\ProgramData\Telegraf\telegraf.conf
+  notify:
+    - Restart windows telegraf service
+- name: Configure telegraf service
+  ansible.windows.win_service:
+    name: telegraf
+    path: "C:\\Program Files\\Telegraf\\telegraf.exe --config-directory=C:\\ProgramData\\Telegraf"
+  notify:
+    - Restart windows telegraf service
+
+- name: Download vim package
+  ansible.windows.win_get_url:
+    url: https://github.com/vim/vim-win32-installer/releases/download/v{{ common_windows_vim_version }}/gvim_{{ common_windows_vim_version }}_x64.zip
+    dest: C:\software\gvim_{{ common_windows_vim_version }}_x64.zip
+- name: Extract vim installer
+  community.windows.win_unzip:
+    src: C:\software\gvim_{{ common_windows_vim_version }}_x64.zip
+    dest: 'C:\Program Files'
+    creates: 'C:\Program Files\vim'
+  notify: Install vim
+
+- name: Install Notepad++
+  ansible.windows.win_powershell:
+    script: |
+      $notepadppUrl = "https://artifactory.pyrsoftware.ca/artifactory/ggn-applications/npp.8.6.5.Installer.x64.exe"
+      $destination = "$env:TEMP\notepadpp_installer.exe"
+      Invoke-WebRequest -Uri $notepadppUrl -OutFile $destination
+      Start-Process -FilePath "$env:TEMP\notepadpp_installer.exe" -ArgumentList "/S"
+    creates: 'C:\Program Files\Notepad++\'
+
+- name: Install windows_exporter
+  ansible.windows.win_package:
+    path: "https://github.com/prometheus-community/windows_exporter/releases/download/v{{ common_windows_exporter_version }}/windows_exporter-{{ common_windows_exporter_version }}-amd64.msi"
+    product_id: '{FAF8BA71-6B12-4EC1-A5DF-A5C33008D7FE}'
+    arguments: /quiet ENABLED_COLLECTORS=cpu,cs,logical_disk,memory,net

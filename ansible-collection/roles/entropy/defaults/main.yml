@@ -1,0 +1,83 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+entropy_binaries:
+  - binary: pyr64.bin
+    artifactory_base_path: build-results/coreserver/TAG/2201B/pyr/
+    dest_path: /bigdisk0/apps/C_RNGEntropy/
+  - binary: pyrentropyurandomsmem.bin
+    artifactory_base_path: build-results/rngserver/TAG/2205B/pyrentropyurandom/
+    dest_path: /bigdisk0/apps/bin/C_RNGEntropy/
+
+hercules_host: '127.0.0.145'
+advertise_host: '127.0.0.1'
+stationname: 'TEST'
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+
+entropy_ca_disp_crt: "undefined"
+entropy_server_disp_crt: "undefined"
+entropy_server_disp_pass: "undefined"
+entropy_server_disp_key: "undefined"
+
+
+entropy_comm: |
+  alias=ip:{{ advertise_host }}:33303
+  alias=ip:{{ advertise_host }}:33320
+  alias=ip:*:33303
+  alias=ip:*:33304
+  rule=ip:*:33320 pyrssl0://$0:33320
+  rule=ip:*:* pyrtcp0://$0:$1
+  performance=10000
+
+entropy_managers: |
+  manager=tcp
+  manager=tcpmux
+  manager=unixsmem
+  manager=unixsmemmux
+  manager=ssl_in
+
+entropy_tcp: |
+  type=tcp
+  port=33303
+  option.islocal=1
+  option.compressbits=0
+  option.logfile=\bigdisk0\apps\C_RNGEntropy\protolocal.log
+  option.keepalive=30000/180000
+  gatherstatistic=1
+
+entropy_tcpmux: |
+  type=tcpmux
+  port=33304
+
+entropy_unixsmem: |
+  type=unixsmem
+  port=33303
+  option.logfile=\bigdisk0\apps\C_RNGEntropy\protolocalunixsmem.log
+  gatherstatistic=1
+
+entropy_unixsmemmux: |
+  type=unixsmemmux
+  port=33304
+  option.logfile=\bigdisk0\apps\C_RNGEntropy\protolocalunixsmemmux.log
+  gatherstatistic=1
+
+entropy_multiexe: ""
+
+entropy_ssl_in: |
+  type=ssl
+  port=33320
+  option.keepalive=5000/30000
+  @/bigdisk0/apps/credentials/cert.ini
+
+entropy_exe: |
+  rngentropy=/bigdisk0/apps/bin/C_RNGEntropy/pyrentropyurandomsmem.bin;/bigdisk0/apps/logs/C_RNGEntropy/
+
+rngentropy_instance:
+  - RNGEntropyInstance;s=/bigdisk0/apps/configs/C_RNGEntropy/;s={{ stationname }}.rngentropy.RNGEntropyInstance-{{ advertise_host.split('.')[-1] }}
+
+entropy_intelrng: |
+  noIntelRng=0

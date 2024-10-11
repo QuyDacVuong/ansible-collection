@@ -1,0 +1,10 @@
+[[inputs.nginx]]
+  urls = ["https://{{ certificate_domain }}/nginx_status"]
+
+[[inputs.prometheus]]
+  urls = ["http://localhost:8080/cs/metrics"]
+
+[[inputs.x509_cert]]
+  sources = ["https://localhost:443"]
+  tls_server_name = "{{ certificate_domain }}"
+  exclude_root_certs = true

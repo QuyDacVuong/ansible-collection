@@ -1,0 +1,11 @@
+[[inputs.x509_cert]]
+  sources = {{ external_urls | to_json }}
+  exclude_root_certs = true
+  timeout = "5s"
+  [inputs.x509_cert.tags]
+  zone = "{{ zone }}"
+[[inputs.http_response]]
+  urls = {{ external_urls | to_json }}
+  response_timeout = "5s"
+  [inputs.http_response.tags]
+  zone = "{{ zone }}"

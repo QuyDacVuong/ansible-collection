@@ -1,0 +1,26 @@
+# Hercules
+{% for host in groups[hercules_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# ZONE0_OLTP
+{% for host in groups[oltp_zone0_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:2348"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# C_TEMPLATESERVER
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ C_TEMPLATESERVER.split(":")[1] }}:{{ C_TEMPLATESERVER.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+
+# vim: ft=toml

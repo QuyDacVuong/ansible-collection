@@ -1,0 +1,17 @@
+---
+- name: Copy archive_logs.sh shell script
+  ansible.builtin.template:
+    src: archive_logs.sh
+    dest: /usr/local/bin/archive_logs.sh
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Archive GGN Application Logs Cron Job
+  ansible.builtin.cron:
+    name: "Archive GGN Application Logs"
+    minute: "0"
+    hour: "*"
+    job: "/usr/local/bin/archive_logs.sh"
+  tags:
+    - notest

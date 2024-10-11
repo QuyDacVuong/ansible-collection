@@ -1,0 +1,10 @@
+export JAVA_HOME=/software/jdk11
+export TOMCAT_VERSION=/software/tomcat8
+
+export JAVA_OPTS="-XX:MaxPermSize=1024m -Xss1m -Xms256m -Xmx2048m \
+ -DlistenPort=8119 -DserverPort=9140"
+
+export OSSGATEWAY_HOME=/bigdisk0/tomcat/conf/cs-oss
+export VENDORSERVICEGATEWAY_HOME=/bigdisk0/tomcat/conf/cs-vendorservice-oss
+export VENDOR=OSS
+export VENDOR_ID=40

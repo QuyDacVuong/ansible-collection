@@ -1,0 +1,777 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://starsgroup.com/AuxGateSchema"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://starsgroup.com/AuxGateSchema">
+
+	<annotation>
+		<documentation>defines the communication protocol between TSG's AUX
+			backend and SBG's GaTE. communication is secured using SSL and
+			server-level authentication.
+		</documentation>
+	</annotation>
+
+	<complexType name="RequestHeaderType">
+		<sequence>
+			<element name="requestId" type="unsignedLong">
+				<annotation>
+					<documentation>unique id that identifies the request. retransmitted
+						requests have the same request ids of the original requests.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="password">
+				<annotation>
+					<documentation>
+						password to do server level authentication.
+					</documentation>
+				</annotation>
+				<simpleType>
+					<restriction base="string">
+						<maxLength value="20"></maxLength>
+					</restriction>
+				</simpleType>
+			</element>
+			<element name="sendTime" type="dateTime">
+				<annotation>
+					<documentation>time when the request is (re)transmitted. the send
+						time can be different for different transmissions of the same
+						request.
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="AuthTokenType">
+		<annotation>
+			<documentation>token for player authentication. issued by SBG.
+			</documentation>
+		</annotation>
+		<restriction base="string">
+			<maxLength value="2048"></maxLength>
+		</restriction>
+	</simpleType>
+
+	<complexType name="AuthenticateUserReqType">
+		<sequence>
+			<element name="header" type="tns:RequestHeaderType"></element>
+			<element name="request"
+				type="tns:AuthenticateUserReqBodyType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="AuthenticateUserReqBodyType">
+		<sequence>
+			<element name="accountId" type="int">
+				<annotation>
+					<documentation>player's account id defined by SBG. uniquely
+						identifies a registered user in SBG.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="token" type="tns:AuthTokenType">
+			</element>
+			<element name="client" type="tns:ClientType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="ClientType">
+		<sequence>
+			<element name="clientIp">
+				<annotation>
+					<documentation>client IP as AUX sees</documentation>
+				</annotation>
+				<simpleType>
+					<restriction base="string">
+						<maxLength value="32"></maxLength>
+					</restriction>
+				</simpleType>
+			</element>
+			<element name="trackingInfo">
+				<annotation>
+					<documentation>a string provided by SBG client and passed as it is
+						to GATE. the string is transparent to AUX.
+					</documentation>
+				</annotation>
+				<simpleType>
+					<restriction base="string">
+						<maxLength value="2048"></maxLength>
+					</restriction>
+				</simpleType>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="AuthenticateUserRespType">
+		<sequence>
+			<element name="status" type="tns:ResponseStatusType"></element>
+			<element name="response"
+				type="tns:AuthenticateUserRespBodyType" maxOccurs="1" minOccurs="0"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="StartGameReqType">
+		<sequence>
+			<element name="header" type="tns:RequestHeaderType"></element>
+			<element name="request" type="tns:StartGameReqBodyType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="StartGameReqBodyType">
+		<sequence>
+			<element name="accountId" type="unsignedInt">
+				<annotation>
+					<documentation>player's account id defined by SBG. uniquely
+						identifies a registered user in SBG.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="token" type="tns:AuthTokenType">
+			</element>
+			<element name="gameSessionId" type="unsignedLong">
+				<annotation>
+					<documentation>uniquely identifies the game session. defined by
+						aux.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="startTime" type="dateTime">
+				<annotation>
+					<documentation>time when the game session starts.</documentation>
+				</annotation>
+			</element>
+			<element name="sessionContext"
+				type="tns:GameSessionContextType"></element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="GameCurrencyEnum">
+		<annotation>
+			<documentation>game currencies</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="GBP"></enumeration>
+			<enumeration value="EUR"></enumeration>
+		</restriction>
+	</simpleType>
+
+	<complexType name="StartGameRespType">
+		<sequence>
+			<element name="status" type="tns:ResponseStatusType"></element>
+			<element name="response" type="tns:StartGameRespBodyType"
+				maxOccurs="1" minOccurs="0"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="BalanceType">
+		<sequence>
+			<element name="cashAmount" type="long">
+				<annotation>
+					<documentation>cash balance in player's account in pennies.
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="EndGameReqType">
+		<sequence>
+			<element name="header" type="tns:RequestHeaderType"></element>
+			<element name="request" type="tns:EndGameReqBodyType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="EndGameReqBodyType">
+		<sequence>
+			<element name="accountId" type="unsignedInt">
+				<annotation>
+					<documentation>player's account id defined by SBG. uniquely
+						identifies a registered user in SBG.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="gameSessionId" type="unsignedLong">
+				<annotation>
+					<documentation>uniquely identifies the game session. defined by
+						aux.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="terminationCode"
+				type="tns:TerminationCodeEnum">
+				<annotation>
+					<documentation>indicates why game is terminated.</documentation>
+				</annotation>
+			</element>
+			<element name="endTime" type="dateTime">
+				<annotation>
+					<documentation>time when the game session was closed.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="sessionContext"
+				type="tns:GameSessionContextType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="ResponseStatusType">
+		<sequence>
+			<element name="requestId" type="unsignedLong">
+				<annotation>
+					<documentation>copied from the request message of the response.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="error" type="tns:ErrorEnum">
+			</element>
+			<element name="errorDetails" type="string"></element>
+			<element name="errorContext" type="string" minOccurs="0"></element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="ErrorEnum">
+		<annotation>
+			<documentation>error codes</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="E_SYSTEM"></enumeration>
+			<enumeration value="E_INVALID_MESSAGE"></enumeration>
+			<enumeration value="E_INVALID_USER"></enumeration>
+			<enumeration value="E_USER_PROHIBITTED_FOR_GAME"></enumeration>
+			<enumeration value="E_GAME_PROHIBBITED"></enumeration>
+			<enumeration value="E_RESPONSIBLE_GAMING"></enumeration>
+			<enumeration value="EINSUFFICIENT_FUNDS"></enumeration>
+			<enumeration value="E_ILLEGAL_STATE"></enumeration>
+			<enumeration value="SUCCESS"></enumeration>
+		</restriction>
+	</simpleType>
+
+	<complexType name="AuthenticateUserRespBodyType">
+		<sequence>
+			<element name="userScreenName">
+				<annotation>
+					<documentation>
+						player's screen name. this pieces of information
+						is used on live dealer tables, races, and
+						detailed hand histories.
+					</documentation>
+				</annotation>
+				<simpleType>
+					<restriction base="string">
+						<maxLength value="20"></maxLength>
+					</restriction>
+				</simpleType>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="StartGameRespBodyType">
+		<sequence>
+			<element name="balance" type="tns:BalanceType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="EndGameRespType">
+		<sequence>
+			<element name="status" type="tns:ResponseStatusType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="GameSessionContextType">
+		<sequence>
+			<element name="gameCurrency" type="tns:GameCurrencyEnum">
+				<annotation>
+					<documentation>game play currency</documentation>
+				</annotation>
+			</element>
+			<element name="tableTypeId" type="unsignedLong">
+				<annotation>
+					<documentation>table type id identifies a table type defined in
+						AUX. a table type is a set of parameters for the game.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="playForFun" type="boolean">
+				<annotation>
+					<documentation>indicate if the game is played with fun money or
+						real money. true if played with fun money.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="client" type="tns:ClientType"></element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="TerminationCodeEnum">
+		<annotation>
+			<documentation>indicates why game session is closed.</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="TC_NORMAL"></enumeration>
+			<enumeration value="TC_CLIENT_DISCONNECTED"></enumeration>
+			<enumeration value="TC_PROTOCOL_ERROR"></enumeration>
+			<enumeration value="TC_UNMAPPED"></enumeration>
+		</restriction>
+	</simpleType>
+
+	<complexType name="BetReqType">
+		<sequence>
+			<element name="header" type="tns:RequestHeaderType"></element>
+			<element name="request" type="tns:BetReqBodyType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="BetReqBodyType">
+		<sequence>
+			<element name="accountId" type="unsignedInt">
+				<annotation>
+					<documentation>player's account id defined by SBG. uniquely
+						identifies a registered user in SBG.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="gameSessionId" type="unsignedLong">
+				<annotation>
+					<documentation>uniquely identifies the game session. defined by
+						aux.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="handId" type="unsignedLong">
+				<annotation>
+					<documentation>id of the hand. defined by aux. a hand starts from
+						first bet until the bet and all supplementary bets are resolved.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="wager" type="tns:WagerType"></element>
+			<element name="sessionContext"
+				type="tns:GameSessionContextType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="WagerType">
+		<sequence>
+			<element name="transactionId" type="unsignedLong">
+				<annotation>
+					<documentation>
+						id of wager transaction. defined by AUX.
+					</documentation>
+				</annotation>
+			</element>
+            <element name="wagerTime" type="dateTime"></element>
+            <element name="cashAmount" type="int">
+				<annotation>
+					<documentation>
+						cash amount in the transaction.
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="BetRespType">
+		<sequence>
+			<element name="status" type="tns:ResponseStatusType"></element>
+			<element name="response" type="tns:BetRespBodyType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="BetRespBodyType">
+		<sequence>
+			<element name="balance" type="tns:BalanceType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="HandResultReqType">
+		<sequence>
+			<element name="header" type="tns:RequestHeaderType"></element>
+			<element name="request" type="tns:HandResultReqBodyType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="HandResultReqBodyType">
+		<sequence>
+			<element name="accountId" type="unsignedInt">
+				<annotation>
+					<documentation>player's account id defined by SBG. uniquely
+						identifies a registered user in SBG.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="gameSessionId" type="unsignedLong">
+				<annotation>
+					<documentation>uniquely identifies the game session. defined by
+						aux.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="handId" type="unsignedLong">
+				<annotation>
+					<documentation>id of the hand. defined by aux. a hand starts from
+						first bet until the bet and all supplementary bets are resolved.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="pay" type="tns:PayType" maxOccurs="1" minOccurs="0">
+				<annotation>
+					<documentation>there can be 0 to more than one HandResultReq
+						messages that have the pay element in a hand.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="handOver" type="tns:HandOverType"
+				maxOccurs="1" minOccurs="0">
+				<annotation>
+					<documentation>only one HandResultRequest message will have
+						handOver element in a hand.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="sessionContext"
+				type="tns:GameSessionContextType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="PayType">
+		<sequence>
+			<element name="transactionId" type="unsignedLong">
+				<annotation>
+					<documentation>id of the pay transaction.</documentation>
+				</annotation>
+			</element>
+			<element name="payTime" type="dateTime">
+				<annotation>
+					<documentation>time when the pay was requested</documentation>
+				</annotation>
+			</element>
+			<element name="type" type="tns:PayTypeEnum">
+				<annotation>
+					<documentation>indicate what the pay is. valid values can be "win
+						from game", "refund from game", "jackpot win" and etc.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="cashAmount" type="long">
+				<annotation>
+					<documentation>cash amount in the transaction in pennies.
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="PayTypeEnum">
+		<annotation>
+			<documentation>different credit types</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="PT_WINNING"></enumeration>
+			<enumeration value="PT_REFUND"></enumeration>
+			<enumeration value="PT_JACKPOT_WINNING"></enumeration>
+		</restriction>
+	</simpleType>
+
+	<complexType name="HandOverType">
+		<sequence>
+			<element name="handOverTime" type="dateTime"></element>
+			<element name="jackpots" type="tns:JackpotsType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="JackpotsType">
+		<sequence>
+			<element name="jackpot" type="tns:JackpotType"
+				maxOccurs="unbounded" minOccurs="1"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="JackpotType">
+		<sequence>
+			<element name="jackpotKey" type="unsignedInt">
+				<annotation>
+					<documentation>unique key that identifies the jackpot pool.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="contribution" type="int">
+				<annotation>
+					<documentation>player's jackpot contribution in the hand. in
+						1/1000th of a penny in game play currency.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="pay" type="long">
+				<annotation>
+					<documentation>total amount paid from jackpot pool to player. in
+						pennies in game play currency.
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="HandResultRespType">
+		<sequence>
+			<element name="status" type="tns:ResponseStatusType"></element>
+			<element name="response" type="tns:HandResultRespBodyType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="HandResultRespBodyType">
+		<sequence>
+			<element name="balance" type="tns:BalanceType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="GetBalanceReqType">
+		<sequence>
+			<element name="header" type="tns:RequestHeaderType"></element>
+			<element name="request" type="tns:GetBalanceReqBodyType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="GetBalanceReqBodyType">
+		<sequence>
+			<element name="accountId" type="unsignedInt">
+				<annotation>
+					<documentation>player's account id defined by SBG. uniquely
+						identifies a registered user in SBG.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="gameSessionId" type="unsignedLong">
+				<annotation>
+					<documentation>uniquely identifies the game session. defined by
+						aux.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="sessionContext"
+				type="tns:GameSessionContextType">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="GetBalanceRespType">
+		<sequence>
+			<element name="status" type="tns:ResponseStatusType"></element>
+			<element name="response" type="tns:GetBalanceRespBodyType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="GetBalanceRespBodyType">
+		<sequence>
+			<element name="balance" type="tns:BalanceType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="OutOfHandCreditReqType">
+		<sequence>
+			<element name="header" type="tns:RequestHeaderType"></element>
+			<element name="request" type="tns:OutOfHandCreditReqBodyType">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="OutOfHandCreditReqBodyType">
+		<sequence>
+			<element name="accountId" type="unsignedInt">
+				<annotation>
+					<documentation>
+						player's account id defined by SBG. uniquely
+						identifies a registered user in SBG.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="creditContextType">
+				<simpleType>
+					<restriction base="tns:CreditContextTypeEnum">
+						<enumeration value="value"></enumeration>
+						<enumeration value="CCT_REMOVE_STUCK_GAME"></enumeration>
+					</restriction>
+				</simpleType>
+			</element>
+			<element name="playForFun" type="boolean">
+				<annotation>
+					<documentation>
+						indicate if the game is played with fun money or
+						real money. true if played with fun money.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="pay" type="tns:PayType" maxOccurs="1" minOccurs="0"></element>
+			<element name="creditContext" type="tns:CreditContextType"></element>
+		</sequence>
+	</complexType>
+
+
+	<complexType name="CreditContextType">
+		<choice>
+			<element name="stuckGame" type="tns:StuckGameCreditContextType">
+			</element>
+		</choice>
+	</complexType>
+
+	<complexType name="StuckGameCreditContextType">
+		<sequence>
+			<element name="gameSessionId" type="unsignedLong">
+				<annotation>
+					<documentation>uniquely identifies the game session. defined by	aux.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="handId" type="unsignedLong" maxOccurs="1" minOccurs="0">
+				<annotation>
+					<documentation>uniquely identifies for hand. defined by	aux.
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="OutOfHandCreditRespType">
+		<sequence>
+			<element name="status" type="tns:ResponseStatusType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="PingReqType">
+		<sequence>
+			<element name="header" type="tns:RequestHeaderType"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="PingRespType">
+		<sequence>
+			<element name="status" type="tns:ResponseStatusType"></element>
+		</sequence>
+	</complexType>
+
+
+	<element name="AuthenticateUserReq"
+		type="tns:AuthenticateUserReqType">
+		<annotation>
+			<documentation>
+				authenticate a player with player credential and a
+				token provided by SBG.
+			</documentation>
+		</annotation>
+	</element>
+
+	<element name="AuthenticateUserResp"
+		type="tns:AuthenticateUserRespType">
+		<annotation>
+			<documentation>response of AuthenticateUserReq.</documentation>
+		</annotation>
+	</element>
+
+	<element name="StartGameReq" type="tns:StartGameReqType">
+		<annotation>
+			<documentation>
+				request permission to start playing on a game table.
+			</documentation>
+		</annotation>
+	</element>
+
+	<element name="StartGameResp" type="tns:StartGameRespType">
+		<annotation>
+			<documentation>response of StartGameReq.</documentation>
+		</annotation>
+	</element>
+
+	<element name="EndGameReq" type="tns:EndGameReqType">
+		<annotation>
+			<documentation>
+				notify SBG that player left the game and game session
+				has been closed. preconditions: game session is open and all hand
+				results of the game session is transmitted.
+			</documentation>
+		</annotation>
+	</element>
+
+	<element name="EndGameResp" type="tns:EndGameRespType">
+		<annotation>
+			<documentation>response of EndGameReq.</documentation>
+		</annotation>
+	</element>
+
+	<element name="BetReq" type="tns:BetReqType">
+		<annotation>
+			<documentation>
+				request funds for a player's action in game.
+				preconditions: game session is open and player is still logged-in.
+			</documentation>
+		</annotation>
+	</element>
+
+	<element name="BetResp" type="tns:BetRespType">
+		<annotation>
+			<documentation>response of BetReq.</documentation>
+		</annotation>
+	</element>
+
+	<element name="HandResultReq" type="tns:HandResultReqType">
+		<annotation>
+			<documentation>
+				report a winning or/and end of a hand. preconditions:
+				game session is open.
+			</documentation>
+		</annotation>
+	</element>
+
+	<element name="HandResultResp" type="tns:HandResultRespType">
+		<annotation>
+			<documentation>response of HandResultReq.</documentation>
+		</annotation>
+	</element>
+
+	<element name="GetBalanceReq" type="tns:GetBalanceReqType">
+		<annotation>
+			<documentation>get player's account balance.</documentation>
+		</annotation>
+	</element>
+
+	<element name="GetBalanceResp" type="tns:GetBalanceRespType">
+		<annotation>
+			<documentation>response of GetBalanceReq.</documentation>
+		</annotation>
+	</element>
+
+	<element name="OutOfHandCreditReq"
+		type="tns:OutOfHandCreditReqType">
+		<annotation>
+			<documentation>request to credit player in various scenarios.
+			</documentation>
+		</annotation>
+	</element>
+
+	<element name="OutOfHandCreditResp"
+		type="tns:OutOfHandCreditRespType">
+		<annotation>
+			<documentation>response of OutOfHandCreditReq.</documentation>
+		</annotation>
+	</element>
+
+	<element name="PingReq" type="tns:PingReqType">
+		<annotation>
+			<documentation>send a hearth beat for health checking purpose. hearth
+				beat is sent when the idle timer expires.
+			</documentation>
+		</annotation>
+	</element>
+
+	<element name="PingResp" type="tns:PingRespType">
+		<annotation>
+			<documentation>response of PingReq</documentation>
+		</annotation>
+
+	</element>
+
+
+	<simpleType name="CreditContextTypeEnum">
+		<restriction base="string"></restriction>
+	</simpleType>
+</schema>

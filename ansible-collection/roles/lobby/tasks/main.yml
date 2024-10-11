@@ -1,0 +1,33 @@
+---
+- name: Include lobby.yml
+  ansible.builtin.include_tasks: lobby.yml
+  tags:
+    - lobby
+  args:
+    apply:
+      tags:
+        - lobby
+
+- name: Include reef.yml
+  ansible.builtin.include_tasks: reef.yml
+  tags:
+    - reef
+  args:
+    apply:
+      tags:
+        - reef
+
+- name: Configure Log Aggregation
+  ansible.windows.win_template:
+    src: promtail.yaml.j2
+    dest: "C:\\ProgramData\\Promtail\\promtail.yaml"
+  notify:
+    - Restart promtail
+
+- name: Configure net_response metrics
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify: Restart Telegraf
+
+...

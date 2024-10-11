@@ -1,0 +1,26 @@
+# This variable is used to figure out if config is loaded or not.
+TOMCAT_CFG_LOADED="1"
+
+# Java options
+JAVA_HOME="/software/jdk-17.0.6+10"
+JAVA_OPTS="$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m  \
+ -DlistenPort=8130 -DserverPort=9055"
+
+# Catalina options
+CATALINA_BASE="/bigdisk0/apache-tomcat"
+CATALINA_HOME="/bigdisk0/apache-tomcat"
+CATALINA_OPTS="-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+CATALINA_PID="/var/run/apache-tomcat/tomcat.pid"
+CATALINA_TMPDIR="/bigdisk0/apache-tomcat/temp"
+
+# You can change your tomcat locale here
+LANG="en_US"
+
+# Run tomcat under the Java Security Manager
+SECURITY_MANAGER="false"
+
+# If you wish to further customize your tomcat environment,
+# put your own definitions here
+# (i.e. LD_LIBRARY_PATH for some jdbc drivers)
+GGNDEMOBACKOFFICE_HOME="/bigdisk0/apache-tomcat/conf/ggndemobackoffice"
+TOMCAT_VERSION="/bigdisk0/apache-tomcat-{{ ggndemobackoffice_tomcat_version }}"

@@ -1,0 +1,14 @@
+# we can setup memory ajustments here ... and everything else
+
+
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true -XX:MaxPermSize=1024m -Xss1m -Xms256m -Xmx2048m \
+-DlistenPort=8109 -DserverPort=9130"
+
+export SGDOGSGATEWAY_HOME=/bigdisk0/tomcat/conf/cs-sgd
+export CASINOSERVICESTEST_HOME=/bigdisk0/tomcat/conf/cs-common-test
+export VENDORSERVICEGATEWAY_HOME=/bigdisk0/tomcat/conf/cs-vendorservice-sgd
+export VENDOR=SGD
+export VENDOR_ID=30
+
+export TOMCAT_VERSION=/software/tomcat8
+export JAVA_HOME=/software/jre11

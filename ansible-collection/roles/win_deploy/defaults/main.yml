@@ -1,0 +1,9 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+win_deploy_bins: []
+win_deploy_services: []
+win_deploy_id: "versions"

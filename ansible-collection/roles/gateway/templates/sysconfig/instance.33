@@ -1,0 +1,12 @@
+# we can setup memory ajustments here ... and everything else
+
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true -XX:MaxPermSize=1024m -Xss1m -Xms256m -Xmx2048m \
+                  -DlistenPort=8112 -DserverPort=9133"
+
+export CASINOSERVICES_HOME=/bigdisk0/tomcat/conf/cs-common
+export CS_JPF_HOME=/bigdisk0/tomcat/conf/cs-jpf-isoftbet
+export VENDOR=ISOFTBET
+export VENDOR_ID=33
+
+export JAVA_HOME=/software/jdk11
+export TOMCAT_VERSION=/software/tomcat8

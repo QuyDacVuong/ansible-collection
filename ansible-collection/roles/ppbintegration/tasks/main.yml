@@ -1,0 +1,68 @@
+---
+- name: Install java
+  ansible.builtin.include_role:
+    name: casino.server.java
+  vars:
+    java_package: OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz
+    java_version: jdk-17.0.10+7
+
+- name: Install tomcat
+  ansible.builtin.include_role:
+    name: casino.server.tomcat
+  vars:
+    tomcat_instances:
+      - name: ppbintegration
+        version: "{{ ppbintegration_tomcat_version }}"
+        src: "{{ artifactory_baseurl }}/ggn-applications/apache-tomcat/apache-tomcat-{{ ppbintegration_tomcat_version }}.tar.gz"
+        environment_variables:
+          - TOMCAT_CFG_LOADED=1
+          - JAVA_OPTS=$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m
+          - CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC
+          - CATALINA_PID=/var/run/apache-tomcat-ppbintegration/run.pid
+          - SECURITY_MANAGER=false
+          - INSTANCE=pyr_tomcat_ppbbackofficegateway
+          - INSTANCE_NAME=pyr_tomcat_ppbbackofficegateway
+          - UMASK=0022
+          - LOGGING_MANAGER=-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+          - PPBBACKOFFICEGATEWAY_HOME=/bigdisk0/tomcat/ppbintegration/conf/ppbintegration
+        wars:
+          - url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/ppbbackofficegateway/ppbbackofficegateway-{{ ppbbackofficegateway_version }}.war"
+            name: ppbbackofficegateway
+        config_files:
+          - src: templates/config/log4j2.xml
+            dest: ppbintegration/config
+          - src: ppbbackofficegateway.ini
+            dest: ppbintegration/config
+
+- name: Copy keys
+  ansible.builtin.copy:
+    content: "{{ item.name }}"
+    dest: "/bigdisk0/tomcat/ppbintegration/conf/ppbintegration/config/{{ item.file_name }}"
+    owner: tomcat
+    group: tomcat
+    mode: "0644"
+  loop:
+    - {name: '{{ ppb_ggn_pfx }}', file_name: 'ggn.pfx'}
+    - {name: '{{ ppb_truststore }}', file_name: 'truststore.jks'}
+  notify:
+    - Restart tomcat
+
+- name: Configure Log ingestion
+  ansible.builtin.template:
+    src: promtail.yaml.j2
+    dest: /etc/promtail/promtail.yaml
+    owner: promtail
+    group: promtail
+    mode: "0644"
+  notify:
+    - Restart promtail
+
+- name: Monitor connectivity
+  ansible.builtin.template:
+    src: net_response.conf.j2
+    dest: /etc/telegraf/telegraf.d/net_response.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+  notify:
+    - Restart telegraf

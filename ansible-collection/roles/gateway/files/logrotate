@@ -1,0 +1,9 @@
+/bigdisk0/tomcat/rgs/logs/catalina.out {
+   copytruncate
+   daily
+   rotate 7
+   compress
+   missingok
+   dateext
+   dateformat .%Y-%m-%d.out
+}

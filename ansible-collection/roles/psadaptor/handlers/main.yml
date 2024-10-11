@@ -1,0 +1,27 @@
+---
+- name: Restart promtail
+  ansible.windows.win_service:
+    name: Promtail
+    state: restarted
+- name: Restart telegraf
+  ansible.windows.win_service:
+    name: telegraf
+    state: restarted
+- name: Restart adaptor
+  ansible.windows.win_service:
+    name: PYR_C_ADAPTOR
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+- name: Restart hesender
+  ansible.windows.win_service:
+    name: PYR_HESENDER
+    state: restarted
+- name: Restart memsender
+  ansible.windows.win_service:
+    name: PYR_MEMSENDER
+    state: restarted
+- name: Restart demobackoffice
+  ansible.windows.win_service:
+    name: PYR_C_DEMOBACKOFFICEPS
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"

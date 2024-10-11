@@ -1,0 +1,40 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+datafeedgateway_binaries:
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/TAG/2205C/pyr/
+    dest_path: D:\apps\c_auxukgw\
+  - binary: auxdataservices.exe
+    url_path: build-results/casinoserver/TAG/MainDev/auxdataservices/
+    dest_path: D:\apps\bin\c_auxukgw\
+  - binary: libcrypto-1_1.dll
+    url_path: build-results/casinoserver/master/current_202105281126-032872de68ef/auxdataservices/resources/externaldll/
+    dest_path: D:\apps\bin\c_auxukgw\
+  - binary: libssl-1_1.dll
+    url_path: build-results/casinoserver/master/current_202105281126-032872de68ef/auxdataservices/resources/externaldll/
+    dest_path: D:\apps\bin\c_auxukgw\
+  - binary: lz4.dll
+    url_path: build-results/casinoserver/master/current_202105281126-032872de68ef/auxdataservices/resources/externaldll/
+    dest_path: D:\apps\bin\c_auxukgw\
+  - binary: rdkafka.dll
+    url_path: build-results/casinoserver/master/current_202105281126-032872de68ef/auxdataservices/resources/externaldll/
+    dest_path: D:\apps\bin\c_auxukgw\
+  - binary: zlib.dll
+    url_path: build-results/casinoserver/master/current_202105281126-032872de68ef/auxdataservices/resources/externaldll/
+    dest_path: D:\apps\bin\c_auxukgw\
+  - binary: zstd.dll
+    url_path: build-results/casinoserver/master/current_202105281126-032872de68ef/auxdataservices/resources/externaldll/
+    dest_path: D:\apps\bin\c_auxukgw\
+
+certificate_domain: "datafeedgateway-{{ env }}.csr.pstars-eu-west-1-intermediate"
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+
+datfeedgateway_kafka: ""
+
+service_start_mode: "auto"
+service_state: "started"

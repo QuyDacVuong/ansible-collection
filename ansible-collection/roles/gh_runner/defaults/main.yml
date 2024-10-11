@@ -1,0 +1,12 @@
+---
+repo_name: FlutterInt/fips-fst-ansible
+runner_token: abc123
+labels: TEST
+artifactory_baseurl: https://artifactory.pyrsoftware.ca/artifactory
+telegraf_version: 1.27.2-1
+artifactory_username: anonymous
+artifactory_password: password
+number_of_runner: 1
+squad: ""
+external_urls: []
+zone: "zoneS"

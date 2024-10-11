@@ -1,0 +1,117 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+service_start_mode: "auto"
+service_state: "started"
+
+concentrator_binaries:
+  - binary: pyr64.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\c_concentrator{{ concentrator_instance }}\
+  - binary: pyrssl64.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\c_concentrator{{ concentrator_instance }}\
+concentrator_instance: ""
+
+certificate_domain: "concentrator-{{ env }}.csr.pstars-eu-west-1-intermediate"
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+
+
+concentrator_comm_alias: |
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:7350
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:7448
+
+
+concentrator_comm_extra_rules: |
+  {% for host in (groups['role_ggn_gdk'] | sort) %}
+  rule = ip:{{ hostvars[host]['private_ip_address'] }}:2348 pyrtcp0://{{ hostvars[host]['private_ip_address'] }}:2350
+  {% endfor %}
+  {% for host in (groups['role_ggn_non_gdk'] | sort) %}
+  rule = ip:{{ hostvars[host]['private_ip_address'] }}:2348 pyrtcp0://{{ hostvars[host]['private_ip_address'] }}:2350
+  {% endfor %}
+  {% for host in (groups['role_ggn_gdk'] | sort) %}
+  rule={{ host | to_factory}} pyrtcp0://{{ hostvars[host]['private_ip_address'] }}:2348
+  {% endfor %}
+  {% for host in (groups['role_ggn_non_gdk'] | sort) %}
+  rule={{ host | to_factory}} pyrtcp0://{{ hostvars[host]['private_ip_address'] }}:2348
+  {% endfor %}
+  rule=ip:{{ hostvars[groups.role_ggn_lobby.0]['private_ip_address'] }}:2348 pyrtcp0://{{ hostvars[groups.role_ggn_lobby.0]['private_ip_address'] }}:2350
+  rule=ip:c_resolver:port pyrtcp0://{{ hostvars[groups.role_ggn_lobby.0]['private_ip_address'] }}:4348
+  rule=ip:*:* pyrtcp0://{{ hostvars[groups.role_ggn_lobby.0]['private_ip_address'] }}:2350
+
+concentrator_comm_extra_options: |
+  performance=1
+  performancetimer=10000
+
+concentrator_managers: |
+  manager=tcp
+  manager=tcpd
+  manager=udt
+
+concentrator_tcpmux: []
+
+concentrator_smemmux: []
+
+concentrator_sslmp_extra_options: []
+
+concentrator_tcp: |
+  type=tcp
+  port=7348
+  option.logfile=d:\apps\logs\c_concentrator\protolocal.log
+  option.protocol=5
+  option.largeframesize=1000000
+  option.intcpbuffer=1000000
+  option.compressbits=0
+  option.maxconnectionsperthread=2
+  option.keepalive=30000/180000
+  option.islocal=1
+  gatherstatistic=2
+
+concentrator_tcpd: |
+  type=tcp
+  port=7350
+  option.logfile=d:\apps\c_concentrator\protolocald.log
+  ;option.compressbits=0
+  option.largeframesize=1000000
+  option.optimizepacket=1
+  option.maxconnectionsperthread=1
+  option.keepalive=30000/180000
+  option.islocal=1
+  gatherstatistic=2
+  option.outtcpbuffer=1512000
+  option.intcpbuffer=1512000
+
+concentrator_udt: |
+  type=udt
+  port=7448
+  option.keepalive=5000/30000
+  option.logfile=d:\apps\c_concentrator\protolocalu.log
+  option.islocal=1
+  option.protocol=5
+  option.largeframesize=1000000
+  option.framesize=4096
+  option.optimizepacket=1
+  ;option.compressbits=0
+  option.networkstatslogthreshold=1000
+  gatherstatistic=2
+
+concentrator_restrictconnections: |
+  test=1
+  debug=5
+  ip:*:*/AuxLobbyServerInstance/CLI.auxlobby=pyrssl0:/*;routeallow
+  ip:*:*/AuxLobbyServerInstance/auxlobby=pyrssl0:/*;forward ip:$0:$1/AuxLobbyServerInstance/CLI.auxlobby
+  ip:*:*/AuxLobbyServerInstance/CPA.*=pyrtcp0:/*;forward ip:$0:$1/AuxLobbyServerInstance/CLI.$0
+  ip:*:*/AuxLobbyEtcServerInstance/CPA.*=pyrtcp0:/*;forward ip:$0:$1/AuxLobbyEtcServerInstance/CLI.$0
+  ip:*:*/auxtable.*/CLI.client=pyrssl0:/*;routeallow
+  ip:*:*/auxtable.*/client=pyrssl0:/*;forward ip:$0:$1/auxtable.$0/CLI.client
+  ip:*:*/auxtable.*/CLI.client_cipwa=pyrtcp0:/*;routeallow
+  ip:*:*/auxtable.*/CPA.*=pyrtcp0:/*;forward ip:$0:$1/auxtable.$0/CLI.$0
+  *=pyrssl0:/*;routedeny last
+
+concentrator_restrictsubscription: |
+  ip:*:*/Ip2CountryServerInstance/*=*;forward ip:c_resolver:port/Ip2CountryServerInstance/$0

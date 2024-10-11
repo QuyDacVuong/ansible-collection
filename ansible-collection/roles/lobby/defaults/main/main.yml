@@ -1,0 +1,147 @@
+---
+lobby_binaries:
+  - binary: auxadmin.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxadmin/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxhhserver.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxhhserver/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxids.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxids/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxintegrationserver.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxintegrationserver/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxisadaptorppb.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxisadaptorppb/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxisadaptorsbg.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxisadaptorsbg/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxisassistant.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxisassistant/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxlobby.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxlobby/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxrgsmessagerouter.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxrgsmessagerouter/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxshadowlobby.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxshadowlobby/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxtablemonitorserver.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxtablemonitorserver/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: auxtrigger.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxtrigger/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: pyrmultiproxysmem.exe
+    url_path: build-results/coreserver/{{ coresever_bin_branch }}/multiproxy/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: pyrentropyroutersmem.exe
+    url_path: build-results/coreserver/{{ coresever_bin_branch }}/entropyrouter/
+    dest_path: D:\apps\bin\c_lobby
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/{{ coresever_bin_branch }}/disp64/
+    dest_path: D:\apps\c_lobby
+
+lobby_reef_binaries:
+  - binary: auxreef.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxreef/
+    dest_path: D:\apps\bin\c_reef_lobby
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/{{ coresever_bin_branch }}/disp64/
+    dest_path: D:\apps\c_reef_lobby
+
+lobby_configs:
+  - src: configs/c_lobby/auxadaptor_ppb.ini
+    dest: D:\apps\configs\c_lobby\auxadaptor_ppb.ini
+  - src: configs/c_lobby/auxadaptor_sbg.ini
+    dest: D:\apps\configs\c_lobby\auxadaptor_sbg.ini
+  - src: configs/c_lobby/auxadmin.ini
+    dest: D:\apps\configs\c_lobby\auxadmin.ini
+  - src: configs/c_lobby/auxhhserver.ini
+    dest: D:\apps\configs\c_lobby\auxhhserver.ini
+  - src: configs/c_lobby/auxlobby.ini
+    dest: D:\apps\configs\c_lobby\auxlobby.ini
+  - src: configs/c_lobby/AuxShadow.ini
+    dest: D:\apps\configs\c_lobby\AuxShadow.ini
+  - src: configs/c_lobby/auxtrigger.ini
+    dest: D:\apps\configs\c_lobby\auxtrigger.ini
+  - src: configs/c_lobby/dispatcher.ini
+    dest: D:\apps\configs\c_lobby\dispatcher.ini
+  - src: configs/c_lobby/IntegrationServer.ini
+    dest: D:\apps\configs\c_lobby\IntegrationServer.ini
+  - src: configs/c_lobby/isassistant.ini
+    dest: D:\apps\configs\c_lobby\isassistant.ini
+  - src: configs/c_lobby/RgsMessageRouter.ini
+    dest: D:\apps\configs\c_lobby\RgsMessageRouter.ini
+  - src: configs/c_lobby/TableMonitorServer.ini
+    dest: D:\apps\configs\c_lobby\TableMonitorServer.ini
+  - src: configs/c_lobby/entropy/multiproxy.ini
+    dest: D:\apps\configs\c_lobby\entropy\multiproxy.ini
+  - src: configs/c_lobby/entropy/EntropyRouter.ini
+    dest: D:\apps\configs\c_lobby\entropy\EntropyRouter.ini
+  - src: configs/c_lobby/login/IntegrationServer.ini
+    dest: D:\apps\configs\c_lobby\login\IntegrationServer.ini
+  - src: apps/monitor_client/Hercules.ini
+    dest: D:\apps\monitor_client\Hercules.ini
+  - src: apps/monitor_client/MemSender.ini
+    dest: D:\apps\monitor_client\MemSender.ini
+  - src: apps/c_lobby/dispatcher.ini
+    dest: D:\apps\c_lobby\dispatcher.ini
+
+lobby_reef_configs:
+  - src: configs/c_reef_lobby/dispatcher.ini
+    dest: D:\apps\configs\c_reef_lobby\dispatcher.ini
+  - src: configs/c_reef_lobby/backup0/auxreef.ini
+    dest: D:\apps\configs\c_reef_lobby\backup0\auxreef.ini
+  - src: configs/c_reef_lobby/master/auxreef.ini
+    dest: D:\apps\configs\c_reef_lobby\master\auxreef.ini
+  - src: apps/c_reef_lobby/dispatcher.ini
+    dest: D:\apps\c_reef_lobby\dispatcher.ini
+
+lobby_folders:
+  - D:\apps\bin\c_lobby
+  - D:\apps\c_lobby
+  - D:\apps\configs\c_lobby
+  - D:\apps\configs\c_lobby\entropy
+  - D:\apps\configs\c_lobby\login
+  - D:\apps\configs\hh_locale
+  - D:\apps\logs\c_lobby
+
+hercules_host: "{{ hostvars[groups.role_ggn_hercules.0]['private_ip_address'] }}"
+lobby_host: "{{ hostvars[groups.role_ggn_lobby.0]['private_ip_address'] }}"
+oltp_host: "{{ hostvars[groups.role_ggn_oltp.0]['private_ip_address'] }}"
+sharedzone_olap: 127.0.46.27
+sharedzone_crm: 127.0.20.3
+C_ZNS_LOBBY: ip:127.0.46.73:2348
+lobby_entropy_binary: pyrmultiproxysmem.exe
+lobby_playtech_live_vendor_name: "skbv-uk:example.uk"
+lobby_ca_disp_crt: "undefined"
+lobby_server_disp_crt: "undefined"
+lobby_server_disp_key: "undefined"
+lobby_server_disp_pass: "undefined"
+lobby_auxlobby_dynamicsettings_multitabletypes: "PM"
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+
+# Used for indexing Entropy servers, assumes there will never be more than five Entropy servers
+ordinal_numbers:
+  - first
+  - second
+  - third
+  - fourth
+  - fifth
+resolver_remote_host: 10.30.20.135
+
+table_servers: "{{ (groups[gdk_role] + groups[non_gdk_role]) | sort | map('to_server_list') }}"
+
+oltp_role: 'role_ggn_oltp'
+entropy_role: role_ggn_entropy
+entropy_host: "{{ hostvars[groups.role_ggn_entropy.0]['private_ip_address'] }}"
+region: eu-west-1
+lobby_auxshadow_staticsettining: ""
+service_start_mode: "auto"
+service_state: "started"

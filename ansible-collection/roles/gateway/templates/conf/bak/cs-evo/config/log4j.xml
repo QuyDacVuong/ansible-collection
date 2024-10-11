@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration>
+	
+    <!-- Appenders -->
+   <appender name="fileappender" class="org.apache.log4j.rolling.RollingFileAppender">
+        <param name="threshold" value="debug" />
+        <rollingPolicy name="file" class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="${catalina.base}/logs/EvGateway.log.%d{yyyyMMdd}" />
+        </rollingPolicy>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %-5p %m%n" />
+        </layout>
+    </appender>
+    <!-- Root Logger -->
+    <root>
+        <priority value="debug" />
+        <appender-ref ref="fileappender" />
+    </root>
+
+</log4j:configuration>

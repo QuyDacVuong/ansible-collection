@@ -1,0 +1,147 @@
+---
+- name: Create base folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps\bin
+    - D:\apps\certificates
+    - D:\apps\configs
+    - D:\apps\credentials
+    - D:\apps\logs
+
+# This block should be split from the role and included in DBM roles
+- name: DB2 Client setup
+  block:
+    - name: Query Installed Programs
+      ansible.windows.win_reg_stat:
+        path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{E27D4C1E-2DC8-4E6E-BD9F-C4EF5E86F07D}
+        name: DisplayVersion
+      register: installed_programs_versions
+      ignore_errors: true  # Ignore errors if the registry path does not exist
+
+    - name: Verify Db2 Client Installation
+      ansible.builtin.set_fact:
+        db2_client_installed: "{{ installed_programs_versions.value | default('0') }}"  ## This can be found in DB2_client_11.5.8.32821_ntx64\db2\spec under vara: vrmf=11.5.8000.7748
+
+    - name: Download DB2 client installer
+      ansible.windows.win_get_url:
+        url: "{{ artifactory_baseurl }}/ggn-applications/db2/{{ db2_client_package }}.zip"
+        dest: D:\{{ db2_client_package }}.zip
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        force_basic_auth: "{{ get_url_force_basic_auth }}"
+      when: db2_client_installed != db2_client_version
+
+    # Using powershell expand archive because of a bug in win_unzip module with tilde "~". Link to the issue: https://github.com/ansible-collections/community.windows/issues/76
+    - name: Extract DB2 client installer
+      ansible.windows.win_powershell:
+        script: |
+          Expand-Archive -LiteralPath D:\{{ db2_client_package }}.zip -DestinationPath D:\Software\ -Force
+        creates: D:\Software\{{ db2_client_package }}
+
+    - name: Install DB2 client
+      ansible.windows.win_powershell:
+        script: |
+          net localgroup db2admns %USERDOMAIN%\%USERNAME% /ADD
+          net localgroup db2users %USERDOMAIN%\%USERNAME% /ADD
+          D:\Software\{{ db2_client_package }}\setup.exe -u D:\Software\{{ db2_client_package }}\11.5.8_CLIENT.rsp -l D:\Software\{{ db2_client_package }}\new-install-db2-11-5.log
+      when: db2_client_installed != db2_client_version
+
+    - name: Copy db2dsdriver into relevant place - templated
+      ansible.windows.win_template:
+        src: db2dsdriver.cfg.j2
+        dest: C:\ProgramData\IBM\DB2\DB2COPY1\cfg\db2dsdriver.cfg
+      notify: Restart DB2 service
+
+- name: Generate cert
+  ansible.builtin.include_role:
+    name: casino.server.generate_certs
+  vars:
+    certificate_domain: "disp-{{ env }}.csr.pstars-{{ region }}-intermediate"
+- name: Generate encryption key
+  ansible.builtin.set_fact:
+    key_passphrase: "{{ lookup('ansible.builtin.password', '/dev/null', length=15, chars=['ascii_letters', 'digits'], seed=inventory_hostname) }}"
+  no_log: true
+- name: Download Signed certs from ACM
+  ansible.windows.win_command:
+    argv:
+      - C:\Program Files\Amazon\AWSCLIV2\aws.exe
+      - acm
+      - export-certificate
+      - --certificate-arn
+      - "{{ certificate_arn }}"
+      - --passphrase
+      - "{{ key_passphrase | b64encode }}"
+  register: acm_certs
+  no_log: true
+  when: not ansible_check_mode
+
+- name: Certificate config
+  ansible.windows.win_copy:
+    content: |
+      servercert=d:\apps\certificates\server_disp.pyr.crt
+      serverkey=d:\apps\certificates\server_disp.pyr.key
+      serverkeypassword={{ key_passphrase }}
+    dest: D:\apps\certificates\cert.ini
+  notify:
+    - Restart cdldbm
+    - Restart wmtcdldbm
+- name: CA certificate
+  ansible.windows.win_copy:
+    remote_src: true
+    src: "C:\\software\\pki-csr-pstars-{{ region }}-intermediate.pem"
+    dest: D:\apps\certificates\ca_disp.crt
+  notify:
+    - Restart cdldbm
+    - Restart wmtcdldbm
+- name: Server certificate
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).Certificate }}{{ (acm_certs.stdout | from_json).CertificateChain }}"
+    dest: D:\apps\certificates\server_disp.pyr.crt
+  notify:
+    - Restart cdldbm
+    - Restart wmtcdldbm
+- name: Server key
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).PrivateKey }}"
+    dest: D:\apps\certificates\server_disp.pyr.key
+  notify:
+    - Restart cdldbm
+    - Restart wmtcdldbm
+
+- name: Configure cdldbm
+  ansible.builtin.include_tasks:
+    file: cdldbm.yml
+    apply:
+      tags:
+        - cdldbm
+
+- name: Configure wmtcdldbm
+  ansible.builtin.include_tasks:
+    file: wmtcdldbm.yml
+    apply:
+      tags:
+        - wmtcdldbm
+
+- name: Configure telegraf
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify:
+    - Restart telegraf
+- name: Configure Log Aggregation
+  ansible.windows.win_template:
+    src: promtail.yaml.j2
+    dest: "C:\\ProgramData\\Promtail\\promtail.yaml"
+  notify:
+    - Restart promtail
+- name: Configure monitor
+  ansible.windows.win_template:
+    src: "{{ item }}"
+    dest: "D:\\apps\\monitor_client\\{{ item | basename }}"
+  with_fileglob:
+    - templates/monitor_client/*.ini
+  notify:
+    - Restart hesender
+    - Restart memsender

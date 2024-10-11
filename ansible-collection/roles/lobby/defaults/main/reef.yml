@@ -1,0 +1,60 @@
+---
+# templates/configs/c_reef_lobby/dispatcher.ini
+reef_dispatcher_comm: |
+  name=AppFactory
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:3348
+  alias=ip:*:3350
+  rule=ip:127.0.0.1:5447 pyrtcp0://127.0.0.1:5447
+  rule=ip:*:* pyrtcp0://$0:$1
+
+reef_dispatcher_tcpmux: |
+  port=3350
+  ;gatherstatistic=1
+
+reef_dispatcher_tcp: |
+  port=3348
+  option.islocal=1
+  ;option.protocol=3
+  option.compressbits=0
+  option.logfile=d:\apps\logs\c_reef_lobby\protolocal.log
+  option.keepalive=0/0
+  gatherstatistic=1
+
+reef_dispatcher_smem: |
+  port=3348
+  ;gatherstatistic=1
+
+reef_dispatcher_smemmux: |
+  port=3350
+  ;gatherstatistic=1
+
+reef_dispatcher_exe: |
+  reef=d:\apps\bin\c_reef_lobby\auxreef.exe;d:\apps\logs\c_reef_lobby;0/0;R240
+
+reef_dispatcher_start: |
+  reef=AuxReefMasterInstance;s=d:\\apps\\configs\\c_reef_lobby\\master\\
+  reef=AuxReefBackupInstance0;s=d:\\apps\\configs\\c_reef_lobby\\backup0\\
+
+# templates/configs/c_reef_lobby/backup0/auxreef.ini
+reef_backup0_staticsettings: |
+  myId=AuxReefBackupInstance0
+  ReefRole=backup
+  regularQueueSizeInMegaByte=200
+  compactableQueueSizeInMegaByte=200
+
+reef_backup0_dynamicconnect: |
+  reefServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:3348
+  reefServerInstance=AuxReefMasterInstance
+
+# templates/configs/c_reef_lobby/master/auxreef.ini
+reef_master_staticsettings: |
+  myId=AuxReefMaster
+  ReefRole=master
+  regularQueueSizeInMegaByte=200
+  compactableQueueSizeInMegaByte=200
+
+  ReefBackups=REEFBACKUP_0
+
+reef_master_reefbackup_0: |
+  reefServerAddress=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:3348
+  reefServerInstance=AuxReefBackupInstance0

@@ -1,0 +1,48 @@
+---
+#
+# Tasks to be applied to all servers
+#
+
+- name: Base Linux setup
+  ansible.builtin.include_tasks: base-linux.yml
+  when: ansible_system == 'Linux'
+  tags:
+    - common
+    - base
+  args:
+    apply:
+      tags:
+        - common
+        - base
+
+- name: Base Windows setup
+  ansible.builtin.include_tasks: base-windows.yml
+  when: ansible_facts['os_family']=="Windows"
+  tags:
+    - common
+    - base
+  args:
+    apply:
+      tags:
+        - common
+        - base
+
+- name: Linux configuration
+  ansible.builtin.include_tasks: linux.yml
+  when: ansible_system == 'Linux'
+  tags:
+    - common
+  args:
+    apply:
+      tags:
+        - common
+
+- name: Windows configuration
+  ansible.builtin.include_tasks: windows.yml
+  when: ansible_facts['os_family']=="Windows"
+  tags:
+    - common
+  args:
+    apply:
+      tags:
+        - common

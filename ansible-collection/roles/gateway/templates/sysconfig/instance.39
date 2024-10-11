@@ -1,0 +1,9 @@
+export JAVA_OPTS="-XX:MaxPermSize=1024m -Xss1m -Xms256m -Xmx2048m \
+-DlistenPort=8118 -DserverPort=9139"
+
+export CASINOSERVICES_HOME=/bigdisk0/tomcat/conf/cs-common
+export CS_JPF_HOME=/bigdisk0/tomcat/conf/cs-jpf-rubyplay
+export VENDOR=RUBYPLAY
+export VENDOR_ID=39
+export TOMCAT_VERSION=/software/tomcat8
+export JAVA_HOME=/software/jre11

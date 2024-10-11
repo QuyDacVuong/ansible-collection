@@ -1,0 +1,196 @@
+---
+- name: Zone1 folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps
+    - D:\apps\bin
+    - D:\apps\bin\c_oltp
+    - D:\apps\bin\c_reef_oltp
+    - D:\apps\bin\c_tobrelay
+    - D:\apps\c_oltp
+    - D:\apps\c_reef_oltp
+    - D:\apps\c_tobrelay
+    - D:\apps\configs\c_oltp
+    - D:\apps\configs\c_reef_oltp
+    - D:\apps\configs\c_tobrelay
+    - D:\apps\logs\c_oltp
+    - D:\apps\logs\c_reef_oltp
+    - D:\apps\logs\c_tobrelay
+    - D:\apps\olapSaverFiles
+    - D:\apps\configs\c_reef_oltp\replica0
+    - D:\apps\configs\c_reef_oltp\backup1
+    - D:\apps\configs\c_oltp\ROdbm
+    - D:\apps\configs\c_oltp\emaildbd
+    - D:\apps\configs\c_oltp\auxadmindbd
+    - D:\apps\configs\c_oltp\IsDbmProxy
+    - D:\apps\configs\c_oltp\logindbd
+    - D:\apps\configs\c_oltp\jackpotreportdbd
+    - D:\apps\configs\c_oltp\jackpotdbd
+    - D:\apps\configs\c_oltp\ROlogin
+    - D:\apps\configs\c_oltp\hhicetabledbm
+    - D:\apps\configs\c_oltp\automationdbd
+    - D:\apps\configs\c_oltp\login
+    - D:\apps\configs\c_oltp\racedbd
+    - D:\apps\configs\c_oltp\gamedbd
+    - D:\apps\configs\c_tobrelay\loginis
+    - D:\apps\configs\c_tobrelay\loginis\sql
+    - D:\apps\configs\c_tobrelay\hhice
+    - D:\apps\configs\c_tobrelay\hhice\sql
+    - D:\apps\configs\c_tobrelay\main
+    - D:\apps\configs\c_tobrelay\main\sql
+    - D:\apps\configs\c_tobrelay\gameis
+    - D:\apps\configs\c_tobrelay\gameis\sql
+    - C:\ProgramData\IBM\DB2\DB2COPY1\cfg\
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ oltp_binaries }}"
+    win_deploy_services:
+      - PYR_C_OLTP
+      - PYR_C_REEF_OLTP
+      - PYR_C_TOBRELAY
+
+- name: Create Zone1 tobrelay instance directories
+  ansible.windows.win_file:
+    path: D:\apps\configs\c_tobrelay\gameis\gameis{{ item }}
+    state: directory
+  with_sequence: start=0 end={{ oltp_gameis_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Copy pyr64.exe everywhere
+  ansible.windows.win_copy:
+    src: D:\apps\bin\c_oltp\pyr64.exe
+    dest: "{{ item }}"
+    remote_src: true
+    force: true  # only performs a copy if the two files are different
+  loop:
+    - D:\apps\c_oltp\pyr64.exe
+    - D:\apps\c_reef_oltp\pyr164.exe
+    - D:\apps\c_tobrelay\pyr264.exe
+  notify:
+    - Restart OLTP service  # only notifies if the copy actually happened
+    - Restart REEF service  # only notifies if the copy actually happened
+    - Restart TOBRELAY service  # only notifies if the copy actually happened
+
+- name: Create dispatcher.ini links
+  community.windows.win_lineinfile:
+    path: D:\apps\{{ item.path }}\dispatcher.ini
+    line: "{{ item.content }}"
+    create: true
+  loop:
+    - path: c_oltp
+      content: "@d:/apps/configs/c_oltp/dispatcher.ini"
+    - path: c_reef_oltp
+      content: "@d:/apps/configs/c_reef_oltp/dispatcher.ini"
+    - path: c_tobrelay
+      content: "@d:/apps/configs/c_tobrelay/dispatcher.ini"
+  notify:
+    - Restart OLTP service  # only notifies if the copy actually happened
+    - Restart REEF service  # only notifies if the copy actually happened
+    - Restart TOBRELAY service  # only notifies if the copy actually happened
+
+- name: Zone1 config files
+  ansible.windows.win_template:
+    src: "apps/configs/zone1/{{ item.src }}"
+    dest: "D:\\apps\\configs\\{{ item.dest }}"
+  loop:
+    - src: c_reef_oltp/replica0/auxreef.ini
+      dest: c_reef_oltp\replica0\auxreef.ini
+    - src: c_reef_oltp/dispatcher.ini
+      dest: c_reef_oltp\dispatcher.ini
+    - src: c_reef_oltp/backup1/auxreef.ini
+      dest: c_reef_oltp\backup1\auxreef.ini
+    - src: c_oltp/AuxDbm.ini
+      dest: c_oltp\AuxDbm.ini
+    - src: c_oltp/ROdbm/AuxDbm.ini
+      dest: c_oltp\ROdbm\AuxDbm.ini
+    - src: c_oltp/emaildbd/auxdbd.ini
+      dest: c_oltp\emaildbd\auxdbd.ini
+    - src: c_oltp/AuxTableDbm.ini
+      dest: c_oltp\AuxTableDbm.ini
+    - src: c_oltp/auxadmindbd/auxdbd.ini
+      dest: c_oltp\auxadmindbd\auxdbd.ini
+    - src: c_oltp/IsDbmProxy/auxproxyserver.ini
+      dest: c_oltp\IsDbmProxy\auxproxyserver.ini
+    - src: c_oltp/IsDbmProxy/IntegrationDbm.ini
+      dest: c_oltp\IsDbmProxy\IntegrationDbm.ini
+    - src: c_oltp/logindbd/auxdbd.ini
+      dest: c_oltp\logindbd\auxdbd.ini
+    # - src: c_oltp/jackpotreportdbd/auxdbd.ini
+    #   dest: c_oltp\jackpotreportdbd\auxdbd.ini
+    # - src: c_oltp/jackpotdbd/auxdbd.ini
+    #   dest: c_oltp\jackpotdbd\auxdbd.ini
+    - src: c_oltp/dispatcher.ini
+      dest: c_oltp\dispatcher.ini
+    # - src: c_oltp/m2nproxy.ini
+    #   dest: c_oltp\m2nproxy.ini
+    - src: c_oltp/ROlogin/IntegrationDbm.ini
+      dest: c_oltp\ROlogin\IntegrationDbm.ini
+    - src: c_oltp/auxdbd.ini
+      dest: c_oltp\auxdbd.ini
+    - src: c_oltp/sharedOLAPs.ini
+      dest: c_oltp\sharedOLAPs.ini
+    - src: c_oltp/auxiddbm.ini
+      dest: c_oltp\auxiddbm.ini
+    - src: c_oltp/hhicetabledbm/AuxTableDbm.ini
+      dest: c_oltp\hhicetabledbm\AuxTableDbm.ini
+    - src: c_oltp/auxemailserver.ini
+      dest: c_oltp\auxemailserver.ini
+    - src: c_oltp/automationdbd/auxdbd.ini
+      dest: c_oltp\automationdbd\auxdbd.ini
+    - src: c_oltp/login/IntegrationDbm.ini
+      dest: c_oltp\login\IntegrationDbm.ini
+    # - src: c_oltp/racedbd/auxdbd.ini
+    #   dest: c_oltp\racedbd\auxdbd.ini
+    - src: c_oltp/gamedbd/auxdbd.ini
+      dest: c_oltp\gamedbd\auxdbd.ini
+    - src: c_tobrelay/loginis/tobrelay.ini
+      dest: c_tobrelay\loginis\tobrelay.ini
+    - src: c_tobrelay/dispatcher.ini
+      dest: c_tobrelay\dispatcher.ini
+    - src: c_tobrelay/hhice/tobrelay.ini
+      dest: c_tobrelay\hhice\tobrelay.ini
+    - src: c_tobrelay/main/tobrelay.ini
+      dest: c_tobrelay\main\tobrelay.ini
+  notify:
+    - Restart OLTP service  # only notifies if the copy actually happened
+    - Restart REEF service  # only notifies if the copy actually happened
+    - Restart TOBRELAY service  # only notifies if the copy actually happened
+
+
+- name: Zone1 tobrelay ini files
+  ansible.windows.win_template:
+    src: apps/configs/zone1/c_tobrelay/gameis/gameisN/tobrelay.ini
+    dest: D:\apps\configs\c_tobrelay\gameis\gameis{{ item }}\tobrelay.ini
+  with_sequence: start=0 end={{ oltp_gameis_proxy_instances - 1 }} stride=1
+  notify:
+    - Restart TOBRELAY service
+
+- name: Create and start services
+  block:
+    - name: Create services
+      ansible.windows.win_service:
+        name: "PYR_{{ item.name }}"
+        path: D:\apps\{{ item.name }}\{{ item.bin_name }}
+        display_name: "PYR_{{ item.name }}"
+      loop:
+        - {name: 'C_OLTP', bin_name: 'pyr64.exe'}
+        - {name: 'C_TOBRELAY', bin_name: 'pyr264.exe'}
+        - {name: 'C_REEF_OLTP', bin_name: 'pyr164.exe'}
+
+    - name: Start services
+      ansible.windows.win_service:
+        name: "PYR_{{ item }}"
+        start_mode: "{{ service_start_mode }}"
+        state: "{{ service_state }}"
+      loop:
+        - C_OLTP
+        - C_REEF_OLTP
+        - C_TOBRELAY
+      tags:
+        - launch

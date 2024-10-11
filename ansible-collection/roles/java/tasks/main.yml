@@ -1,0 +1,36 @@
+---
+- name: Create Software directory
+  ansible.builtin.file:
+    path: /software
+    state: directory
+    mode: "0755"
+
+- name: Download Java package
+  ansible.builtin.get_url:
+    url: "{{ artifactory_baseurl }}/ggn-applications/openjdk/{{ java_package }}"
+    dest: "/software/{{ java_package }}"
+    mode: "0644"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+
+- name: Unarchive java package
+  ansible.builtin.unarchive:
+    src: "/software/{{ java_package }}"
+    dest: /software
+    remote_src: true
+    creates: /software/{{ java_version }}
+
+- name: Set alternative
+  community.general.alternatives:
+    name: java
+    link: /usr/bin/java
+    path: "/software/{{ java_version }}/bin/java"
+
+- name: Set JAVA_HOME in /etc/environment
+  ansible.builtin.lineinfile:
+    path: /etc/profile.d/java_home.sh
+    regexp: '^export JAVA_HOME='
+    line: 'export JAVA_HOME="/software/{{ java_version }}"'
+    create: true
+    mode: "0644"

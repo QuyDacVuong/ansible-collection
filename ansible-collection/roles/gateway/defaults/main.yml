@@ -1,0 +1,153 @@
+---
+artifactory_baseurl: https://artifactory.pyrsoftware.ca/artifactory
+artifactory_releases_folder: packagesraw
+certificate_domain: gw-{{ env }}.csr.pstars-{{ region }}-intermediate
+gateway_tomcat_version: 8.5.99
+tomcat_non_ssl_connector_port: 8080
+tomcat_directory: /bigdisk0/tomcat
+aams_version: 1.2.5
+cs_version: 1.11.8
+cs_jpf_version: 1.5.3
+cs_servicegw_version: 1.1.3
+egtgateway_version: 1.11.5
+mgsgateway_version: 1.11.8
+playtechlivedealergateway_version: 1.11.7
+pragmaticlivegateway_version: 1.11.7
+sgdogsgateway_version: 1.11.10
+vendorservicegateway_version: 1.11.2
+aams_gateway_host: "ip:127.0.0.1:5348"
+aams_gateway_instance: "AuxAams831GatewayServerInstance"
+hercules_host: "127.0.0.5"
+lobby_host: 127.0.0.40
+C_ZNS_LOBBY: "ip:127.0.0.73:2348"
+C_MONITORMAIN: "ip:{{ hercules_host }}:9322"
+C_RGS: "ip:127.0.0.1:2348"
+C_ITGATEWAY: "ip:127.0.0.1:2348"
+C_LOBBY: "ip:127.0.0.1:2348"
+C_OLTP: "ip:127.0.0.1:2348"
+gateway_log_level: info
+gateway_tomcat_instances:
+  - name: gateway
+    version: "{{ gateway_tomcat_version }}"
+    src: "{{ artifactory_baseurl }}/ggn-applications/apache-tomcat/apache-tomcat-{{ gateway_tomcat_version }}.tar.gz"
+    environment_variables:
+      - TOMCAT_CFG_LOADED=1
+      - JAVA_OPTS=$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m
+      - CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC
+      - CATALINA_PID=/var/run/apache-tomcat-vendor-gateways/run.pid
+      - SECURITY_MANAGER=false
+      - AAMSSMS_HOME={{ tomcat_directory }}/gateway/conf/aamssms
+      - CASINOSERVICES_HOME={{ tomcat_directory }}/gateway/conf/cs-common
+      - CS_JPF_HOME={{ tomcat_directory }}/gateway/conf/cs-jpf
+      - CS_SERVICEGW_HOME={{ tomcat_directory }}/gateway/conf/cs-servicegw
+      - EGTGATEWAY_HOME={{ tomcat_directory }}/gateway/conf/cs-egt
+      - PTLDGATEWAY_HOME={{ tomcat_directory }}/gateway/conf/cs-playtechlive
+      - PRAGMATICLIVEGATEWAY_HOME={{ tomcat_directory }}/gateway/conf/cs-pragmaticlive
+      - SGDOGSGATEWAY_HOME={{ tomcat_directory }}/gateway/conf/cs-sgd
+      - OSSGATEWAY_HOME={{ tomcat_directory }}/gateway/conf/cs-oss
+    config_files:
+      - src: aamssms/AamsSoftwareModulesServer.ini
+        dest: aamssms/config
+      - src: aamssms/log4j2.xml
+        dest: aamssms/config
+
+      - src: cs-common/casinoservices.ini
+        dest: cs-common/config
+      - src: cs-common/log4j2.xml
+        dest: cs-common/config
+
+      - src: cs-jpf/JpfGateway.ini
+        dest: cs-jpf/config
+      - src: cs-jpf/log4j2.xml
+        dest: cs-jpf/config
+
+      - src: cs-egt/egtgateway.ini
+        dest: cs-egt/config
+      - src: cs-egt/log4j2.xml
+        dest: cs-egt/config
+
+      - src: cs-evo/EvGateway.ini
+        dest: cs-evo/config
+      - src: cs-evo/log4j2.xml
+        dest: cs-evo/config
+
+      - src: cs-mgs/mgsgateway.ini
+        dest: cs-mgs/config
+      - src: cs-mgs/log4j2.xml
+        dest: cs-mgs/config
+
+      - src: cs-playtechlive/playtechlivedealergateway.ini
+        dest: cs-playtechlive/config
+      - src: cs-playtechlive/log4j2.xml
+        dest: cs-playtechlive/config
+
+      - src: cs-pragmaticlive/pragmaticlivegateway.ini
+        dest: cs-pragmaticlive/config
+      - src: cs-pragmaticlive/log4j2.xml
+        dest: cs-pragmaticlive/config
+
+      - src: cs-servicegw/ServiceGateway.ini
+        dest: cs-servicegw/config
+      - src: cs-servicegw/log4j2.xml
+        dest: cs-servicegw/config
+
+      - src: cs-sgd/sgdogsgateway.ini
+        dest: cs-sgd/config
+      - src: cs-sgd/log4j2.xml
+        dest: cs-sgd/config
+
+      - src: cs-vendorservice-playtech/vendorservicegateway.ini
+        dest: cs-vendorservice-playtech/config
+      - src: cs-vendorservice-playtech/log4j2.xml
+        dest: cs-vendorservice-playtech/config
+    wars:
+      - name: aams
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/AamsModulesService/AamsModulesService-{{ aams_version }}.war"
+      - name: cs
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/cs/cs-{{ cs_version }}.war"
+      - name: cs-jpf
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/cs/cs-jpf-{{ cs_jpf_version }}.war"
+      - name: cs-servicegw
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/service/service-gw-{{ cs_servicegw_version }}.war"
+      - name: egtgateway
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/egtgateway/egtgateway-{{ egtgateway_version }}.war"
+      - name: mgsgateway
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/mgsgateway/mgsgateway-{{ mgsgateway_version }}.war"
+      - name: playtechlivedealergateway
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/playtechlivedealergateway/playtechlivedealergateway-{{ playtechlivedealergateway_version }}.war"
+      - name: pragmaticlivegateway
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/pragmaticlivegateway/pragmaticlivegateway-{{ pragmaticlivegateway_version }}.war"
+      - name: sgdogsgateway
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/sgdogsgateway/sgdogsgateway-{{ sgdogsgateway_version }}.war"
+      - name: vendorservicegateway
+        url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/vendorservicegateway/vendorservicegateway-{{ vendorservicegateway_version }}.war"
+    healthchecks:
+      - "http://127.0.0.1:8080/cs/version"
+      - "http://127.0.0.1:8080/cs-jpf/version"
+vpc_cidrs:
+  - 127.0.0.1/32
+gateway_vendors:
+  - name: Playngo
+    aams:
+      username: playngo
+      password: REDACTED
+    app: cs
+    cidrs:
+      - 127.0.0.1/32
+    id: 12
+    seckeys: REDACTED
+    shortname: png
+    servicegw:
+      url: http://172.29.32.73:15000/pokerstars/finalizegame
+  - name: Skywind
+    aams:
+      username: skywind
+      password: REDACTED
+    app: cs
+    cidrs:
+      - 127.0.0.1/32
+    id: 19
+    seckeys: REDACTED
+    shortname: skywind
+    servicegw:
+      url: https://skywind-ps-eu.sw420101.com/pokerstars-session-web/finalizegame

@@ -1,0 +1,10 @@
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true $JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m  \
+-DlistenPort=8105 -DserverPort=38105"
+
+export CASINOSERVICES_HOME=/bigdisk0/tomcat/conf/cs-common
+export CS_JPF_HOME=/bigdisk0/tomcat/conf/cs-jpf-igt
+export VENDOR=IGT
+export VENDOR_ID=26
+export JAVA_HOME=/software/jre11
+ 
+export TOMCAT_VERSION=/software/tomcat8

@@ -1,0 +1,40 @@
+---
+- name: Update ca-trust
+  ansible.builtin.command: /usr/bin/update-ca-trust extract
+  changed_when: false
+- name: Restart chrony
+  ansible.builtin.systemd_service:
+    name: chronyd
+    state: restarted
+  when: molecule_yml is undefined
+- name: Restart telegraf
+  ansible.builtin.systemd_service:
+    name: telegraf
+    state: restarted
+  when: molecule_yml is undefined
+
+- name: Restart w32time service
+  ansible.windows.win_service:
+    name: w32time
+    state: restarted
+
+- name: Install vim
+  ansible.windows.win_command:
+    argv:
+      - C:\Program Files\Vim\vim82\install.exe
+      - -create-batfiles
+      - -create-vimrc
+      - -install-popup
+      - -install-openwith
+      - -add-start-menu
+      - -install-icons
+
+- name: Restart windows telegraf service
+  ansible.windows.win_service:
+    name: telegraf
+    state: restarted
+
+- name: Restart amazonssmagent
+  ansible.windows.win_service:
+    name: AmazonSSMAgent
+    state: restarted

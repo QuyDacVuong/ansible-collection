@@ -1,0 +1,61 @@
+---
+- name: Discover services
+  ansible.windows.win_powershell:
+    script: |
+      Function Parse-IniFile ($file) {
+        $ini = @{}
+        $section = "NO_SECTION"
+        $ini[$section] = @{}
+        switch -regex -file $file {
+          "^\[(.+)\]$" {
+            $section = $matches[1].Trim()
+            $ini[$section] = @{}
+          }
+          "^\s*([^#].+?)\s*=\s*(.*)" {
+            $name,$value = $matches[1..2]
+            # skip comments that start with semicolon:
+            if (!($name.StartsWith(";"))) {
+              $ini[$section][$name] = $value.Trim()
+            }
+          }
+        }
+        $ini
+      }
+      $iniFiles = Get-ChildItem -Path D:\apps\configs -Recurse -Filter "dispatcher.ini"
+      foreach ($f in $iniFiles){
+        foreach ($s in (Parse-IniFile $f.FullName).start.values){Write-Output $s.split(';')[0] }
+      }
+  register: services_output
+
+- name: Format the output
+  ansible.builtin.set_fact:
+    obj_array: "{{ obj_array | default([]) + [{'name': item}] }}"
+  loop: "{{ services_output.output }}"
+
+- name: Write services to SSM
+  ansible.windows.win_copy:
+    content: |
+      {
+        "SchemaVersion": "1.0",
+        "TypeName": "Custom:DispatcherServices",
+        "Content": {{ obj_array | to_json }}
+      }
+    dest: "C:\\ProgramData\\Amazon\\SSM\\InstanceData\\{{ hostvars[inventory_hostname].instance_id }}\\inventory\\custom\\dispatcher.json"
+
+# `ansible: 1` is deliberate, and both modifies the metric name and causes prometheus to serve it (due to requiring a numeric value)
+- name: Register pyr versions
+  ansible.windows.win_copy:
+    content: '{"coresever_bin_branch": "{{ coresever_bin_branch }}", "casinosever_bin_branch": "{{ casinosever_bin_branch }}", "ansible": 1 }'
+    dest: "D:\\apps\\pyr_versions.json"
+- name: Ingest pyr versions
+  ansible.windows.win_copy:
+    content: |
+      [[inputs.file]]
+        files=["D:\\apps\\pyr_versions.json"]
+        data_format="json"
+        json_string_fields=["coresever_bin_branch","casinosever_bin_branch"]
+        name_override="pyr_versions"
+    dest: "C:\\ProgramData\\Telegraf\\ansible.conf"
+  notify:
+    - Restart Telegraf
+...

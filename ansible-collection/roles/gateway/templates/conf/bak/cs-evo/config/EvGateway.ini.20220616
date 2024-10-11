@@ -1,0 +1,241 @@
+
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+EnableWalletApi=1
+RetrieveHandHistory=0
+EvToken=937fd3ef9a48eac865c038b2dc06e9a8
+
+RouterServerAddress={{ C_RGS }}
+RouterServerInstance=AuxRgMessageRouterInstance
+
+HandHistoryDbmAddress={{ C_OLTP }}
+HandHistoryDbmInstance=AuxTableDbmServerInstance
+
+# HOST_FULLTILT = 1,
+# HOST_POKERSTAR = 2,
+# HOST_SIMULATOR = 3,
+# HOST_SIMULATOR_PS = 4,
+# HOST_NEWFT = 5,
+# HOST_BETSTARS = 6,
+# HOST_STARSCASINO = 7,
+# HOST_POKERSTARSVEGAS = 8,
+# HOST_SKYBET = 9,
+#
+#GAMING_SITE_US_NJ = 1,
+#GAMING_SITE_COM = 2,
+#GAMING_SITE_NET = 3,
+#GAMING_SITE_ORG = 4,
+#GAMING_SITE_BETA = 5,
+#GAMING_SITE_FRANCE = 6,
+#GAMING_SITE_EU = 7,
+#GAMING_SITE_ES = 8,
+#GAMING_SITE_IT = 9,
+#GAMING_SITE_UK = 10,
+#GAMING_SITE_DK = 11,
+#GAMING_SITE_PT = 12,
+#GAMING_SITE_RO = 13,
+#
+
+Hosts=FullTilt:1,PS:2,Simulator:3,PsSimulator:4,FT:5,BS:6,SC:7,VG:8,SB:9,FB:10,SBV:11
+
+[EVSETTINGS_FT]
+HostSitePairs=H1S2,H1S3,H1S7,H1S10,H1S11
+UserAuthBaseUrl=https://livecasino.fulltilt.com/cgibin/UserAuthentication
+EvUserID=fulltilt00000001hhvqr6zwh7yusi30
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.fulltilt.com/admin
+EvUserLogoutUrl=https://livecasino.fulltilt.com/logout
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PS]
+HostSitePairs=H2S8,H7S8
+UserAuthBaseUrl=https://livecasino.pokerstars.es/cgibin/UserAuthentication
+EvUserID=pokerstarses00011xjn4g5zlitq8hbl
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.es/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.es/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.es/ua/v1/pokerstarses0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PAROLI]
+HostSitePairs=H2S2,H2S7,H2S10,H2S11,H2S14,H2S20
+UserAuthBaseUrl=https://livecasino.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+# CLIENT_PLATFORM_TYPE_WINDOWS = 1;
+# CLIENT_PLATFORM_TYPE_MACHINTOSH = 2;
+# CLIENT_PLATFORM_TYPE_IOS = 3;
+# CLIENT_PLATFORM_TYPE_ANDROID = 4;
+# CLIENT_PLATFORM_TYPE_WEB = 5;
+# CLIENT_PLATFORM_TYPE_LINUX = 6;
+
+[EVSETTINGS_PR4M]
+HostSitePairs=H2S2P3,H2S2P4,H2S7P3,H2S7P4,H2S10P3,H2S10P4,H2S11P3,H2S11P4,H2S14P3,H2S14P4,H2S20P3,H2S20P4,H9S7P3,H9S7P4
+UserAuthBaseUrl=https://livecasino.casinogames.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.casinogames.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_FT4M]
+HostSitePairs=H1S2P3,H1S2P4,H1S7P3,H1S7P4,H1S10P3,H1S10P4
+UserAuthBaseUrl=https://livecasino.casinogames-as.fulltilt.com/cgibin/UserAuthentication
+EvUserID=fulltilt00000001hhvqr6zwh7yusi30
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames-as.fulltilt.com/admin
+EvUserLogoutUrl=https://livecasino.casinogames-as.fulltilt.com/logout
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PSES4M]
+HostSitePairs=H2S8P3,H2S8P4,H2S8P8,H7S8P3,H7S8P4,H7S8P8,H6S8P3,H6S8P4
+UserAuthBaseUrl=https://livecasino.casinogames.pokerstars.es/cgibin/UserAuthentication
+EvUserID=pokerstarses00011xjn4g5zlitq8hbl
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames.pokerstars.es/admin
+EvUserLogoutUrl=https:/livecasino.casinogames.pokerstars.es/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.casinogames.pokerstars.es/ua/v1/pokerstarses0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PSIT]
+HostSitePairs=H2S9,H7S9,H6S9P3,H6S9P4,H9S9P3,H9S9P4
+UserAuthBaseUrl=https://livecasino-it.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarsit00017ujieern4hfcjrei
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino-it.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino-it.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino-it.pokerstars.com/ua/v1/pokerstarsit0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+#BETSTARS, PAROLI
+[EVSETTINGS_BS_PR]
+HostSitePairs=H6S2,H6S7,H6S10,H6S11,H6S14,H6S20
+UserAuthBaseUrl=https://livecasino.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+
+[EVSETTINGS_NEWFT_PR]
+HostSitePairs=H5S2,H5S7,H5S10,H5S11,H5S20
+UserAuthBaseUrl=https://livecasino.fulltilt.com/cgibin/UserAuthentication
+EvUserID=fulltilt00000001hhvqr6zwh7yusi30
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.fulltilt.com/admin
+EvUserLogoutUrl=https://livecasino.fulltilt.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.fulltilt.com/ua/v1/fulltilt00000001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_NEWFT_PR4M]
+HostSitePairs=H5S2P3,H5S7P3,H5S10P3,H5S11P3,H5S20P3,H5S2P4,H5S7P4,H5S10P4,H5S11P4,H5S20P4,H5S2P8,H5S7P8,H5S10P8,H5S11P8,H5S20P8
+UserAuthBaseUrl=https://livecasino.casinogames-as.fulltilt.com/cgibin/UserAuthentication
+EvUserID=fulltilt00000001hhvqr6zwh7yusi30
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames-as.fulltilt.com/admin
+EvUserLogoutUrl=https://livecasino.casinogames-as.fulltilt.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.fulltilt.com/ua/v1/fulltilt00000001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_CS_PR]
+HostSitePairs=H7S2,H7S7,H7S10,H7S11,H7S14,H7S20
+UserAuthBaseUrl=https://livecasino.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PS_RO]
+HostSitePairs=H2S13,H7S13
+UserAuthBaseUrl=https://livecasino.pokerstars.ro/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.ro/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.ro/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.ro/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_PS_RO4M]
+HostSitePairs=H2S13P3,H2S13P4,H2S13P8,H7S13P8,H6S13
+UserAuthBaseUrl=https://livecasino.casinogames.pokerstars.ro/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames.pokerstars.ro/admin
+EvUserLogoutUrl=https://livecasino.casinogames.pokerstars.ro/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.casinogames.pokerstars.ro/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_CS_PR4M]
+HostSitePairs=H7S2P3,H7S2P4,H7S7P3,H7S7P4,H7S10P3,H7S10P4,H7S11P3,H7S11P4,H7S14P3,H7S14P4,H7S2P8,H7S7P8,H7S10P8,H7S11P8,H7S20P3,H7S20P4,H7S20P8
+UserAuthBaseUrl=https://livecasino.casinogames.pokerstars.com/cgibin/UserAuthentication
+EvUserID=pokerstarscom0018it1szlexjui6pmq
+EvPassword=add-aws-lookup-here
+EvCsrHandHistoryUrl=https://livecasino.casinogames.pokerstars.com/admin
+EvUserLogoutUrl=https://livecasino.casinogames.pokerstars.com/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.com/ua/v1/pokerstarscom001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_GR]
+HostSitePairs=H2S24,H7S24
+EvCsrHandHistoryUrl=https://pokerstarsgr.evo-games.com/admin
+EvUserLogoutUrl=https://pokerstarsgr.evo-games.com/service/controller/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://pokerstarsgr.evo-games.com/ua/v1/pokerstarsgr0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+[EVSETTINGS_GR4M]
+HostSitePairs=H8S24P3,H7S24P3,H8S24P4,H7S24P4,H8S24P8,H7S24P8
+EvCsrHandHistoryUrl=https://livecasino.pokerstars.gr/admin
+EvUserLogoutUrl=https://livecasino.pokerstars.gr/service/controller/logout
+UserAuthVersion=2
+UserAuthBaseUrl2=https://livecasino.pokerstars.gr/ua/v1/pokerstarsgr0001/
+EvPassword2=redacted
+AddBrandName2Nickname=1
+
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.%VENDOR%
+ReportInterval=60
+
+[LOG]
+LEVEL=debug
+DESTINATIONS=file
+#LOGFILEPATH=${catalina.base}/logs/
+LOGFILEPATH=/bigdisk0/tomcat/catalina_base/3/logs/

@@ -1,0 +1,32 @@
+---
+- name: Converge
+  hosts: gh_runner
+  become: true
+  vars:
+    env: test
+
+  pre_tasks:
+    - name: Install jq
+      ansible.builtin.yum:
+        name: jq
+        state: installed
+    - name: Create /bigdisk0
+      ansible.builtin.file:
+        path: /bigdisk0
+        state: directory
+        owner: root
+        group: root
+        mode: 0777
+  roles:
+    - role: gh_runner
+      vars:
+        runner_action: delete
+    - role: gh_runner
+      vars:
+        runner_action: uninstall
+    - role: gh_runner
+      vars:
+        runner_action: install
+        env: "management-nonprod"
+        zone: "zone1"
+        external_urls: ["https://www.example.com"]

@@ -1,0 +1,200 @@
+---
+### Creating folder structures
+
+- name: Create directories
+  ansible.builtin.file:
+    path: /bigdisk0/apps/{{ item }}/
+    state: directory
+    recurse: true
+  loop:
+    - C_RNGEntropy
+    - configs/C_RNGEntropy
+    - bin/C_RNGEntropy
+    - logs/C_RNGEntropy
+    - credentials
+
+### Download binaries from artifactory
+
+- name: Download binaries
+  block:
+    - name: Create software directories
+      ansible.builtin.file:
+        path: "/bigdisk0/software/{{ item.artifactory_base_path }}"
+        state: directory
+        recurse: true
+      loop: "{{ entropy_binaries }}"
+    - name: "Download {{ item.binary }}"
+      ansible.builtin.get_url:
+        url: "{{ [artifactory_baseurl, item.artifactory_base_path, item.binary] | path_join }}"
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        force_basic_auth: "{{ get_url_force_basic_auth }}"
+        dest: "/bigdisk0/software/{{ item.artifactory_base_path }}/{{ item.binary }}"
+        mode: "0755"
+      loop: "{{ entropy_binaries }}"
+    - name: "Symlink new version of {{ item.binary }}"
+      ansible.builtin.file:
+        src: "/bigdisk0/software/{{ item.artifactory_base_path }}/{{ item.binary }}"
+        dest: "{{ (item.dest_path, item.binary) | path_join }}"
+        state: link
+        force: true
+      notify: Restart entropy
+      loop: "{{ entropy_binaries }}"
+
+### Deploying config files
+
+- name: Create entropy.ini
+  ansible.builtin.template:
+    src: entropy.ini
+    dest: /bigdisk0/apps/configs/C_RNGEntropy/entropy.ini
+    mode: "0644"
+  notify: Restart entropy
+
+- name: Create dispatcher.ini
+  ansible.builtin.template:
+    src: dispatcher.ini
+    dest: /bigdisk0/apps/configs/C_RNGEntropy/dispatcher.ini
+    mode: "0644"
+  notify: Restart entropy
+
+- name: Create mapping dispatcher.ini
+  ansible.builtin.copy:
+    dest: /bigdisk0/apps/C_RNGEntropy/dispatcher.ini
+    content: "@/bigdisk0/apps/configs/C_RNGEntropy/dispatcher.ini"
+    mode: "0644"
+  notify: Restart entropy
+
+### credentials
+- name: Generate cert
+  ansible.builtin.include_role:
+    name: casino.server.generate_certs
+  vars:
+    certificate_domain: "disp-{{ env }}.csr.pstars-{{ region }}-intermediate"
+- name: Create random but idempotent password
+  ansible.builtin.set_fact:
+    key_passphrase: "{{ lookup('ansible.builtin.password', '/dev/null', length=15, chars=['ascii_letters', 'digits'], seed=inventory_hostname) }}"
+  no_log: true
+- name: Download Signed CA certs from ACM
+  ansible.builtin.shell: |
+    /bin/aws acm export-certificate \
+    --region {{ region }} \
+    --certificate-arn {{ certificate_arn }} \
+    --passphrase {{ key_passphrase }}
+  register: acm_certs
+  no_log: true
+  tags: notest
+  when: not ansible_check_mode
+  changed_when: false
+
+- name: Create ca_disp.crt
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/usr/share/pki/ca-trust-source/anchors/pki-csr-pstars-{{ region }}-intermediate.pem"
+    dest: /bigdisk0/apps/credentials/ca_disp.crt
+    mode: "0644"
+  notify: Restart entropy
+
+- name: Create cert.ini
+  ansible.builtin.template:
+    src: apps/credentials/cert.ini
+    dest: /bigdisk0/apps/credentials/cert.ini
+    mode: "0644"
+  notify: Restart entropy
+
+- name: Create server_disp.pyr.crt
+  ansible.builtin.copy:
+    content: "{{ (acm_certs.stdout | from_json).Certificate }}{{ (acm_certs.stdout | from_json).CertificateChain }}"
+    dest: /bigdisk0/apps/credentials/server_disp.pyr.crt
+    mode: "0644"
+  notify: Restart entropy
+
+- name: Create server_disp.pyr.key
+  ansible.builtin.copy:
+    content: "{{ (acm_certs.stdout | from_json).PrivateKey }}"
+    dest: /bigdisk0/apps/credentials/server_disp.pyr.key
+    mode: "0644"
+  notify: Restart entropy
+
+- name: Create server_disp.pyr.pass
+  ansible.builtin.copy:
+    content: "{{ key_passphrase }}"
+    dest: /bigdisk0/apps/credentials/server_disp.pyr.pass
+    mode: "0644"
+  notify: Restart entropy
+
+### Create and start pyr_C_RNGEntropy.service service
+
+- name: Create pyr_C_RNGEntropy.service
+  ansible.builtin.copy:
+    src: pyr_C_RNGEntropy.service
+    dest: /etc/systemd/system/pyr_C_RNGEntropy.service
+    mode: "0644"
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Start pyr_C_RNGEntropy.service
+  ansible.builtin.systemd:
+    name: pyr_C_RNGEntropy.service
+    state: started
+    enabled: true
+  tags:
+    - launch
+    - notest
+
+- name: Delete old entropy logs
+  ansible.builtin.cron:
+    name: cleanup old log files
+    weekday: "*"
+    minute: "15"
+    hour: "1"
+    user: root
+    job: "cd /bigdisk0/apps/logs/C_RNGEntropy && find ./ -mtime +29 -name '*.log.????????' -exec /bin/rm {} \\;"
+  tags: notest
+
+- name: Delete old dispatcher logs
+  ansible.builtin.cron:
+    name: cleanup old dispatcher log files
+    weekday: "*"
+    minute: "15"
+    hour: "1"
+    user: root
+    job: "cd /bigdisk0/apps/C_RNGEntropy && find ./ -mtime +29 -name '*.log.????????' -exec /bin/rm {} \\;"
+  tags: notest
+
+- name: Create monitoring folder in BigDisk0 for promtail-positions
+  ansible.builtin.file:
+    path: /bigdisk0/monitoring
+    state: directory
+    owner: promtail
+
+- name: Configure Log Aggregation
+  ansible.builtin.template:
+    src: promtail.yaml.j2
+    dest: /etc/promtail/promtail.yaml
+    owner: promtail
+    group: promtail
+    mode: "0644"
+  notify:
+    - Restart promtail
+
+- name: Monitor connectivity
+  ansible.builtin.template:
+    src: net_response.conf.j2
+    dest: /etc/telegraf/telegraf.d/net_response.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+  notify:
+    - Restart telegraf
+
+- name: Monitor certificates
+  ansible.builtin.template:
+    src: x509_input.conf.j2
+    dest: /etc/telegraf/telegraf.d/x509_input.conf
+    owner: telegraf
+    group: telegraf
+    mode: "0644"
+  notify:
+    - Restart telegraf

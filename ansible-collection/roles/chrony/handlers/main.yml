@@ -1,0 +1,6 @@
+---
+- name: Restart Chrony
+  ansible.builtin.service:
+    name: chronyd
+    state: restarted
+  when: molecule_yml is undefined

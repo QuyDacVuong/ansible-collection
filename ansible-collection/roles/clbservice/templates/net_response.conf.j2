@@ -1,0 +1,33 @@
+# Hercules
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hercules_host }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+
+# {% for c in concentrator_hosts %}
+# Concentrator
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ c }}:7348"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ ip2country_host }}:{{ resolver_port }}"
+  interval="60s"
+  collection_jitter="20s"
+
+{% if hostvars[inventory_hostname]['tags']['Role'] == "casino-zone0-clbservice" %}
+{% for k in clb_rapid_kafka_servers %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ k }}"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+{% endif %}
+
+# vim: ft=toml

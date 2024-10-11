@@ -1,0 +1,29 @@
+---
+- name: Restart casinoadmin service
+  ansible.windows.win_service:
+    name: casinoadmin8083
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart casinolobbyadmin service
+  ansible.windows.win_service:
+    name: casinolobbyadmin8087
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart casinoreports service
+  ansible.windows.win_service:
+    name: casinoreports8089
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart casinoadminmt service
+  ansible.windows.win_service:
+    name: casinoadminmt8099
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart Telegraf
+  ansible.windows.win_service:
+    name: Telegraf
+    state: restarted

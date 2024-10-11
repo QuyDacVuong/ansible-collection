@@ -1,0 +1,86 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+coresever_bin_branch: "TAG/2403D"
+casinosever_bin_branch: "TAG/AUX2403"
+
+non_gdk_table_server_binaries:
+  - binary: pyr64.exe
+    url_path: build-results/coreserver/{{ coresever_bin_branch }}/disp64/
+    dest_path: D:\apps\c_tables\
+  - binary: auxictableservermulti64.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxictableservermulti/
+    dest_path: D:\apps\bin\c_tables\
+  - binary: auxptldstableserverproxy.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxptldstableserverproxy/
+    dest_path: D:\apps\bin\c_tables\
+  - binary: auxrgstableproxy.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxrgstableproxy/
+    dest_path: D:\apps\bin\c_tables\
+  - binary: auxtableservermulti.exe
+    url_path: build-results/casinoserver/{{ casinosever_bin_branch }}/auxtableservermulti/
+    dest_path: D:\apps\bin\c_tables\
+
+non_gdk_table_comm: |
+  name=AppFactory
+  identification={{ stationname}}.NONGDK-{{ hostvars[inventory_hostname]['private_ip_address'].split('.')[-1] }}
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2348
+  alias=ip:{{ hostvars[inventory_hostname]['private_ip_address'] }}:2350
+  alias=ip:*:2349
+  alias=ip:*:443
+  alias=ip:*:443/*
+  alias=ip:*:26002
+  alias=ip:*:26003
+  alias={{ inventory_hostname | to_factory }}
+
+  {% for host in (groups[gdk_role] | sort ) %}
+  ; {{ hostvars[host]['inventory_hostname'] }}
+  rule={{ host | to_factory }} pyrtcp0://{{ hostvars[host]['private_ip_address'] }}:2348
+  {% endfor %}
+
+  {% for host in (groups[non_gdk_role] | sort ) %}
+  {% if host != inventory_hostname %}
+  ; {{ hostvars[host]['inventory_hostname'] }}
+  rule={{ host | to_factory }} pyrtcp0://{{ hostvars[host]['private_ip_address'] }}:2348
+  {% endif %}
+  {% endfor %}
+
+  ; block hercules traffic in prod temporarily because it's so noisy
+  ; upstream issue to be fixed in 2024-05 restart, at which point this can be removed
+  rule=ip:100.122.128.45:9322 pyrtcp0://100.122.128.45:12345
+
+  rule=ip:127.0.0.1:5447 pyrtcp0://127.0.0.1:5447
+  rule=ip:*:* pyrtcp0://$0:$1
+  performance=1
+  performancetimer=10000
+  appfactoryfile=d:\apps\logs\c_tables\listofobjects.log
+  trafficprintlast=0
+
+non_gdk_table_server_exes: |
+  AuxTableServer=d:\apps\bin\c_tables\auxtableservermulti.exe;d:\apps\logs\c_tables
+  AuxRgProxyServer=d:\apps\bin\c_tables\auxrgstableproxy.exe;d:\apps\logs\c_tables
+  AuxIcProxyServer=d:\apps\bin\c_tables\auxictableservermulti64.exe;d:\apps\logs\c_tables
+  AuxPtLdProxyServer=d:\apps\bin\c_tables\auxptldstableserverproxy.exe;d:\apps\logs\c_tables
+
+non_gdk_table_server_multiexes: |
+  AuxTableServerMulti=d:\apps\bin\c_tables\auxtableservermulti.exe;d:\apps\logs\c_tables;0/0;R240
+  AuxRgProxyServerMulti=d:\apps\bin\c_tables\auxrgstableproxy.exe;d:\apps\logs\c_tables;0/0;R240
+  AuxIcProxyServerMulti=d:\apps\bin\c_tables\auxictableservermulti64.exe;d:\apps\logs\c_tables;0/0;R240
+  AuxPtLdProxyServerMulti=d:\apps\bin\c_tables\auxptldstableserverproxy.exe;d:\apps\logs\c_tables;0/0;R240
+
+hercules_host: hostvars[groups.role_ggn_hercules.0]['private_ip_address']
+
+gdk_role: role_ggn_gdk
+hercules_role: role_ggn_hercules
+lobby_role: role_ggn_lobby
+non_gdk_role: role_ggn_non_gdk
+oltp_role: role_ggn_oltp
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+region: eu-west-1
+service_start_mode: "auto"
+service_state: "started"

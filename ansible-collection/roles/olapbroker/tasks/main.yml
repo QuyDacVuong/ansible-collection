@@ -1,0 +1,105 @@
+---
+- name: Create base folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps\bin\c_olap_broker
+    - D:\apps\certificates
+    - D:\apps\configs\c_olap_broker
+    - D:\apps\c_olap_broker
+    - D:\logs\c_olap_broker
+
+- name: Deploy binaries
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ olapbroker_binaries }}"
+    win_deploy_services: [PYR_C_OLAP_BROKER]
+
+- name: Generate cert
+  ansible.builtin.include_role:
+    name: casino.server.generate_certs
+  vars:
+    certificate_domain: "disp-{{ env }}.csr.pstars-{{ region }}-intermediate"
+- name: Generate encryption key
+  ansible.builtin.set_fact:
+    key_passphrase: "{{ lookup('ansible.builtin.password', '/dev/null', length=15, chars=['ascii_letters', 'digits'], seed=inventory_hostname) }}"
+  no_log: true
+- name: Download Signed certs from ACM
+  ansible.windows.win_command:
+    argv:
+      - C:\Program Files\Amazon\AWSCLIV2\aws.exe
+      - acm
+      - export-certificate
+      - --certificate-arn
+      - "{{ certificate_arn }}"
+      - --passphrase
+      - "{{ key_passphrase | b64encode }}"
+  register: acm_certs
+  no_log: true
+  when: not ansible_check_mode
+- name: Certificate config
+  ansible.windows.win_copy:
+    content: |
+      servercert=d:\apps\certificates\server_disp.pyr.crt
+      serverkey=d:\apps\certificates\server_disp.pyr.key
+      serverkeypassword={{ key_passphrase }}
+    dest: D:\apps\certificates\cert.ini
+  notify:
+    - Restart olap broker
+- name: CA certificate
+  ansible.windows.win_copy:
+    remote_src: true
+    src: "C:\\software\\pki-csr-pstars-{{ region }}-intermediate.pem"
+    dest: D:\apps\certificates\ca_disp.crt
+  notify:
+    - Restart olap broker
+- name: Server certificate
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).Certificate }}{{ (acm_certs.stdout | from_json).CertificateChain }}"
+    dest: D:\apps\certificates\server_disp.pyr.crt
+  notify:
+    - Restart olap broker
+- name: Server key
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).PrivateKey }}"
+    dest: D:\apps\certificates\server_disp.pyr.key
+  notify:
+    - Restart olap broker
+- name: Server pass
+  ansible.windows.win_copy:
+    content: "{{ key_passphrase }}"
+    dest: D:\apps\certificates\server_disp.pyr.pass
+  notify:
+    - Restart olap broker
+
+- name: Configure dispatcher
+  ansible.windows.win_template:
+    src: dispatcher.ini.j2
+    dest: D:\apps\configs\c_olap_broker\dispatcher.ini
+- name: Link dispatcher config
+  ansible.windows.win_copy:
+    content: "@d:/apps/configs/c_olap_broker/dispatcher.ini"
+    dest: D:\apps\c_olap_broker\dispatcher.ini
+
+- name: Configure monitor
+  ansible.windows.win_template:
+    src: "{{ item }}"
+    dest: "D:\\apps\\monitor_client\\{{ item | basename }}"
+  with_fileglob:
+    - templates/monitor_client/*.ini
+  notify:
+    - Restart hesender
+    - Restart memsender
+- name: Create dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_OLAP_BROKER
+    path: D:\apps\c_olap_broker\pyr64.exe
+- name: Start dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_OLAP_BROKER
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch

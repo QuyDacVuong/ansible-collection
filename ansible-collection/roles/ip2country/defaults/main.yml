@@ -1,0 +1,92 @@
+---
+ip2country_binaries:
+  - binary: pyrip2countrysmem.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_02_2302H/
+    dest_path: D:\apps\bin\c_ip2country\
+  - binary: pyr64.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\c_ip2country\
+  - binary: download_and_import.exe
+    url_path: ggn-applications/
+    dest_path: D:\resolver
+  - binary: pyrgeoiprereadsmem.exe
+    url_path: build-results/coreserver/TAG/2401E/pyrgeoipreread
+    dest_path: D:\resolver
+
+# templates/apps/c_ip2country/sanity.ip2country.limit, templates/configs/c_ip2country/sanity.ip2country.limit
+ip2country_msglimits: ""
+
+# templates/configs/c_ip2country/dispatcher.ini
+ip2country_comm: |
+  name=AppFactory
+  alias=ip:{{ lobby_host }}:4348
+  alias=ip:c_ip2countryaddress:port
+  alias=ip:c_resolver:port
+  alias=ip:*:4350
+  rule=ip:127.0.0.1:5447 pyrtcp0://127.0.0.1:5447
+  rule=ip:*:* pyrtcp0://$0:$1
+
+ip2country_managers: ""
+
+ip2country_tcp: |
+  port=4348
+  option.islocal=1
+  option.compressbits=0
+  option.logfile=d:\apps\logs\c_ip2country\protolocal.log
+  option.keepalive=0/0
+  gatherstatistic=1
+
+ip2country_tcpmux: |
+  port=4350
+  ;gatherstatistic=1
+
+ip2country_smem: |
+  port=4348
+  ;gatherstatistic=1
+
+ip2country_smemmux: |
+  port=4350
+  ;gatherstatistic=1
+
+ip2country_exe: |
+  ip2country=d:\apps\bin\c_ip2country\pyrip2countrysmem.exe;d:\apps\logs\c_ip2country\
+
+ip2country_start: |
+  ip2country=Ip2CountryServerInstance;s=d:\apps\\configs\\c_ip2country\\
+
+# templates/configs/c_ip2country/ip2country.ini
+ip2country_startup: |
+  defaultComUrl=pokerstars.com
+  defaultNetUrl=pokerstars.net
+  geoipdir=d:\apps\configs\c_ip2country
+  forceUseGeopIpCityDb=1
+  geoIpDbVersion=2
+
+ip2country_resolver: |
+  scf=d:\apps\resolver\
+  scf-restart=d:\apps\resolver2\
+
+  scf-config-version=2
+  scf-config-name=resolver.inc
+
+ip2country_resolver_info: |
+  Resolver=IOM
+  Resolver-version=!resolver-version!
+  Configuration-version=2
+
+ip2country_resolver_map: ""
+
+ip2country_clients: ""
+
+ip2country_marketdbm: ""
+
+ip2country_neturl: ""
+
+ip2country_comurl: ""
+
+ip2country_msglimitoptions: ""
+
+resolver_remote_folder: "out/config/qa"
+
+service_start_mode: "auto"
+service_state: "started"

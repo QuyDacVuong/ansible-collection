@@ -1,0 +1,37 @@
+---
+stationname: TEST
+ppbintegration_tomcat_version: 8.5.78
+ppbbackofficegateway_version: 1.0.33
+
+ppbintegration_bgi_host: bgi.flutterb2b.com.nxt.ppbdev.com
+ppbintegration_bgi_port: "443"
+
+lobby_host: 127.0.0.133
+hercules_host: 127.0.0.145
+advertise_host: 127.0.0.1
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+
+ppb_backoffice_gateways: |
+  [BACKOFFICE_BETFAIR]
+  ;BGIURL=https://bgi-nxt.betfair.com/BetfairGamingInterfaceService/v1
+  ;BGIURL=http://10.30.46.132:8148/ggndemobackoffice/ws/bgi/betfair/
+  BGIURL=https://{{ ppbintegration_bgi_host }}:{{ ppbintegration_bgi_port}}/bf/BetfairGamingInterfaceService/v1
+  RgsUser=Ggn
+  RgsPassword={{ betfair_rgs_pass }}
+  KeyStore=ggn.pfx
+  KeyStorePass={{ ggn_keyst_pass }}
+  ;TrustStore=truststore.jks
+  ;StorePass={{ ggn_store_pass }}
+
+
+  [BACKOFFICE_PADDYPOWER]
+  ;BGIURL=https://bgi.nxt.paddypower.com/BetfairGamingInterfaceService/v1
+  ;BGIURL=http://10.30.46.133:8148/ggndemobackoffice/ws/bgi/paddypower/
+  BGIURL=https://{{ ppbintegration_bgi_host }}:{{ ppbintegration_bgi_port }}/pp/BetfairGamingInterfaceService/v1
+  RgsUser=Ggn
+  RgsPassword={{ paddy_rgs_pass }}
+  KeyStore=ggn.pfx
+  KeyStorePass={{ ggn_keyst_pass }}
+  ;TrustStore=truststore.jks
+  ;StorePass={{ ggn_store_pass }}

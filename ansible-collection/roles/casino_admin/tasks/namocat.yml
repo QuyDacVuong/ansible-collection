@@ -1,0 +1,29 @@
+---
+- name: Install nssm
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/casino-devops/casino-admin/nssm.exe"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+    dest: 'D:\software\nssm.exe'
+
+- name: Download namocat
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/casino-devops/casino-admin/namocat-ccms.zip"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+    dest: 'D:\namocat-ccms.zip'
+
+- name: Unzip namocat
+  community.windows.win_unzip:
+    src: D:\namocat-ccms.zip
+    dest: D:\
+    creates: D:\namocat-ccms
+  register: unzip_namocat
+
+- name: Install namocat
+  ansible.windows.win_powershell:
+    script: |
+      D:\software\nssm.exe install namocat-ccms D:\namocat-ccms\start-namocat-ccms.bat
+  when: unzip_namocat.changed

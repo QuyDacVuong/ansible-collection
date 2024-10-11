@@ -1,0 +1,92 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+aws_tags:
+  - Key: CreatedBy
+    Value: "Ansible"
+get_url_force_basic_auth: false
+public_domain: example.com
+env: development
+
+clb_tomcat_version: 8.5.96
+tomcat_directory: /bigdisk0/tomcat
+tomcat_non_ssl_connector_port: 8080
+
+clbservice_version: 2.0.50
+log_level_warn: "debug"
+log_level_info: "debug"
+zip_logs: ".gz"
+
+certificate_domain: clbservice-{{ env }}.csr.pstars-{{ region }}-intermediate
+stationname: "DEV"
+
+concentrator_hosts: ["127.0.0.70"]
+lobby_host: "127.0.0.136"
+hercules_host: "127.0.0.145"
+ip2country_host: "{{ lobby_host }}"
+advertise_host: "127.0.0.133"
+
+resolver_port: "4348"
+
+clbservice_tomcat_instances:
+  - name: clbservice
+    version: "{{ clb_tomcat_version }}"
+    src: "{{ artifactory_baseurl }}/ggn-applications/apache-tomcat/apache-tomcat-{{ clb_tomcat_version }}.tar.gz"
+    non_ssl_connector_port: 8081
+    shutdown_port: 8006
+    environment_variables:
+      - TOMCAT_CFG_LOADED=1
+      - JAVA_OPTS=$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m
+      - CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC
+      - CATALINA_PID=/var/run/apache-tomcat-clbservice/run.pid
+      - SECURITY_MANAGER=false
+      - WMTCLBSERVICE_HOME={{ tomcat_directory }}/clbservice/conf/config
+    config_files:
+      - src: clbservice/profile.ini
+        dest: config
+        mode: "0644"
+      - src: clbservice/log4j2.xml
+        mode: "0644"
+        dest: config
+    wars:
+      - url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/clbservice/clbservice-{{ clbservice_version }}.war"
+        name: clbservice
+
+clb_rapid_kafka_servers:
+  - "b-1.dtplcoremskintgcluster.f58xgc.c8.kafka.eu-west-1.amazonaws.com:9094"
+  - "b-2.dtplcoremskintgcluster.f58xgc.c8.kafka.eu-west-1.amazonaws.com:9094"
+clb_rapid_kafka_topic_request: relic-starsweb-requests-qa
+clb_rapid_kafka_topic_response: relic-starsweb-responses-qa
+clb_rapid_kafka_topic_partition: "32"
+clb_rapid_group_id: starsweb-recommendations-qa-0
+clb_rapid_log_metrics_interval: 60000
+clb_rapid_kafka_nonprod_security: ""
+clb_testmode: "true"
+clb_parsers: |
+  {100:bj,105:bj,106:bj,101:rt,104:rt,107:rt,108:bj,109:bj,110:rt}
+
+clb_origins: |
+  ['https://starscrm.rationalcdn.com','https://casino.qa-vs.pyr','https://casino.qa-nl-sc.pyr/','https://casinoapp.qa-nl-sc.pyr/','https://casino.qa-eu-vs.pyr','https://casino.qa-uk-vs.pyr','https://casinoapp.qa-vs.pyr','https://casinoapp.qa-eu-vs.pyr','https://casinoapp.qa-uk-vs.pyr','https://casino.qa-sc.pyr','https://casino.qa-eu-sc.pyr','https://casino.qa-uk-sc.pyr','https://dev-casino.qa.pyr','https://casino.qa.pyr','https://casino.qa-eu.pyr','https://casino.qa-it.pyr','https://casino.qa-es.pyr','https://casino.qa-uk.pyr','https://casino.sb-qa.pyr','https://casino.sb-qa-uk.pyr','https://casino.sb-qa-eu.pyr','https://casino.qa-gr-sc.pyr','https://casino.qa-gr.pyr','https://sports.qacore.pyr','https://casinoapp.qa-eu-sc.pyr','https://tools1-qa.pyrsoftware.ca:5556','https://casinoapp.qa-uk.pyr','https://casinoapp.qa-eu.pyr','https://casinoapp.qa.pyr','https://casino.qa-it-sc.pyr','https://casino.qa-es-sc.pyr','https://casinoapp.qa-it-sc.pyr','https://casinoapp.qa-es-sc.pyr','https://casino.qa-dk-sc.pyr','https://casinoapp.qa-dk-sc.pyr','https://casino.qa-ft.pyr','https://casinoapp.qa-ft.pyr','https://casino.qa-eu-ft.pyr','https://casino.qa-uk-ft.pyr','https://casinoapp.qa-eu-ft.pyr','https://casinoapp.qa-uk-ft.pyr','https://casino.qa-dk-ft.pyr','https://casinoapp.qa-dk-ft.pyr','https://casino.qa-se-ft.pyr','https://casinoapp.qa-se-ft.pyr','https://op1-casino.qa-asia-sc.pyr','https://op1-casino.qa-asia.pyr','https://casinoapp.qa-asia-sc.pyr','https://casinoapp.qa-asia.pyr','https://casino.qa-pt-sc.pyr','https://casinoapp.qa-pt-sc.pyr','https://casino.qa-cz-sc.pyr','https://casinoapp.qa-cz-sc.pyr','https://casino.qa-ro-sc.pyr','https://casinoapp.qa-ro-sc.pyr','https://casino.qa-bg-sc.pyr','https://casinoapp.qa-bg-sc.pyr','https://casino.qa-se-sc.pyr','https://casinoapp.qa-se-sc.pyr','https://casinoapp.3rd.qa-ar-sc.pyr','https://casino.3rd.qa-ar-sc.pyr','https://cdn.asia.qa.pyr','https://cdn1.asia.qa.pyr','https://cdn2.asia.qa.pyr','https://cdn3.asia.qa.pyr','https://casinoapp.qa-arba-sc.pyr','https://casinoapp.qa-de-sc.pyr','https://vegasapp.qa-vs.pyr/','https://vegasapp.qa-eu-vs.pyr','https://vegasapp.qa-de-sc.pyr','casinoapp.qa-uk-sc.pyr','https://casinoapp.qa-nl.pyr','https://casinoapp.qa-nl-sc.pyr','http://localhost', 'https://localhost', 'http://127.0.0.1:8080','http://127.0.0.1:8080','http://127.0.0.1:49651','http://127.0.0.1:50332','http://127.0.0.1:53444','http://127.0.0.1:56765','http://127.0.0.1:59846','http://127.0.0.1:60427','http://127.0.0.1:61908','http://127.0.0.1:64339','http://localhost:17171']
+
+clb_cache: |
+  cdnURL=https://cashier.rationalcdn.com/vendors/starsweb/qa
+  cdnTransferTime=30
+  assetsURL=https://cashier.rationalcdn.com/vendors/starsweb/qa
+  mode=Test
+  cacheable=false
+
+clb_security: |
+  EncryptionKey={{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/clbservice/EncryptionKey') }}
+  InitializationVector={{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/clbservice/InitializationVector') }}
+
+clb_hercules_mode: ""
+
+clb_identification: |
+  ModuleName=WMTCDL
+
+clb_rapid_kafka_template: ""
+
+starsweb_environment: ""
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push

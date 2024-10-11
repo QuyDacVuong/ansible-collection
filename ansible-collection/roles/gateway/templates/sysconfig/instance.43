@@ -1,0 +1,12 @@
+# we can setup memory ajustments here ... and everything else
+
+
+export JAVA_OPTS="-XX:MaxPermSize=1024m -Xss1m -Xms256m -Xmx2048m -DlistenPort=8122 -DserverPort=9143"
+
+export JAVA_HOME=/software/jdk11
+export TOMCAT_VERSION=/software/tomcat8
+
+export CASINOSERVICES_HOME=/bigdisk0/tomcat/conf/cs-common
+export CS_JPF_HOME=/bigdisk0/tomcat/conf/cs-jpf-capecod
+export VENDOR=CAPECOD
+export VENDOR_ID=43

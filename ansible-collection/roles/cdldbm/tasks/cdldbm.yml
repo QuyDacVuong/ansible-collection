@@ -1,0 +1,50 @@
+---
+- name: Create cdldbm directories
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps\bin\c_cdldbm
+    - D:\apps\configs\c_cdldbm
+    - D:\apps\configs\c_cdldbm\CdlDbmProxy
+    - D:\apps\c_cdldbm
+    - D:\apps\logs\c_cdldbm
+- name: Deploy cdldbm binaries
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ cdldbm_binaries }}"
+    win_deploy_services:
+      - PYR_C_CDLDBM
+
+- name: Write CdlDbmProxy configuration
+  ansible.windows.win_template:
+    src: "{{ item }}"
+    dest: "D:\\apps\\configs\\c_cdldbm\\CdlDbmProxy\\{{ item | basename | regex_replace('\\.j2$', '') }}"
+  loop: "{{ lookup('fileglob', 'templates/configs/c_cdldbm/CdlDbmProxy/*.j2', wantlist=True) }}"
+  notify:
+    - Restart cdldbm
+- name: Write dispatcher configuration
+  ansible.windows.win_template:
+    src: templates/configs/c_cdldbm/dispatcher.ini.j2
+    dest: D:\apps\configs\c_cdldbm\dispatcher.ini
+  notify:
+    - Restart cdldbm
+- name: Write dispatcher link
+  ansible.windows.win_copy:
+    content: "@d:/apps/configs/c_cdldbm/dispatcher.ini"
+    dest: D:\apps\c_cdldbm\dispatcher.ini
+  notify:
+    - Restart cdldbm
+
+- name: Create dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_CDLDBM
+    path: D:\apps\c_cdldbm\pyr64.exe
+- name: Start dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_CDLDBM
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch

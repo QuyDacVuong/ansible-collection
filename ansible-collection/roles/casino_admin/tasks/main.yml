@@ -1,0 +1,160 @@
+---
+- name: Create base folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\software
+    - D:\logs
+    - D:\tomcat-app-config
+    - D:\tomcat-app-config\casinoadmin
+    - D:\tomcat-app-config\casinoadmin\config
+    - D:\tomcat-app-config\casinolobbyadmin
+    - D:\tomcat-app-config\casinolobbyadmin\config
+    - D:\tomcat-app-config\casinoreports
+    - D:\tomcat-app-config\casinoreports\config
+    - D:\tomcat-app-config\casinoadminmt
+    - D:\tomcat-app-config\casinoadminmt\config
+    - C:\Java
+
+- name: Download tomcat vanilla
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/casino-devops/casino-admin/tomcat8-xxxx-vanilla.zip"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: true
+    dest: D:\tomcat8-xxxx-vanilla.zip
+
+- name: Download Java
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/casino-devops/casino-admin/{{ java_package }}"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+    dest: D:\software\java.zip
+
+- name: Unzip vanilla tomcat
+  community.windows.win_unzip:
+    src: D:\tomcat8-xxxx-vanilla.zip
+    dest: D:\
+    creates: D:\tomcat8-xxxx-vanilla
+  register: unzip_vanilla_tomcat
+
+- name: Create the casino admin tools tomcat folders
+  ansible.windows.win_copy:
+    src: D:\tomcat8-xxxx-vanilla\
+    dest: "D:\\tomcat8-{{ item.port }}-{{ item.name }}"
+    remote_src: true
+  loop: "{{ casino_admin_apps }}"
+  when: unzip_vanilla_tomcat.changed
+
+- name: Download CATs wars
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/{{ item.name }}/{{ item.name }}-{{ item.war_version }}.war"
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: true
+    dest: D:\tomcat8-{{ item.port }}-{{ item.name }}\webapps\{{ item.name }}.war
+  loop: "{{ casino_admin_apps }}"
+  notify:
+    - Restart casinoadmin service
+    - Restart casinolobbyadmin service
+    - Restart casinoreports service
+    - Restart casinoadminmt service
+
+- name: Copy config.properties
+  ansible.windows.win_template:
+    src: "{{ item.name }}/{{ item.name }}-config.properties"
+    dest: "D:\\tomcat-app-config\\{{ item.name }}\\config\\{{ item.name }}-config.properties"
+  loop: "{{ casino_admin_apps }}"
+  notify:
+    - Restart casinoadmin service
+    - Restart casinolobbyadmin service
+    - Restart casinoreports service
+    - Restart casinoadminmt service
+
+- name: Copy log4j
+  ansible.windows.win_template:
+    src: "{{ item.name }}/{{ item.name }}-{{ item.log }}.xml"
+    dest: "D:\\tomcat-app-config\\{{ item.name }}\\config\\{{ item.name }}-{{ item.log }}.xml"
+  loop: "{{ casino_admin_apps }}"
+  notify:
+    - Restart casinoadmin service
+    - Restart casinolobbyadmin service
+    - Restart casinoreports service
+    - Restart casinoadminmt service
+
+- name: Copy profile.ini
+  ansible.windows.win_template:
+    src: "{{ item.name }}/profile.ini"
+    dest: "D:\\tomcat-app-config\\{{ item.name }}\\config\\profile.ini"
+  loop: "{{ casino_admin_apps }}"
+  notify:
+    - Restart casinoadmin service
+    - Restart casinolobbyadmin service
+    - Restart casinoreports service
+    - Restart casinoadminmt service
+
+- name: Copy casinolobbyadmin keys
+  ansible.windows.win_copy:
+    content: "{{ item.name }}"
+    dest: "D:\\tomcat-app-config\\casinolobbyadmin\\config\\{{ item.file_name }}"
+  loop:
+    - {name: '{{ casino_lobby_acms }}', file_name: 'qa-repl-acmsRW.jks'}
+    - {name: '{{ casino_lobby_key }}', file_name: 'id_rsa'}
+  notify:
+    - Restart casinolobbyadmin service
+
+- name: Edit conf files
+  ansible.windows.win_powershell:
+    script: |
+      (Get-Content D:\tomcat8-{{ item.port }}-{{ item.name }}\bin\service.bat) | Foreach-Object {$_ -replace '<change-to-appname>', '{{ item.name }}' ` -replace 'XXXX', '{{ item.port }}' } | Set-Content D:\tomcat8-{{ item.port }}-{{ item.name }}\bin\service.bat
+      (Get-Content D:\tomcat8-{{ item.port }}-{{ item.name }}\conf\server.xml) -Replace 'XXXX', '{{ item.port }}' | Set-Content D:\tomcat8-{{ item.port }}-{{ item.name }}\conf\server.xml
+  loop: "{{ casino_admin_apps }}"
+  when: unzip_vanilla_tomcat.changed
+
+- name: Install java
+  community.windows.win_unzip:
+    src: D:\software\java.zip
+    dest: C:\Java\
+    creates: C:\Java\jdk-17
+
+- name: Set an environment variable for all users
+  ansible.windows.win_environment:
+    state: present
+    name: JRE_HOME
+    value: C:\Java\jdk-17
+    level: machine
+
+- name: Set casinoadmin aps environment variables for all users
+  ansible.windows.win_environment:
+    state: present
+    name: "{{ item.name|upper }}_HOME"
+    value: 'D:\tomcat-app-config\{{ item.name }}'
+    level: machine
+  loop: "{{ casino_admin_apps }}"
+  when: unzip_vanilla_tomcat.changed
+
+- name: Set casinolobbyadmin environment variables #casinolobbyadmin doesnt have \config folder hardcoded ...
+  ansible.windows.win_environment:
+    state: present
+    name: "CASINOLOBBYADMIN_HOME"
+    value: 'D:\tomcat-app-config\casinolobbyadmin\config'
+    level: machine
+
+- name: Install casino admin service
+  ansible.windows.win_powershell:
+    script: |
+      cd D:\tomcat8-{{ item.port }}-{{ item.name }}\bin\
+      ./service.bat install
+  loop: "{{ casino_admin_apps }}"
+  when: unzip_vanilla_tomcat.changed
+
+- name: Call namocat task
+  ansible.builtin.include_tasks: "namocat.yml"
+
+- name: Configure net_response metrics
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify: Restart Telegraf

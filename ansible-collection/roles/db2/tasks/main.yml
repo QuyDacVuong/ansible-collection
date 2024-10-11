@@ -1,0 +1,76 @@
+---
+- name: Add prometheus endpoint
+  ansible.builtin.copy:
+    content: |
+      # This file created by ansible
+      [[outputs.prometheus_client]]
+        listen = "0.0.0.0:9126"
+    dest: /bigdisk0/telegraf/etc/conf.d/output_prometheus.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Reload telegraf
+
+- name: Download ibm_db2_exporter
+  ansible.builtin.get_url:
+    url: "{{ artifactory_baseurl }}/casino-devops/db2/ibm_db2_exporter"
+    dest: /usr/local/bin/ibm_db2_exporter
+    mode: 0755
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+    force_basic_auth: "{{ get_url_force_basic_auth }}"
+
+- name: Create db2_exporter group
+  ansible.builtin.group:
+    name: "{{ db2_exporter_group }}"
+    state: present
+
+- name: Create db2_exporter user
+  ansible.builtin.user:
+    name: "{{ db2_exporter_username }}"
+    password: "{{ lookup('amazon.aws.secretsmanager_secret', '{{ env }}/db2/db2-exporter-password', region='eu-west-1') | password_hash('sha512') }}"
+    create_home: false
+    system: true
+    shell: "/bin/bash"
+    group: "{{ db2_exporter_group }}"
+    groups: "{{ db2_exporter_groups }}"
+  tags: notest
+
+- name: Create sysconfig for ibm_db2_exporter
+  ansible.builtin.template:
+    src: ibm_db2_exporter.sysconfig
+    dest: /etc/sysconfig/ibm_db2_exporter
+    owner: root
+    group: root
+    mode: 0644
+  tags: notest
+
+- name: Create systemd unit file for ibm_db2_exporter
+  ansible.builtin.copy:
+    src: ibm_db2_exporter.service
+    dest: /etc/systemd/system/ibm_db2_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Start ibm_db2_exporter
+  ansible.builtin.systemd:
+    name: ibm_db2_exporter
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags: notest
+
+- name: Add db2_exporter input to telegraf
+  ansible.builtin.copy:
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      # This file created by ansible
+      [[inputs.prometheus]]
+        urls = ["http://localhost:9953/metrics"]
+    dest: /bigdisk0/telegraf/etc/conf.d/db2_exporter.conf
+  notify:
+    - Reload telegraf

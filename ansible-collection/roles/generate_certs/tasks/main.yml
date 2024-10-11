@@ -1,0 +1,20 @@
+---
+#
+# Tasks to generate CA Signed Certificates
+#
+
+- name: Include playbook to generate certs for linux
+  ansible.builtin.include_tasks: generate-linux-certificate.yml
+  when: ansible_system == 'Linux' and not ansible_check_mode
+  args:
+    apply:
+      tags:
+        - certs
+
+- name: Include playbook to generate certs for windows
+  ansible.builtin.include_tasks: generate-win-certificate.yml
+  when: ansible_facts['os_family']=="Windows" and not ansible_check_mode
+  args:
+    apply:
+      tags:
+        - certs

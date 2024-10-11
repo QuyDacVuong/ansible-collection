@@ -1,0 +1,77 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: cipwa
+    image: "ghcr.io/alicekaerast/docker-${MOLECULE_DISTRO:-amazonlinux2023}-ansible:latest"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /run
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
+  inventory:
+    group_vars:
+      all:
+        region: eu-west-1
+        instance_id: i-1234
+        tags:
+          Zone: zone1
+          CasinoEnvironment: unittest
+          Name: cipwa
+          Platform: Linux
+        gdk_role: "cipwa"
+        non_gdk_role: "cipwa"
+        stationname: "TEST"
+        cdl_host: "127.0.0.137"
+        lobby_host: "127.0.10.136"
+        hercules_host: "127.0.10.145"
+        advertise_host: "127.0.10.133"
+        concentrator_hosts: ["127.0.0.70", "127.0.0.71"]
+        starsweb_environment: "qa-casino5"
+        cipwa_tomcat_instances:
+          - name: cipwa
+            version: "{{ cipwa_tomcat_version }}"
+            src: "{{ artifactory_baseurl }}/ggn-applications/apache-tomcat/apache-tomcat-{{ cipwa_tomcat_version }}.tar.gz"
+            environment_variables:
+              - TOMCAT_CFG_LOADED=1
+              - JAVA_OPTS=$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m
+              - CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC
+              - CATALINA_PID=/var/run/apache-tomcat-cipwa/run.pid
+              - SECURITY_MANAGER=false
+              - CIPWA_HOME={{ tomcat_directory }}/cipwa/conf
+            config_files:
+              - src: CipwaServer.ini
+                mode: "0644"
+                dest: config
+            wars:
+              - url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/cipwa/cipwa-{{ cipwa_version }}.war"
+                name: cipwa
+            healthchecks:
+              - "http://127.0.0.1:8080/cipwa/metrics"
+          - name: clbservice
+            version: "{{ cipwa_tomcat_version }}"
+            src: "{{ artifactory_baseurl }}/ggn-applications/apache-tomcat/apache-tomcat-{{ cipwa_tomcat_version }}.tar.gz"
+            non_ssl_connector_port: 8081
+            ssl_connector_port: 8444
+            environment_variables:
+              - TOMCAT_CFG_LOADED=1
+              - JAVA_OPTS=$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m
+              - CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC
+              - CATALINA_PID=/var/run/apache-tomcat-cipwa/run.pid
+              - SECURITY_MANAGER=false
+            config_files:
+              - src: clbservice/profile.ini
+                dest: profile.ini
+                mode: "0644"
+            wars:
+              - url: "{{ artifactory_baseurl }}/{{ artifactory_releases_folder }}/clbservice/clbservice-{{ clbservice_version }}.war"
+                name: clbservice

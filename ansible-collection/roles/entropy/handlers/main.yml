@@ -1,0 +1,18 @@
+---
+- name: Restart entropy
+  ansible.builtin.service:
+    name: pyr_C_RNGEntropy.service
+    state: restarted
+  when: "'launch' not in ansible_skip_tags"
+
+- name: Restart promtail
+  ansible.builtin.service:
+    name: promtail
+    state: restarted
+  when: molecule_yml is not defined
+
+- name: Restart telegraf
+  ansible.builtin.service:
+    name: telegraf
+    state: restarted
+  when: molecule_yml is undefined

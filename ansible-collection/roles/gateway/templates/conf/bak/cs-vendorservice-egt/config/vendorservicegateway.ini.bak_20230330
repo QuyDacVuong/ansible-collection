@@ -1,0 +1,22 @@
+
+
+[STATICCONNECT]
+JackpotServerAddress={{ C_ZNS_LOBBY }}
+JackpotServerInstance=JackpotServerInstance
+
+[STATICSETTINGS]
+ReconnectInterval=1000
+AuxReconnectIntervalInSeconds=15
+JackpotFeedCheckIntervalInSec=10
+GetXRatesIntervalInMin=60
+
+[VENDOR-Egt]
+VendorId=36
+VendorName=EGT
+JackpotFeedUrl=http://stats.egtmgs.com/jackpot_Pokerstars_RON.json
+ExtraProp.SupportedCurrency=RON,EUR
+
+[Hercules]
+HerculesServerAddress={{ C_MONITORMAIN }}
+StationName=WEB-SERVICES.GATEWAYS-%INSTANCE_NAME%.CS-VendorServiceGateway-%VENDOR%
+ReportInterval=60

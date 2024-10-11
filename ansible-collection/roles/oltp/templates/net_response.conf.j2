@@ -1,0 +1,84 @@
+# Hercules
+{% for host in groups[hercules_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# LOBBY
+{% for host in groups[lobby_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:2348"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# DB2
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ db_config['dbs']['zone1-oltp']['host'] }}:{{ db_config['dbs']['zone1-oltp']['port'] }}"
+  interval = "60s"
+  collection_jitter = "20s"
+
+# LOBBY REEF
+{% for host in groups[lobby_role] %}
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[host]['private_ip_address'] }}:3348"
+  interval="60s"
+  collection_jitter="20s"
+{% endfor %}
+
+# C_TEMPLATESERVER
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ C_TEMPLATESERVER.split(":")[1] }}:{{ C_TEMPLATESERVER.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+
+
+# C_ZNS_OLTP
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ C_ZNS_OLTP.split(":")[1] }}:{{ C_ZNS_OLTP.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+
+# C_ZNS_LOBBY
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ C_ZNS_LOBBY.split(":")[1] }}:{{ C_ZNS_LOBBY.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+
+# C_ZNS_REEF_LOBBY
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ C_ZNS_REEF_LOBBY.split(":")[1] }}:{{ C_ZNS_REEF_LOBBY.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+
+# FRANZ - AWS
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ FCS_CASINO_AWS.split(":")[1] }}:{{ FCS_CASINO_AWS.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+
+# FRANZ - IOM
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ FCS_CASINO_IOM.split(":")[1] }}:{{ FCS_CASINO_IOM.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+
+# LOGINDBM
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ LOGINDBM.split(":")[1] }}:{{ LOGINDBM.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+# vim: ft=toml

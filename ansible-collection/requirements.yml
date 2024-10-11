@@ -1,0 +1,8 @@
+---
+collections:
+  - ansible.windows
+  - community.windows
+  - amazon.aws
+  - community.aws
+  - community.general
+  - community.crypto

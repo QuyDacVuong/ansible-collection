@@ -1,0 +1,107 @@
+---
+
+- name: Create base datafeedgateway folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps
+    - D:\apps\bin
+    - D:\apps\bin\c_auxukgw
+    - D:\apps\c_auxukgw
+    - D:\apps\configs\c_auxukgw
+    - D:\apps\configs\c_auxukgw\sbgcert
+    - D:\apps\logs
+    - D:\apps\logs\c_auxukgw
+    - D:\apps\monitoring
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ datafeedgateway_binaries }}"
+    win_deploy_services:
+      - PYR_C_AUXUKGW
+
+- name: Copy configs and files
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: dispatcher.ini
+      dest: D:\apps\c_auxukgw\dispatcher.ini
+    - src: auxdataservices.ini
+      dest: D:\apps\configs\c_auxukgw\auxdataservices.ini
+    - src: dispatcher_config.ini
+      dest: D:\apps\configs\c_auxukgw\dispatcher.ini
+    - src: hercules.ini
+      dest: D:\apps\monitor_client\hercules.ini
+    - src: MemSender.ini
+      dest: D:\apps\monitor_client\MemSender.ini
+  notify:
+    - Restart hesender Monitoring service
+    - Restart memsender Monitoring service
+    - Restart AUXUKGW service
+
+- name: Copy tls key
+  ansible.windows.win_copy:
+    content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/common/sbg-private-key') }}"
+    dest: d:\apps\configs\c_auxukgw\sbgcert\server.key
+
+- name: Copy tls ca bundle
+  ansible.windows.win_copy:
+    content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/common/sbg-ca-bundle') }}"
+    dest: d:\apps\configs\c_auxukgw\sbgcert\ca-bundle.crt
+
+- name: Copy tls cert
+  ansible.windows.win_copy:
+    content: "{{ lookup('amazon.aws.ssm_parameter', '/{{ env }}/common/sbg-certificate') }}"
+    dest: d:\apps\configs\c_auxukgw\sbgcert\certificate.crt
+
+- name: Download 32-bit version of C++ runtime 14.32.31332 thingy
+  ansible.windows.win_get_url:
+    url: "{{ artifactory_baseurl }}/ggn-applications/VC_redist.x86.exe"
+    dest: D:\software\VC_redist.x86.exe
+    url_username: "{{ artifactory_username }}"
+    url_password: "{{ artifactory_password }}"
+
+- name: Install 32-bit version of C++ runtime 14.32.31332 thingy
+  ansible.windows.win_package:
+    path: D:\software\VC_redist.x86.exe
+    product_id: '{8DE5B0D4-A6D8-4F72-B8EF-28776A2EE5D5}'
+    arguments: /passive /norestart
+  register: install_vc_redist
+  failed_when: install_vc_redist.rc not in [0, 1638]
+  changed_when: install_vc_redist.rc == 0
+
+- name: Create dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_AUXUKGW
+    path: D:\apps\c_auxukgw\pyr64.exe
+
+- name: Start dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_AUXUKGW
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch
+
+- name: Configure Log Aggregation
+  ansible.windows.win_template:
+    src: promtail.yaml.j2
+    dest: "C:\\ProgramData\\Promtail\\promtail.yaml"
+  notify:
+    - Restart promtail
+
+- name: Monitor network responses
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify: Restart telegraf
+
+- name: Monitor x509 certificates
+  ansible.windows.win_template:
+    src: x509_input.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\x509_input.conf"
+  notify: Restart telegraf

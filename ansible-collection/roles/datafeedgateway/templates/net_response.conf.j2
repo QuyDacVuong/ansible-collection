@@ -1,0 +1,14 @@
+# Hercules
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hostvars[groups.role_ggn_hercules.0]['private_ip_address'] }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+
+# C_ZNS_LOBBY
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ C_ZNS_LOBBY.split(":")[1] }}:{{ C_ZNS_LOBBY.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+# vim: ft=toml

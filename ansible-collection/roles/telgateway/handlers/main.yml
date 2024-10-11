@@ -1,0 +1,7 @@
+---
+# handlers file for casino.telgateway
+
+- name: Restart Telgateway
+  ansible.windows.win_service:
+    name: PYR_C_TELGATEWAY
+    state: restarted

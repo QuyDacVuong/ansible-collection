@@ -1,0 +1,52 @@
+---
+- name: Create base telgateway folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps\bin\c_telgateway
+    - D:\apps\c_telgateway
+    - D:\apps\configs\c_telgateway
+    - D:\apps\logs\c_telgateway
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ telgateway_binaries }}"
+    win_deploy_id: "telgateway"
+    win_deploy_services:
+      - PYR_C_TELGATEWAY
+  notify: Restart Telgateway
+
+- name: Create config link for telgateway
+  ansible.windows.win_copy:
+    content: "@d:/apps/configs/c_telgateway/dispatcher.ini"
+    dest: D:\apps\c_telgateway\dispatcher.ini
+
+- name: Create config for telgateway
+  ansible.windows.win_template:
+    src: configs/c_telgateway/dispatcher.ini
+    dest: D:\apps\configs\c_telgateway\dispatcher.ini
+  notify: Restart Telgateway
+
+- name: Copy config for telgateway
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: configs/c_telgateway/telgateway.ini
+      dest: D:\apps\configs\c_telgateway\telgateway.ini
+  notify: Restart Telgateway
+
+- name: Create dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_TELGATEWAY
+    path: D:\apps\c_telgateway\pyr64.exe
+    description: Service for GGN Casino Telgateway
+
+- name: Start telgateway service
+  ansible.windows.win_service:
+    name: PYR_C_TELGATEWAY
+    start_mode: auto
+    state: started

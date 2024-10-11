@@ -1,0 +1,14 @@
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true $JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m  \
+-DlistenPort=8106 -DserverPort=8031 "
+
+
+export CASINOSERVICES_HOME=/bigdisk0/tomcat/conf/cs-common
+
+export CS_JPF_HOME=/bigdisk0/tomcat/conf/cs-jpf-stakelogic
+
+export VENDOR=STAKELOGIC
+export VENDOR_ID=27
+
+export TOMCAT_VERSION=/software/tomcat8
+
+export JAVA_HOME=/software/jre11

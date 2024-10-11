@@ -1,0 +1,88 @@
+---
+- name: Configure promtail
+  ansible.builtin.set_fact:
+    promtail_positions_directory: /bigdisk0/monitoring/
+    promtail_config_positions:
+      filename: "/bigdisk0/monitoring/promtail-positions.yml"
+    promtail_config_clients:
+      - url: "{{ loki_url }}/loki/api/v1/push"
+        tenant_id: casino
+        external_labels:
+          environment: "{{ hostvars[inventory_hostname].tags.CasinoEnvironment }}"
+          name: "{{ hostvars[inventory_hostname].tags.Name }}"
+          instanceid: "{{ hostvars[inventory_hostname].instance_id }}"
+          platform: "{{ hostvars[inventory_hostname].tags.Platform }}"
+          zone: "{{ hostvars[inventory_hostname].tags.Zone }}"
+- name: Add standard scrapes
+  ansible.builtin.set_fact:
+    promtail_config_scrape_configs: "{{ promtail_config_scrape_configs + [item] }}"
+  loop:
+    - job_name: journal
+      journal:
+        max_age: 12h
+        labels:
+          job: systemd-journal
+      relabel_configs:
+        - source_labels: ["__journal__systemd_unit"]
+          target_label: "unit"
+- name: Create promtail user
+  ansible.builtin.user:
+    name: promtail
+    system: true
+    home: /opt/promtail
+    shell: /bin/false
+- name: Create promtail config directory
+  ansible.builtin.file:
+    path: "{{ promtail_config_dir }}"
+    state: directory
+    owner: promtail
+    group: promtail
+    mode: "0755"
+- name: Download promtail
+  ansible.builtin.unarchive:
+    src: https://github.com/grafana/loki/releases/download/v2.9.2/promtail-linux-amd64.zip
+    dest: /usr/local/bin
+    include: promtail-linux-amd64
+    remote_src: true
+- name: Create promtail service
+  ansible.builtin.template:
+    src: promtail.service
+    dest: /etc/systemd/system/promtail.service
+    owner: root
+    group: root
+    mode: "0644"
+- name: Allow promtail to tail logs
+  ansible.posix.acl:
+    path: /var/log
+    entity: promtail
+    etype: user
+    permissions: rwX
+    default: true
+    state: present
+    recurse: true
+- name: Allow promtail to read journal logs
+  ansible.builtin.user:
+    name: promtail
+    groups: systemd-journal
+    append: true
+- name: Create monitoring folder in BigDisk0 for promtail-positions
+  ansible.builtin.file:
+    path: "{{ promtail_positions_directory }}"
+    state: directory
+    owner: promtail
+    group: promtail
+    mode: "0755"
+- name: Configure promtail
+  ansible.builtin.template:
+    src: config.yml.j2
+    dest: "{{ promtail_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart promtail
+- name: Validate promtail config
+  ansible.builtin.command:
+    cmd: /usr/local/bin/promtail-linux-amd64 -config.file {{ promtail_config_file }} -check-syntax
+  register: promtail_verify_config
+  changed_when: promtail_verify_config.rc != 0

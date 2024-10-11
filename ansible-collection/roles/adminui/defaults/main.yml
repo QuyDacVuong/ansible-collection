@@ -1,0 +1,9 @@
+---
+adminui_content:
+  - name: ccmsui
+    url: https://artifactory.pyrsoftware.ca/artifactory/packagesraw/ccmsui/ccmsui-1.0.166.zip
+  - name: unifiedCasinoAdmin
+    url: https://artifactory.pyrsoftware.ca/artifactory/packagesraw/unifiedCasinoAdmin/unifiedCasinoAdmin-1.1.601.zip
+  - name: casinoadminui
+    url: https://artifactory.pyrsoftware.ca/artifactory/packagesraw/casinoadminui/casinoadminui-1.0.86.tar.gz
+...

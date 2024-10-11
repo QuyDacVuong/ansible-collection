@@ -1,0 +1,12 @@
+---
+- name: Restart ibm-db2-exporter
+  ansible.builtin.service:
+    name: ibm-db2-exporter
+    state: restarted
+  when: molecule_yml is undefined
+
+- name: Reload telegraf
+  ansible.builtin.service:
+    name: telegraf
+    state: reloaded
+  when: molecule_yml is undefined

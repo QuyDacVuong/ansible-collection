@@ -1,0 +1,152 @@
+---
+- name: Create base lobby folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop: "{{ lobby_folders }}"
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ lobby_binaries }}"
+    win_deploy_id: "lobby"
+    win_deploy_services:
+      - PYR_C_LOBBY
+
+- name: Create server list
+  ansible.builtin.set_fact:
+    full_server_list: "{{ table_servers }}"
+
+# Copy over other config files
+- name: Copy config for lobby
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop: "{{ lobby_configs }}"
+  notify:
+    - Restart hesender Monitoring service
+    - Restart memsender Monitoring service
+    - Restart lobby service
+
+- name: Configure sanity limits
+  block:
+    - name: Configure sanity.rgproxy.limit
+      ansible.windows.win_copy:
+        content: "[MsgLimits]"
+        dest: D:\apps\configs\c_lobby\sanity.rgproxy.limit
+    - name: Configure sanity.ldproxy.limit
+      ansible.windows.win_copy:
+        content: "[MsgLimits]"
+        dest: D:\apps\configs\c_lobby\sanity.ldproxy.limit
+    - name: Configure sanity.ictable.limit
+      ansible.windows.win_copy:
+        content: "[MsgLimits]"
+        dest: D:\apps\configs\c_lobby\sanity.ictable.limit
+    - name: Configure sanity.table.limit
+      ansible.windows.win_copy:
+        content: "[MsgLimits]"
+        dest: D:\apps\configs\c_lobby\sanity.table.limit
+    - name: Configure sanity.ptldproxy.limit
+      ansible.windows.win_copy:
+        content: "[MsgLimits]"
+        dest: D:\apps\configs\c_lobby\sanity.ptldproxy.limit
+
+- name: Create EntropyRouter.ini link
+  ansible.windows.win_copy:
+    content: "@D:\\apps\\configs\\c_lobby\\entropy\\EntropyRouter.ini"
+    dest: D:\apps\configs\c_lobby\EntropyRouter.ini
+
+- name: Create dgeentropy.ini
+  when: env=="qa1" or env=="fips-casino-qa1"
+  ansible.windows.win_template:
+    src: templates/configs/c_lobby/entropy/dgeentropy.ini
+    dest: D:\apps\configs\c_lobby\entropy\dgeentropy.ini
+
+- name: Create dgeentropy.script
+  when: env=="qa1" or env=="fips-casino-qa1"
+  ansible.windows.win_template:
+    src: templates/configs/c_lobby/entropy/dgeentropy.script
+    dest: D:\apps\configs\c_lobby\entropy\dgeentropy.script
+
+# Credentials
+
+- name: Generate cert
+  ansible.builtin.include_role:
+    name: casino.server.generate_certs
+  vars:
+    certificate_domain: "disp-{{ env }}.csr.pstars-{{ region }}-intermediate"
+- name: Generate encryption key
+  ansible.builtin.set_fact:
+    key_passphrase: "{{ lookup('ansible.builtin.password', '/dev/null', length=15, chars=['ascii_letters', 'digits'], seed=inventory_hostname) }}"
+  no_log: true
+- name: Download Signed certs from ACM
+  ansible.windows.win_command:
+    argv:
+      - C:\Program Files\Amazon\AWSCLIV2\aws.exe
+      - acm
+      - export-certificate
+      - --certificate-arn
+      - "{{ certificate_arn }}"
+      - --passphrase
+      - "{{ key_passphrase | b64encode }}"
+  register: acm_certs
+  no_log: true
+  when: not ansible_check_mode
+- name: Certificate config
+  ansible.windows.win_copy:
+    content: |
+      servercert=d:\apps\credentials\server_disp.pyr.crt
+      serverkey=d:\apps\credentials\server_disp.pyr.key
+      serverkeypassword={{ key_passphrase }}
+    dest: D:\apps\credentials\cert.ini
+  notify:
+    - Restart lobby service
+- name: CA certificate
+  ansible.windows.win_copy:
+    remote_src: true
+    src: "C:\\software\\pki-csr-pstars-{{ region }}-intermediate.pem"
+    dest: D:\apps\credentials\ca_disp.crt
+  notify:
+    - Restart lobby service
+- name: Server certificate
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).Certificate }}{{ (acm_certs.stdout | from_json).CertificateChain }}"
+    dest: D:\apps\credentials\server_disp.pyr.crt
+  notify:
+    - Restart lobby service
+- name: Server key
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).PrivateKey }}"
+    dest: D:\apps\credentials\server_disp.pyr.key
+  notify:
+    - Restart lobby service
+- name: Server pass
+  ansible.windows.win_copy:
+    content: "{{ key_passphrase }}"
+    dest: D:\apps\credentials\server_disp.pyr.pass
+  notify:
+    - Restart lobby service
+
+- name: Configure x509 certificate input
+  ansible.windows.win_template:
+    src: x509_input.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\x509_input.conf"
+  notify: Restart Telegraf
+
+# Create Windows Services for the apps
+- name: Create Lobby service
+  ansible.windows.win_service:
+    name: PYR_C_LOBBY
+    path: D:\apps\c_lobby\pyr64.exe
+    display_name: PYR_C_LOBBY
+    description: Service for GGN Casino Lobby
+
+# Start app Windows Services
+- name: Start Lobby service
+  ansible.windows.win_service:
+    name: PYR_C_LOBBY
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch

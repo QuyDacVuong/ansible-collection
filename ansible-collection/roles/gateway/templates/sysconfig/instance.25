@@ -1,0 +1,10 @@
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true $JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2048m  \
+-DlistenPort=8104 -DserverPort=9125 "
+
+export PTLDGATEWAY_HOME=/bigdisk0/tomcat/conf/cs-playtechlive  
+export VENDORSERVICEGATEWAY_HOME=/bigdisk0/tomcat/conf/cs-vendorservice-playtech
+export VENDOR=PLAYTECHLIVE                                           
+export VENDOR_ID=25                                                  
+ 
+export TOMCAT_VERSION=/software/tomcat8
+export JAVA_HOME=/software/jre11

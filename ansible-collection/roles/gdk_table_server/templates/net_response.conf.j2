@@ -1,0 +1,35 @@
+# Hercules
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hercules_host }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+
+# Lobby
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ lobby_host }}:2348"
+  interval="60s"
+  collection_jitter="20s"
+
+# OLTP
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ oltp_host }}:2348"
+  interval="60s"
+  collection_jitter="20s"
+
+# C_ZNS_OLTP
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ C_ZNS_OLTP.split(":")[1] }}:{{ C_ZNS_OLTP.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+
+# C_ZNS_LOBBY
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ C_ZNS_LOBBY.split(":")[1] }}:{{ C_ZNS_LOBBY.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+# vim: ft=toml

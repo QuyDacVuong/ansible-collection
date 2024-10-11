@@ -1,0 +1,59 @@
+---
+- name: Converge
+  hosts: gateway
+  become: true
+
+  pre_tasks:
+    - name: Install tar
+      ansible.builtin.yum:
+        name:
+          - tar
+          - unzip
+          - acl
+        state: present
+    - name: Create bigdisk0 directory
+      ansible.builtin.file:
+        path: /bigdisk0
+        state: directory
+        mode: "0755"
+    - name: Install crypto library
+      ansible.builtin.pip:
+        name: cryptography
+  roles:
+    - role: casino.server.gateway
+  post_tasks:
+    - name: Create private key (RSA, 4096 bits)
+      community.crypto.openssl_privatekey:
+        path: /etc/nginx/tls/server.key
+        passphrase: changeme
+        cipher: auto
+        owner: nginx
+        group: nginx
+    - name: Create simple self-signed certificate
+      community.crypto.x509_certificate:
+        path: /etc/nginx/tls/server-bundle.crt
+        privatekey_path: /etc/nginx/tls/server.key
+        provider: selfsigned
+        owner: nginx
+        group: nginx
+        privatekey_passphrase: changeme
+    - name: Create passphrase
+      ansible.builtin.copy:
+        content: changeme
+        dest: /etc/nginx/tls/server.passphrase
+        mode: "0644"
+        owner: nginx
+        group: nginx
+    - name: Install direnv
+      ansible.builtin.get_url:
+        url: https://github.com/direnv/direnv/releases/download/v2.34.0/direnv.linux-amd64
+        dest: /usr/bin/direnv
+        owner: root
+        mode: 0755
+    - name: Load direnv
+      ansible.builtin.lineinfile:
+        path: /root/.bashrc
+        line: eval "$(direnv hook bash)"
+        create: true
+        owner: root
+        mode: 0644

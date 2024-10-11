@@ -1,0 +1,79 @@
+---
+oltp_gameis_proxy_instances: 4
+
+db2_client_package: "DB2_client_11.5.8.32821_ntx64"
+db2_client_version: "11.5.8000.7748"
+
+db_config:
+  dbs:
+    zone0:
+      dbname: ROOTCMQA
+      host: 127.0.0.1
+      port: 50000
+    zoneS:
+      dbname: RZNSCMQA
+      host: 127.0.0.1
+      port: 50000
+  parameters:
+    - name: ConnectTimeout
+      value: 180
+    - name: IsolationLevel
+      value: SQL_TXN_READ_UNCOMMITTED
+
+oltp_binaries:
+  - binary: pyr64.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: pyrdbmproxy2smem.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: pyretcdbmsmem.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: pyrm2nproxysmem.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: pyrolapsaversmem.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: pyrtobrelaysmem.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\bin\c_tobrelay\
+  - binary: auxdataservices.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxdataservices/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: auxdbd.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxdbd/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: auxdbm.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxdbm/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: auxemailserver.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxemailserver/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: auxintegrationdbm.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxintegrationdbm/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: auxjackpotdbm.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxjackpotdbm/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: auxproxyserver.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxproxyserver/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: auxtabledbm.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxtabledbm/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: auxiddbm.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxiddbm/
+    dest_path: D:\apps\bin\c_oltp\
+  - binary: auxreef.exe
+    url_path: build-results/casinoserver/TAG/AUX2303/auxreef/
+    dest_path: D:\apps\bin\c_reef_oltp\
+
+non_critical_host: 127.0.36.1
+
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+
+region: eu-west-1
+service_start_mode: "auto"
+service_state: "started"

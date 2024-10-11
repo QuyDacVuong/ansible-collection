@@ -1,0 +1,214 @@
+---
+
+- name: Create expected directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /bigdisk0/software
+
+- name: Create whatami
+  ansible.builtin.template:
+    src: whatami-linux
+    dest: /usr/bin/whatami
+    mode: 0755
+
+- name: Configure sshd
+  ansible.builtin.copy:
+    src: sshd_config
+    dest: /etc/ssh/sshd_config
+    mode: "0640"
+    owner: root
+    group: root
+
+- name: Disable salt minion
+  ansible.builtin.systemd_service:
+    name: salt-minion
+    state: stopped
+    enabled: false
+
+- name: Set login banner
+  ansible.builtin.copy:
+    src: issue.net
+    dest: /etc/issue.net
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Add pstars EU CA certificate
+  ansible.builtin.copy:
+    src: pki-csr-pstars-eu-west-1-intermediate.pem
+    dest: /usr/share/pki/ca-trust-source/anchors/pki-csr-pstars-eu-west-1-intermediate.pem
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Update ca-trust
+
+- name: Add pstars US CA certificate
+  ansible.builtin.copy:
+    src: pki-csr-pstars-us-east-1-intermediate.pem
+    dest: /usr/share/pki/ca-trust-source/anchors/pki-csr-pstars-us-east-1-intermediate.pem
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Update ca-trust
+
+- name: Install base packages
+  ansible.builtin.yum:
+    name:
+      - bzip2
+      - curl
+      - jq
+      - lsof
+      - mtr
+      - nc
+      - rsync
+      - screen
+      - strace
+      - tcpdump
+      - traceroute
+      - unzip
+      - vim
+      - yum-utils
+
+- name: Configure node_exporter
+  tags:
+    - node_exporter
+  block:
+    - name: Create node_exporter user
+      ansible.builtin.user:
+        name: node_exporter
+        system: true
+        home: /opt/node_exporter
+        shell: /bin/false
+    - name: Download node_exporter
+      ansible.builtin.get_url:
+        url: https://github.com/prometheus/node_exporter/releases/download/v{{ common_node_exporter_version }}/node_exporter-{{ common_node_exporter_version }}.linux-amd64.tar.gz
+        dest: /bigdisk0/software/node_exporter-{{ common_node_exporter_version }}.linux-amd64.tar.gz
+        owner: root
+        mode: "0644"
+    - name: Extract node_exporter
+      ansible.builtin.unarchive:
+        src: /bigdisk0/software/node_exporter-{{ common_node_exporter_version }}.linux-amd64.tar.gz
+        dest: /bigdisk0/software/
+        remote_src: true
+        creates: /bigdisk0/software/node_exporter-{{ common_node_exporter_version }}.linux-amd64
+    - name: Symlink node_exporter
+      ansible.builtin.file:
+        src: /bigdisk0/software/node_exporter-{{ common_node_exporter_version }}.linux-amd64/node_exporter
+        dest: /usr/local/bin/node_exporter
+        state: link
+        force: true
+    - name: Configure node exporter service
+      ansible.builtin.copy:
+        src: node_exporter.service
+        dest: /etc/systemd/system/node_exporter.service
+        owner: root
+        group: root
+        mode: "0644"
+    - name: Create node_exporter directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+        owner: node_exporter
+        group: node_exporter
+      loop:
+        - /opt/node_exporter/scripts
+        - /opt/node_exporter/textfile
+    - name: Enable and start node exporter service
+      ansible.builtin.systemd_service:
+        name: node_exporter
+        daemon_reload: true
+        enabled: true
+        state: started
+      tags:
+        - notest
+
+- name: Configure telegraf
+  tags: telegraf
+  block:
+    - name: Download telegraf
+      ansible.builtin.get_url:
+        url: "{{ artifactory_baseurl }}/ggn-applications/telegraf-{{ common_telegraf_version }}.x86_64.rpm"
+        dest: /bigdisk0/software/telegraf-{{ common_telegraf_version }}.x86_64.rpm
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        mode: "0644"
+    - name: Install telegraf
+      ansible.builtin.yum:
+        name: /bigdisk0/software/telegraf-{{ common_telegraf_version }}.x86_64.rpm
+        state: present
+    - name: Configure telegraf
+      ansible.builtin.copy:
+        src: telegraf.conf
+        dest: /etc/telegraf/telegraf.conf
+        owner: telegraf
+        group: telegraf
+        mode: "0640"
+      notify:
+        - Restart telegraf
+    - name: Start telegraf
+      ansible.builtin.systemd_service:
+        name: telegraf
+        state: started
+        enabled: true
+      tags:
+        - notest
+
+
+- name: Configure promtail
+  tags: promtail
+  block:
+    - name: Create promtail user
+      ansible.builtin.user:
+        name: promtail
+        system: true
+        home: /opt/promtail
+        shell: /bin/false
+    - name: Create promtail config directory
+      ansible.builtin.file:
+        path: /etc/promtail
+        state: directory
+        owner: promtail
+        group: promtail
+        mode: "0755"
+    - name: Download promtail
+      ansible.builtin.unarchive:
+        src: https://github.com/grafana/loki/releases/download/v2.9.2/promtail-linux-amd64.zip
+        dest: /usr/local/bin
+        include: promtail-linux-amd64
+        remote_src: true
+    - name: Create promtail service
+      ansible.builtin.copy:
+        src: promtail.service
+        dest: /etc/systemd/system/promtail.service
+        owner: root
+        group: root
+        mode: "0644"
+    - name: Allow promtail to tail logs
+      ansible.posix.acl:
+        path: /var/log
+        entity: promtail
+        etype: user
+        permissions: rwX
+        default: true
+        state: present
+        recurse: true
+    - name: Allow promtail to read journal logs
+      ansible.builtin.user:
+        name: promtail
+        groups: systemd-journal
+        append: true
+      notify:
+        - Restart promtail
+    - name: Create monitoring folder in BigDisk0 for promtail-positions
+      ansible.builtin.file:
+        path: /bigdisk0/monitoring
+        state: directory
+        owner: promtail
+        group: promtail
+        mode: "0755"

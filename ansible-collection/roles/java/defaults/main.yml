@@ -1,0 +1,8 @@
+---
+artifactory_baseurl: https://artifactory.pyrsoftware.ca/artifactory
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+java_package: OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz
+java_version: jdk-17.0.10+7

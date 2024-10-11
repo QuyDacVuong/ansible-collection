@@ -1,0 +1,62 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: "D:\\promtail-positions.yaml"
+
+clients:
+  - url: {{ loki_url }}
+    external_labels:
+      environment: {{ hostvars[inventory_hostname].tags.CasinoEnvironment }}
+      name: {{ hostvars[inventory_hostname].tags.Name }}
+      instanceid: {{ hostvars[inventory_hostname].instance_id }}
+      platform: {{ hostvars[inventory_hostname].tags.Platform }}
+      zone: {{ hostvars[inventory_hostname].tags.Zone }}
+    tenant_id: casino
+
+scrape_configs:
+  - job_name: windows-eventlog-system
+    windows_events:
+      use_incoming_timestamp: true
+      bookmark_path: "./bookmark.xml"
+      eventlog_name: System
+      labels:
+        job: windows-eventlog
+    relabel_configs:
+      - source_labels: ['computer']
+        target_label: 'host'
+
+  - job_name: dispatcher-logs
+    static_configs:
+    - targets:
+      - localhost
+      labels:
+        job: dispatcher
+        __path__: D:\apps\c_gdk\dispatcher.log.*
+    pipeline_stages:
+    - regex:
+        expression: '^(?P<extractedtimestamp>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})'
+    - timestamp:
+        source: extractedtimestamp
+        format: '2006-01-02 15:04:05.000'
+        location: 'Etc/GMT-0'
+    - drop:
+        older_than: 24h
+
+  - job_name: gdk-logs
+    static_configs:
+    - targets:
+      - localhost
+      labels:
+        job: gdk
+        __path__: D:\apps\logs\c_gdk\*.log.*
+    pipeline_stages:
+    - regex:
+        expression: '^(?P<extractedtimestamp>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})'
+    - timestamp:
+        source: extractedtimestamp
+        format: '2006-01-02 15:04:05.000'
+        location: 'Etc/GMT-0'
+    - drop:
+        older_than: 24h

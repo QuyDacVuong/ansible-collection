@@ -1,0 +1,14 @@
+# Hercules
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ hercules_host }}:9322"
+  interval="60s"
+  collection_jitter="20s"
+
+# aams gateway
+[[inputs.net_response]]
+  protocol = "tcp"
+  address = "{{ aams_gateway_host.split(":")[1] }}:{{ aams_gateway_host.split(":")[2] }}"
+  interval="60s"
+  collection_jitter="20s"
+# vim: ft=toml

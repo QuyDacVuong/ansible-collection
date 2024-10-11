@@ -1,0 +1,17 @@
+---
+telgateway_binaries:
+  - binary: pyr64.exe
+    url_path: releasesrawserver/coreserver/TAG/PA_PROD_2023_01_2301G/
+    dest_path: D:\apps\c_telgateway
+  - binary: pyrtelgatewaysmem64.exe
+    url_path: build-results/telgateway/master/current_202308031542-1f93ca4dd578/telgatewaysmem/
+    dest_path: D:\apps\bin\c_telgateway
+
+telemetry_gateway_address: "ip:127.0.0.1:5447"
+telemetry_gateway_instance: "TelgatewayInstance"
+telgateway_otlp_exporter_enabled: 1
+telgateway_otlp_exporter_endpoint: "http://127.0.0.1:4317"
+telgateway_prometheus_exporter_enabled: 0
+telgateway_prometheus_exporter_endpoint: "http://localhost:9464"
+
+hercules_host: 127.0.0.1

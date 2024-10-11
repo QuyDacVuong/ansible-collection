@@ -1,0 +1,42 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sec="http://www.betfair.com/security/" xmlns:bet="http://www.betfair.com/servicetypes/v1/BetfairGamingInterface/">
+   <soapenv:Header>
+      <sec:Credentials>
+         <!--You may enter ANY elements at this point-->
+      </sec:Credentials>
+   </soapenv:Header>
+   <soapenv:Body>
+      <bet:PlayerLoginRequest>
+         <bet:playerLoginRequest>
+            <!--You may enter the following 7 items in any order-->
+            <bet:baseRequest>
+               <!--You may enter the following 4 items in any order-->
+               <bet:rgsAuthentication>
+                  <!--You may enter the following 2 items in any order-->
+                  <bet:rgsUser>Ggn</bet:rgsUser>
+                  <bet:rgsPassword>I2ZQF8xWPUvDwSEoLR4N</bet:rgsPassword>
+               </bet:rgsAuthentication>
+               <!--Optional:-->
+               <bet:userAuthentication>
+                  <!--You may enter the following 3 items in any order-->
+                  <bet:accountId>104092559</bet:accountId>
+                  <bet:token>DDmyildJzdLBO4zvbftBuggNOOh6bnGSBNBrzHT-fkpV8QJgqzoHmdeXtiUNRfuBa4QdF_CYR8JLrz_k3nos3GdUbWB49CclupWqO5R-kiJYo73QJtSroMB1KZ5gAeqF</bet:token>
+                  <bet:authenticationType>ONLINE</bet:authenticationType>
+               </bet:userAuthentication>
+               <bet:requestId>8808486-60</bet:requestId>
+               <bet:timestamp>1620952877000</bet:timestamp>
+            </bet:baseRequest>
+            <bet:productName>arcade</bet:productName>
+            <!--Optional:-->
+            <bet:gameCode>3003-2</bet:gameCode>
+            <!--Optional:-->
+            <bet:ipAddress>10.30.174.22</bet:ipAddress>
+            <!--Optional:-->
+            <bet:channel>i</bet:channel>
+            <!--Optional:-->
+            <bet:realMode>true</bet:realMode>
+            <!--Optional:-->
+            <bet:metadata/>
+         </bet:playerLoginRequest>
+      </bet:PlayerLoginRequest>
+   </soapenv:Body>
+</soapenv:Envelope>

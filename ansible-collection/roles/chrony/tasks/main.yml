@@ -1,0 +1,21 @@
+---
+- name: Install Chrony
+  ansible.builtin.yum:
+    name:
+      - chrony
+
+- name: Configure Chrony
+  ansible.builtin.copy:
+    src: chrony.conf
+    dest: /etc/chrony.conf
+    mode: "0644"
+  notify:
+    - Restart Chrony
+
+- name: Enable chrony
+  ansible.builtin.systemd_service:
+    name: chronyd
+    enabled: true
+    state: started
+  tags:
+    - notest

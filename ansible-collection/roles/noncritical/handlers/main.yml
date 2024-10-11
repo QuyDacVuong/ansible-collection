@@ -1,0 +1,39 @@
+---
+# Restart monitoring service
+- name: Restart hesender Monitoring service
+  ansible.windows.win_service:
+    name: PYR_HESENDER
+    state: restarted
+
+- name: Restart memsender Monitoring service
+  ansible.windows.win_service:
+    name: PYR_MEMSENDER
+    state: restarted
+
+- name: Restart stats
+  ansible.windows.win_service:
+    name: PYR_C_STATS
+    state: restarted
+  when: flag_no_restart is not defined
+
+- name: Restart reef
+  ansible.windows.win_service:
+    name: PYR_C_REEF_STATS
+    state: restarted
+  when: flag_no_restart is not defined
+
+- name: Restart auxwingman
+  ansible.windows.win_service:
+    name: PYR_C_AUXWINGMAN
+    state: restarted
+  when: flag_no_restart is not defined
+
+- name: Restart promtail
+  ansible.windows.win_service:
+    name: Promtail
+    state: restarted
+
+- name: Restart Telegraf
+  ansible.windows.win_service:
+    name: Telegraf
+    state: restarted

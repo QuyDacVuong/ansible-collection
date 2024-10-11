@@ -1,0 +1,11 @@
+# we can setup memory ajustments here ... and everything else
+
+
+export JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true -XX:MaxPermSize=1024m -Xss1m -Xms256m -Xmx2048m \
+-DlistenPort=8147 -DserverPort=9168 -Djavax.net.debug=ssl"
+
+
+export TOMCAT_VERSION=/software/tomcat8
+export PPBBACKOFFICEGATEWAY_HOME=/bigdisk0/tomcat/conf/ppbbackofficegateway
+export JAVA_HOME=/software/jre11
+export TOMCAT_VERSION=/software/tomcat8

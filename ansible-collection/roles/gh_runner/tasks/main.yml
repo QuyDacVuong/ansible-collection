@@ -1,0 +1,172 @@
+---
+- name: Check github connectivity
+  ansible.builtin.uri:
+    url: https://github.com
+
+- name: Create ghrunner user
+  ansible.builtin.user:
+    name: ghrunner
+    system: true
+
+- name: Disable salt minion
+  ansible.builtin.systemd_service:
+    name: salt-minion
+    state: stopped
+    enabled: false
+  tags:
+    - notest
+
+- name: Create directory for Github Runner
+  ansible.builtin.file:
+    path: /opt/{{ squad }}gh-runner-{{ item }}
+    state: directory
+    owner: ghrunner
+    group: ghrunner
+    mode: "0755"
+  with_sequence: start=1 end="{{ number_of_runner }}"
+
+- name: Ensure group "docker" exists with correct gid
+  ansible.builtin.group:
+    name: docker
+    state: present
+    gid: 1750
+  when: runner_action == "install"
+
+- name: Install docker (AmazonLinux 2)
+  ansible.builtin.shell: |
+    amazon-linux-extras install docker
+  args:
+    creates: /usr/bin/docker
+  become: true
+  when: runner_action == "install" and (ansible_distribution=="Amazon") and (ansible_distribution_version=="2")
+
+- name: Install docker (AmazonLinux 2023)
+  ansible.builtin.yum:
+    name: docker
+  become: true
+  when: runner_action == "install" and (ansible_distribution=="Amazon") and (ansible_distribution_version=="2023")
+
+- name: Add ghrunner to group docker
+  ansible.builtin.user:
+    name: ghrunner
+    groups: docker
+    append: true
+  become: true
+  when: runner_action == "install"
+
+- name: Starting docker service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+  when: runner_action == "install"
+  tags:
+    - notest
+
+- name: Create create-latest-svc.sh file
+  ansible.builtin.copy:
+    src: create-latest-svc.sh
+    dest: /opt/{{ squad }}gh-runner-{{ item }}/create-latest-svc.sh
+    owner: ghrunner
+    group: ghrunner
+    mode: "0755"
+  when: runner_action == "install"
+  with_sequence: start=1 end="{{ number_of_runner }}"
+
+
+- name: Create delete.sh file
+  ansible.builtin.copy:
+    src: delete.sh
+    dest: /opt/{{ squad }}gh-runner-{{ item }}/delete.sh
+    owner: ghrunner
+    group: ghrunner
+    mode: "0755"
+  with_sequence: start=1 end="{{ number_of_runner }}"
+
+- name: Create remove-svc.sh file
+  ansible.builtin.copy:
+    src: remove-svc.sh
+    dest: /opt/{{ squad }}gh-runner-{{ item }}/remove-svc.sh
+    owner: ghrunner
+    group: ghrunner
+    mode: "0755"
+  with_sequence: start=1 end="{{ number_of_runner }}"
+
+- name: Configure runner
+  ansible.builtin.shell: |
+    export RUNNER_CFG_PAT={{ runner_token }} && ./create-latest-svc.sh -s -- -s {{ repo_name }} -u ghrunner -n {{ env }}-self-hosted-{{ item }} -l {{ env }}-runner,{{ labels }}
+  args:
+    chdir: /opt/{{ squad }}gh-runner-{{ item }}
+  when: runner_action == "install"
+  become: true
+  tags: notest
+  with_sequence: start=1 end="{{ number_of_runner }}"
+
+- name: Uninstall runner
+  ansible.builtin.shell: |
+    export RUNNER_CFG_PAT={{ runner_token }} && ./remove-svc.sh {{ repo_name }}
+  args:
+    chdir: /opt/{{ squad }}gh-runner-{{ number_of_runner }}
+  when: runner_action == "uninstall"
+  become: true
+  tags: notest
+
+- name: Delete runner
+  ansible.builtin.shell: |
+    export RUNNER_CFG_PAT={{ runner_token }} && ./delete.sh {{ repo_name }} {{ env }}-self-hosted-{{ number_of_runner }}
+  args:
+    chdir: /opt/{{ squad }}gh-runner-{{ number_of_runner }}
+  when: runner_action == "delete"
+  tags: notest
+  become: true
+
+- name: Delete runner directory
+  ansible.builtin.file:
+    state: absent
+    path: /opt/{{ squad }}gh-runner-{{ number_of_runner }}/runner
+  when: runner_action == "delete"
+  tags: notest
+  become: true
+
+- name: Configure telegraf
+  tags: telegraf
+  when: runner_action == "install"
+  block:
+    - name: Download telegraf
+      ansible.builtin.get_url:
+        url: "{{ artifactory_baseurl }}/ggn-applications/telegraf-{{ telegraf_version }}.x86_64.rpm"
+        dest: /bigdisk0/telegraf-{{ telegraf_version }}.x86_64.rpm
+        url_username: "{{ artifactory_username }}"
+        url_password: "{{ artifactory_password }}"
+        mode: "0644"
+    - name: Install telegraf
+      ansible.builtin.yum:
+        name: /bigdisk0/telegraf-{{ telegraf_version }}.x86_64.rpm
+        state: present
+    - name: Configure telegraf
+      ansible.builtin.copy:
+        src: telegraf.conf
+        dest: /etc/telegraf/telegraf.conf
+        owner: telegraf
+        group: telegraf
+        mode: "0640"
+      notify:
+        - Restart telegraf
+    - name: Configure x509 external monitor
+      when: env.startswith("management") and external_urls is iterable and external_urls | length > 0
+      ansible.builtin.template:
+        src: x509_input.conf.j2
+        dest: /etc/telegraf/telegraf.d/x509_input_{{ squad }}.conf
+        owner: telegraf
+        group: telegraf
+        mode: "0644"
+        validate: telegraf -test -config %s
+      notify:
+        - Restart telegraf
+    - name: Start telegraf
+      ansible.builtin.systemd_service:
+        name: telegraf
+        state: started
+        enabled: true
+      tags:
+        - notest

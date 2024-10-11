@@ -1,0 +1,13 @@
+{
+  "SchemaVersion": "1.0",
+  "TypeName": "Custom:PyrBinaries",
+  "Content": [
+    {% for item in win_deploy_bins %}
+    {
+      "source": "{{ artifactory_baseurl }}/{{ item.url_path }}{{ item.binary }}",
+      "dest": {{ (item.dest_path, item.binary) | join('\\') | to_json }},
+      "deploy": "{{ win_deploy_id }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}

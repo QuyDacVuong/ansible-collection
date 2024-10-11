@@ -1,0 +1,79 @@
+[parameters]
+
+item=\System\Processor Queue Length, name=System - Processor Queue Length
+item=\System\System Up Time, name=System - System Up Time
+
+item=\Memory\Available MBytes, name=Memory - Available MBytes
+item=\Memory\System Cache Resident Bytes, name=Memory - System Cache Resident Bytes
+item=\Memory\% Committed Bytes in Use, name=Memory - Committed Bytes in Use percent
+item=\Memory\Committed Bytes, name=Memory - Committed Bytes
+item=\Memory\Page Faults/sec, name=Memory - Page Faults per sec
+item=\Memory\Pages/sec, name=Memory - Pages per sec
+item=\Memory\Page Reads/sec, name=Memory - Page Reads per sec
+item=\Memory\Page Writes/sec, name=Memory - Page Writes per sec
+item=\Memory\Pages Input/sec, name=Memory - Pages Input per sec
+item=\Memory\Pages Output/sec, name=Memory - Pages Output per sec
+item=\Memory\Pool Nonpaged Allocs, name=Memory - Pool Nonpaged Allocs
+item=\Memory\Pool Nonpaged Bytes, name=Memory - Pool Nonpaged Bytes
+
+item=\Cache\Data Map Hits %, name=Cache - Data Map Hits percent
+item=\Cache\Pin Read Hits %, name=Cache - Pin Read Hits percent
+
+item=\Process(HeSender64)\Working Set, name=HeSender64 - Working Set
+item=\Process(HeSender64)\% Processor Time, name=HeSender64 - Processor Time percent
+
+item=\Process(HeServer)\Working Set, name=HeServer - Working Set
+item=\Process(HeServer)\% Processor Time, name=HeServer - Processor Time percent
+item=\Process(HeServer)\IO Read Bytes/sec, name=HeServer - IO Read Bytes per sec
+item=\Process(HeServer)\IO Write Bytes/sec, name=HeServer - IO Write Bytes per sec
+item=\Process(HeServer)\IO Write Operations/sec, name=HeServer - IO Write Operations per sec
+item=\Process(HeServer)\Thread Count, name=HeServer - Thread Count
+item=\Process(HeServer)\Handle Count, name=HeServer - Handle Count
+item=\Process(HeServer)\Virtual Bytes, name=HeServer - Virtual Bytes
+
+item=\Process(HeServer#1)\Working Set, name=HeServer1 - Working Set
+item=\Process(HeServer#1)\% Processor Time, name=HeServer1 - Processor Time percent
+item=\Process(HeServer#1)\IO Read Bytes/sec, name=HeServer1 - IO Read Bytes per sec
+item=\Process(HeServer#1)\IO Write Bytes/sec, name=HeServer1 - IO Write Bytes per sec
+item=\Process(HeServer#1)\IO Write Operations/sec, name=HeServer1 - IO Write Operations per sec
+item=\Process(HeServer#1)\Thread Count, name=HeServer1 - Thread Count
+item=\Process(HeServer#1)\Handle Count, name=HeServer1 - Handle Count
+item=\Process(HeServer#1)\Virtual Bytes, name=HeServer1 - Virtual Bytes
+
+
+item=\Process(pyrtest2)\Working Set, name=pyr2 - Working Set
+item=\Process(pyrtest2)\% Processor Time, name=pyr2 - Processor Time percent
+
+item=\Process(pyrHeDSSMem)\Working Set,      name=pyrHeDSSMem - Working Set
+item=\Process(pyrHeDSSMem)\% Processor Time, name=pyrHeDSSMem - Processor Time percent
+item=\Process(pyrHeDSSMem)\IO Read Bytes/sec, name=pyrHeDSSMem - IO Read Bytes per sec
+item=\Process(pyrHeDSSMem)\IO Write Bytes/sec, name=pyrHeDSSMem - IO Write Bytes per sec
+item=\Process(pyrHeDSSMem)\IO Write Operations/sec, name=pyrHeDSSMem - IO Write Operations per sec
+item=\Process(pyrHeDSSMem)\Handle Count, name=pyrHeDSSMem - Handle Count
+
+item=\Process(pyrHeHSSMem)\Working Set,      name=pyrHeHSSMem - Working Set
+item=\Process(pyrHeHSSMem)\% Processor Time, name=pyrHeHSSMem - Processor Time percent
+
+item=\Process(pyrHeISSMem)\Working Set,      name=pyrHeISSMem - Working Set
+item=\Process(pyrHeISSMem)\% Processor Time, name=pyrHeISSMem - Processor Time percent
+
+item=\Process(pyrHeESSMem)\Working Set,      name=pyrHeESSMem - Working Set
+item=\Process(pyrHeESSMem)\% Processor Time, name=pyrHeESSMem - Processor Time percent
+
+item=\Process(pyrHeRcpSMem)\Working Set,      name=pyrHeRcpSMem - Working Set
+item=\Process(pyrHeRcpSMem)\% Processor Time, name=pyrHeRcpSMem - Processor Time percent
+item=\Process(pyrHeRcpSMem)\Thread Count, name=pyrHeRcpSMem - Thread Count
+item=\Process(pyrHeRcpSMem)\Handle Count, name=pyrHeRcpSMem - Handle Count
+item=\Process(pyrHeRcpSMem)\Virtual Bytes, name=pyrHeRcpSMem - Virtual Bytes
+
+item=\Process(pyrHeJdgSMem)\Working Set,      name=pyrHeJdgSMem 1 - Working Set
+item=\Process(pyrHeJdgSMem)\% Processor Time, name=pyrHeJdgSMem 1 - Processor Time percent
+
+item=\Process(pyrHeJdgSMem#1)\Working Set,      name=pyrHeJdgSMem 2 - Working Set
+item=\Process(pyrHeJdgSMem#1)\% Processor Time, name=pyrHeJdgSMem 2 - Processor Time percent
+
+item=\Process(pyrHeJdgSMem#2)\Working Set,      name=pyrHeJdgSMem 3 - Working Set
+item=\Process(pyrHeJdgSMem#2)\% Processor Time, name=pyrHeJdgSMem 3 - Processor Time percent
+
+item=\Process(pyrHeJdgSMem#3)\Working Set,      name=pyrHeJdgSMem 4 - Working Set
+item=\Process(pyrHeJdgSMem#3)\% Processor Time, name=pyrHeJdgSMem 4 - Processor Time percent

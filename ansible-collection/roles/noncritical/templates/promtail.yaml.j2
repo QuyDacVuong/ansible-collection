@@ -1,0 +1,76 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: "D:\\promtail-positions.yaml"
+
+clients:
+  - url: {{ loki_url }}
+    external_labels:
+      environment: {{ hostvars[inventory_hostname].tags.CasinoEnvironment }}
+      name: {{ hostvars[inventory_hostname].tags.Name }}
+      instanceid: {{ hostvars[inventory_hostname].instance_id }}
+      platform: {{ hostvars[inventory_hostname].tags.Platform }}
+      zone: {{ hostvars[inventory_hostname].tags.Zone }}
+    tenant_id: casino
+
+scrape_configs:
+  - job_name: windows-eventlog-system
+    windows_events:
+      use_incoming_timestamp: true
+      bookmark_path: "./bookmark.xml"
+      eventlog_name: System
+      labels:
+        job: windows-eventlog
+    relabel_configs:
+      - source_labels: ['computer']
+        target_label: 'host'
+
+  - job_name: stats-dispatcher-logs
+    static_configs:
+    - targets:
+      - localhost
+      labels:
+        job: dispatcher
+        __path__: D:\apps\c_stats\dispatcher.log.*
+
+  - job_name: stats-logs
+    static_configs:
+    - targets:
+      - localhost
+      labels:
+        job: c_stats
+        __path__: D:\apps\logs\c_stats\*.log.*
+
+  - job_name: reef-dispatcher-logs
+    static_configs:
+    - targets:
+      - localhost
+      labels:
+        job: reef-dispatcher
+        __path__: D:\apps\c_reef_stats\dispatcher.log.*
+
+  - job_name: reef-stats-logs
+    static_configs:
+    - targets:
+      - localhost
+      labels:
+        job: c_reef_stats
+        __path__: D:\apps\logs\c_reef_stats\*.log.*
+
+  - job_name: auxwingman-dispatcher-logs
+    static_configs:
+    - targets:
+      - localhost
+      labels:
+        job: auxwingman-dispatcher
+        __path__: D:\apps\c_auxwingman\dispatcher.log.*
+
+  - job_name: auxwingman-logs
+    static_configs:
+    - targets:
+      - localhost
+      labels:
+        job: c_auxwingman
+        __path__: D:\apps\logs\c_auxwingman\*.log.*

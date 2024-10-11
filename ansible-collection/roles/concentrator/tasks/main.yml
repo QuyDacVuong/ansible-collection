@@ -1,0 +1,111 @@
+---
+- name: Create base concentrator folder structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - D:\apps
+    - D:\apps\bin
+    - D:\apps\bin\c_concentrator{{ concentrator_instance }}
+    - D:\apps\c_concentrator{{ concentrator_instance }}
+    - D:\apps\cert
+    - D:\apps\configs\c_concentrator{{ concentrator_instance }}
+    - D:\apps\logs
+
+- name: Win_deploy
+  ansible.builtin.import_role:
+    name: casino.server.win_deploy
+  vars:
+    win_deploy_bins: "{{ concentrator_binaries }}"
+    win_deploy_services:
+      - PYR_C_CONCENTRATOR
+
+- name: Create random but idempotent password
+  ansible.builtin.set_fact:
+    key_passphrase: "{{ lookup('ansible.builtin.password', '/dev/null', length=15, chars=['ascii_letters', 'digits'], seed=inventory_hostname) }}"
+
+- name: Create config link for concentrators
+  ansible.windows.win_copy:
+    content: "@d:/apps/configs/c_concentrator{{ concentrator_instance }}/dispatcher.ini"
+    dest: D:\apps\c_concentrator{{ concentrator_instance }}\dispatcher.ini
+
+- name: Create config for concentrator
+  ansible.windows.win_template:
+    src: dispatcher.ini
+    dest: D:\apps\configs\c_concentrator{{ concentrator_instance }}\dispatcher.ini
+  diff: false  # this file contains a TLS key passphrase
+  notify:
+    - Restart hesender Monitoring service
+    - Restart memsender Monitoring service
+    - Restart Concentrator service
+
+- name: Copy config for concentrator
+  ansible.windows.win_template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: monitor_client/Hercules.ini
+      dest: D:\apps\monitor_client\Hercules.ini
+    - src: monitor_client/MemSender.ini
+      dest: D:\apps\monitor_client\MemSender.ini
+  notify:
+    - Restart hesender Monitoring service
+    - Restart memsender Monitoring service
+
+- name: Download Signed CA certs from ACM
+  ansible.windows.win_command:
+    argv:
+      - C:\Program Files\Amazon\AWSCLIV2\aws.exe
+      - acm
+      - export-certificate
+      - --certificate-arn
+      - "{{ certificate_arn }}"
+      - --passphrase
+      - "{{ key_passphrase | b64encode }}"
+  register: acm_certs
+  no_log: true
+  when: not ansible_check_mode
+
+- name: Copy tls key
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).PrivateKey }}"
+    dest: D:\apps\cert\devreq
+  when: not ansible_check_mode
+
+- name: Copy tls ca bundle
+  ansible.windows.win_copy:
+    content: "{{ (acm_certs.stdout | from_json).Certificate }}{{ (acm_certs.stdout | from_json).CertificateChain }}"
+    dest: D:\apps\cert\devcert
+  when: not ansible_check_mode
+
+- name: Create dispatcher service
+  ansible.windows.win_service:
+    name: PYR_C_CONCENTRATOR{{ concentrator_instance }}
+    path: D:\apps\c_concentrator{{ concentrator_instance }}\pyr64.exe
+
+- name: Start concentrator service
+  ansible.windows.win_service:
+    name: PYR_C_CONCENTRATOR{{ concentrator_instance }}
+    start_mode: "{{ service_start_mode }}"
+    state: "{{ service_state }}"
+  tags:
+    - launch
+
+- name: Configure Log Aggregation
+  ansible.windows.win_template:
+    src: promtail.yaml.j2
+    dest: "C:\\ProgramData\\Promtail\\promtail.yaml"
+  notify:
+    - Restart promtail
+
+- name: Configure net_response metrics
+  ansible.windows.win_template:
+    src: net_response.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\net_response.conf"
+  notify: Restart Telegraf
+
+- name: Configure certificate metrics
+  ansible.windows.win_template:
+    src: x509_input.conf.j2
+    dest: "C:\\ProgramData\\Telegraf\\x509_input.conf"
+  notify: Restart Telegraf

@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: chrony
+  become: true
+
+  roles:
+    - role: chrony

@@ -1,0 +1,41 @@
+---
+artifactory_baseurl: "https://artifactory.pyrsoftware.ca/artifactory"
+artifactory_releases_folder: "packagesraw"
+artifactory_username: anonymous
+artifactory_password: password
+get_url_force_basic_auth: false
+
+hercules_binaries:
+  - binary: pyrdisp.exe
+    url_path: build-results/coreserver/TAG/2205C/disp/
+    dest_path: D:\apps\c_monitormain\
+  - binary: pyrhedssmem.exe
+    url_path: build-results/monitor/master/2402/hedataserver/
+    dest_path: D:\apps\c_monitormain\
+  - binary: pyrheessmem.exe
+    url_path: build-results/monitor/master/2402/heemailserver/
+    dest_path: D:\apps\c_monitormain\
+  - binary: pyrhehssmem.exe
+    url_path: build-results/monitor/master/2402/hehttpserver/
+    dest_path: D:\apps\c_monitormain\
+  - binary: pyrheissmem.exe
+    url_path: build-results/monitor/master/2402/heinfoserver/
+    dest_path: D:\apps\c_monitormain\
+  - binary: pyrhejdgsmem.exe
+    url_path: build-results/monitor/master/2402/hejudge/
+    dest_path: D:\apps\c_monitormain\
+  - binary: pyrhemngmsmem.exe
+    url_path: build-results/monitor/master/2402/hemngmserver/
+    dest_path: D:\apps\c_monitormain\
+  - binary: pyrhercpsmem.exe
+    url_path: build-results/monitor/master/2402/hereception/
+    dest_path: D:\apps\c_monitormain\
+  - binary: pyrstatussendersmem.exe
+    url_path: build-results/coreserver/TAG/2205C/pyrstatussender/
+    dest_path: D:\apps\c_monitormain\
+
+C_TEMPLATESERVER: "ip:127.0.20.81:3348"
+loki_url: https://services.loki.distributor.casino.iss-test.starsops.com/loki/api/v1/push
+
+service_start_mode: "auto"
+service_state: "started"
