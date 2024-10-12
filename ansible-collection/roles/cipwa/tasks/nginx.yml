@@ -34,7 +34,7 @@
 
 - name: Copy tls key
   ansible.builtin.copy:
-    content: "server.key"
+    src: server.key
     dest: /etc/nginx/tls/server.key
     mode: "0644"
   notify: Reload nginx
@@ -43,7 +43,7 @@
 
 - name: Copy tls cert
   ansible.builtin.copy:
-    content: "server-bundle.crt"
+    src: server-bundle.crt
     dest: /etc/nginx/tls/server-bundle.crt
     mode: "0644"
   notify: Reload nginx
