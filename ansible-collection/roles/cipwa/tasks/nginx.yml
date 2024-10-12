@@ -58,6 +58,14 @@
     owner: nginx
     group: nginx
 
+- name: Create healthcheck.html
+  ansible.builtin.copy:
+    src: healthcheck.html
+    dest: /usr/share/nginx/html/healthcheck.html
+    mode: "0644"
+    owner: nginx
+    group: nginx
+
 # - name: Create nginx configuration
 #  ansible.builtin.template:
 #    src: nginx.conf
