@@ -127,38 +127,6 @@
       tags:
         - notest
 
-- name: Configure telegraf
-  tags: telegraf
-  block:
-    - name: Download telegraf
-      ansible.builtin.get_url:
-        url: "{{ artifactory_baseurl }}/ggn-applications/telegraf-{{ common_telegraf_version }}.x86_64.rpm"
-        dest: /bigdisk0/software/telegraf-{{ common_telegraf_version }}.x86_64.rpm
-        url_username: "{{ artifactory_username }}"
-        url_password: "{{ artifactory_password }}"
-        mode: "0644"
-    - name: Install telegraf
-      ansible.builtin.yum:
-        name: /bigdisk0/software/telegraf-{{ common_telegraf_version }}.x86_64.rpm
-        state: present
-    - name: Configure telegraf
-      ansible.builtin.copy:
-        src: telegraf.conf
-        dest: /etc/telegraf/telegraf.conf
-        owner: telegraf
-        group: telegraf
-        mode: "0640"
-      notify:
-        - Restart telegraf
-    - name: Start telegraf
-      ansible.builtin.systemd_service:
-        name: telegraf
-        state: started
-        enabled: true
-      tags:
-        - notest
-
-
 - name: Configure promtail
   tags: promtail
   block:
