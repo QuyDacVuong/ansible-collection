@@ -1,7 +1,6 @@
 echo
 echo "Hostname: {{ansible_hostname}}"
 echo "FQDN: {{ansible_fqdn}}"
-# echo "IP Address: {{ansible_eth0.ipv4.address}}"
 echo "Instance ID: $(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
 echo
 echo "Environment: {{ env }}"
