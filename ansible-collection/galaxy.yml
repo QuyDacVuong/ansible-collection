@@ -4,12 +4,12 @@ name: server
 version: 1.0.0
 readme: README.md
 authors:
-  - Alice Kaerast <alice_kaerast@flutterint.com>
+  - QuyDacVuong
 description: Configures Casino servers and installs applications
 tags:
   - linux
   - windows
   - applications
 dependencies: {}
-repository: https://github.com/flutterint/ansible-casino-server-collection
+repository: https://github.com/QuyDacVuong/ansible-collection.git
 build_ignore: []
