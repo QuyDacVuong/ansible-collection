@@ -59,7 +59,7 @@
   ansible.builtin.yum:
     name:
       - bzip2
-      - crontab    
+      - cronie  
       - curl
       - jq
       - lsof
