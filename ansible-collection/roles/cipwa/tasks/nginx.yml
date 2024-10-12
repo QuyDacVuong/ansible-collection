@@ -40,12 +40,12 @@
     owner: nginx
     group: nginx
 
-- name: Create nginx configuration
-  ansible.builtin.template:
-    src: nginx.conf
-    dest: /etc/nginx/conf.d/tomcat.conf
-    mode: "0644"
-  notify: Reload nginx
+# - name: Create nginx configuration
+#  ansible.builtin.template:
+#    src: nginx.conf
+#    dest: /etc/nginx/conf.d/tomcat.conf
+#    mode: "0644"
+#  notify: Reload nginx
 
 - name: Validate nginx configuration
   ansible.builtin.command: nginx -t
