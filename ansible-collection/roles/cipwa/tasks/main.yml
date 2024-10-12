@@ -1,21 +1,21 @@
 ---
-- name: Install java
-  ansible.builtin.include_role:
-    name: casino.server.java
+# - name: Install java
+#  ansible.builtin.include_role:
+#    name: casino.server.java
 
-- name: Install tomcat
-  ansible.builtin.include_role:
-    name: casino.server.tomcat
-  vars:
-    tomcat_instances: "{{ cipwa_tomcat_instances }}"
+# - name: Install tomcat
+#  ansible.builtin.include_role:
+#    name: casino.server.tomcat
+#  vars:
+#    tomcat_instances: "{{ cipwa_tomcat_instances }}"
 
-- name: Rotate cipwa.out
-  ansible.builtin.copy:
-    src: "logrotate"
-    dest: "/etc/logrotate.d/tomcat"
-    owner: root
-    group: root
-    mode: "0644"
+# - name: Rotate cipwa.out
+#  ansible.builtin.copy:
+#    src: "logrotate"
+#    dest: "/etc/logrotate.d/tomcat"
+#    owner: root
+#    group: root
+#    mode: "0644"
 
 - name: Install and configure nginx
   ansible.builtin.include_tasks:
