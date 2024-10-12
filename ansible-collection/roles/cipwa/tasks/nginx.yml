@@ -32,6 +32,24 @@
     mode: "0644"
   diff: false  # this file contains a TLS key passphrase
 
+- name: Copy tls key
+  ansible.builtin.copy:
+    content: "server.key"
+    dest: /etc/nginx/tls/server.key
+    mode: "0644"
+  notify: Reload nginx
+  tags: notest
+  when: not ansible_check_mode
+
+- name: Copy tls cert
+  ansible.builtin.copy:
+    content: "server-bundle.crt"
+    dest: /etc/nginx/tls/server-bundle.crt
+    mode: "0644"
+  notify: Reload nginx
+  tags: notest
+  when: not ansible_check_mode
+
 - name: Create favicon.ico
   ansible.builtin.copy:
     src: favicon.ico
