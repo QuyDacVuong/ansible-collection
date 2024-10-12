@@ -50,6 +50,11 @@
   notify:
     - Update ca-trust
 
+- name: Remove curl-minimal package
+  ansible.builtin.yum:
+    name: curl-minimal
+    state: absent
+
 - name: Install base packages
   ansible.builtin.yum:
     name:
